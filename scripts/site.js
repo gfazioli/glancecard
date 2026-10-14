@@ -100,12 +100,30 @@ const TYPES = {
   ".txt": "text/plain; charset=utf-8",
 };
 
+/**
+ * The file a request names inside `base`, or null when it lands outside:
+ * compared as a relative path, since a sibling folder whose name starts with
+ * the base's (`_site-other`) passes a prefix check.
+ */
+export function resolveRequest(base, url) {
+  let pathname;
+  try {
+    pathname = decodeURIComponent(new URL(url, "http://x").pathname);
+  } catch {
+    return null;
+  }
+  const file = path.join(base, pathname);
+  const rel = path.relative(base, file);
+  if (rel.startsWith("..") || path.isAbsolute(rel)) return null;
+  return file;
+}
+
 /** A static server for the built site, gzipping text the way Pages does. */
 function serve(dir, port) {
   const base = path.resolve(dir);
   createServer((req, res) => {
-    let file = path.join(base, decodeURIComponent(new URL(req.url, "http://x").pathname));
-    if (!file.startsWith(base)) return res.writeHead(403).end();
+    let file = resolveRequest(base, req.url);
+    if (!file) return res.writeHead(403).end();
     if (existsSync(file) && statSync(file).isDirectory()) file = path.join(file, "index.html");
     if (!existsSync(file)) return res.writeHead(404).end("not found");
     const type = TYPES[path.extname(file)] ?? "application/octet-stream";

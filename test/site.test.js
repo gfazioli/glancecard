@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { after, test } from "node:test";
-import { build } from "../scripts/site.js";
+import { build, resolveRequest } from "../scripts/site.js";
 import { springsCSS } from "../scripts/springs.js";
 
 // The website in site/, held to what a crawler and a phone need, and to the
@@ -109,5 +109,19 @@ test("the build makes every card the page shows, at its real size", async () => 
   }
   for (const file of ["og.png", "apple-touch-icon.png", "favicon.svg", "site.js", "legal.html", "privacy.html"]) {
     assert.ok(readFileSync(path.join(out, file)).length > 0, file);
+  }
+});
+
+test("the preview server serves nothing outside the build", () => {
+  const base = path.resolve("/srv/_site");
+  assert.equal(resolveRequest(base, "/index.html"), path.join(base, "index.html"));
+  assert.equal(resolveRequest(base, "/cards/profile-midnight.svg"), path.join(base, "cards", "profile-midnight.svg"));
+  // The URL parser resolves /../ and even /%2e%2e/ before anything sees
+  // them. An encoded slash it leaves alone, and decoding it afterwards is the
+  // way out: into a sibling whose name starts with the base's.
+  assert.equal(resolveRequest(base, "/../etc/passwd"), path.join(base, "etc", "passwd"));
+  assert.equal(resolveRequest(base, "/%2e%2e/%2e%2e/etc/passwd"), path.join(base, "etc", "passwd"));
+  for (const url of ["/%2e%2e%2f_site-other/secret.txt", "/%2e%2e%2f%2e%2e%2fetc/passwd", "/%E0%A4%A"]) {
+    assert.equal(resolveRequest(base, url), null, url);
   }
 });
