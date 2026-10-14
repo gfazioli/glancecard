@@ -1,0 +1,1184 @@
+{
+ "kind": "repo",
+ "fetchedAt": "2026-10-14T16:16:46.833Z",
+ "repo": {
+  "name": "octoscope",
+  "nameWithOwner": "gfazioli/octoscope",
+  "description": "Terminal dashboard for GitHub — followers, stars, PRs and issues at a glance, auto-refreshed",
+  "homepageUrl": "https://gfazioli.github.io/octoscope",
+  "createdAt": "2026-04-21T17:12:51Z",
+  "pushedAt": "2026-10-14T14:36:00Z",
+  "diskUsage": 57759,
+  "isArchived": false,
+  "isPrivate": false,
+  "stargazerCount": 68,
+  "forkCount": 1,
+  "watchers": {
+   "totalCount": 0
+  },
+  "licenseInfo": {
+   "spdxId": "MIT"
+  },
+  "isSecurityPolicyEnabled": true,
+  "repositoryTopics": {
+   "nodes": [
+    {
+     "topic": {
+      "name": "bubbletea"
+     }
+    },
+    {
+     "topic": {
+      "name": "cli"
+     }
+    },
+    {
+     "topic": {
+      "name": "dashboard"
+     }
+    },
+    {
+     "topic": {
+      "name": "github"
+     }
+    },
+    {
+     "topic": {
+      "name": "github-api"
+     }
+    },
+    {
+     "topic": {
+      "name": "go"
+     }
+    },
+    {
+     "topic": {
+      "name": "lipgloss"
+     }
+    },
+    {
+     "topic": {
+      "name": "monitoring"
+     }
+    },
+    {
+     "topic": {
+      "name": "stats"
+     }
+    },
+    {
+     "topic": {
+      "name": "terminal"
+     }
+    },
+    {
+     "topic": {
+      "name": "tui"
+     }
+    }
+   ]
+  },
+  "languages": {
+   "totalSize": 2209407,
+   "edges": [
+    {
+     "size": 2168629,
+     "node": {
+      "name": "Go",
+      "color": "#00ADD8"
+     }
+    },
+    {
+     "size": 23760,
+     "node": {
+      "name": "Tape",
+      "color": null
+     }
+    },
+    {
+     "size": 11529,
+     "node": {
+      "name": "Shell",
+      "color": "#89e051"
+     }
+    },
+    {
+     "size": 3024,
+     "node": {
+      "name": "Makefile",
+      "color": "#427819"
+     }
+    },
+    {
+     "size": 2465,
+     "node": {
+      "name": "Dockerfile",
+      "color": "#384d54"
+     }
+    }
+   ]
+  },
+  "branches": {
+   "totalCount": 1
+  },
+  "tags": {
+   "totalCount": 55,
+   "nodes": [
+    {
+     "name": "v0.39.0"
+    }
+   ]
+  },
+  "openIssues": {
+   "totalCount": 9
+  },
+  "closedIssues": {
+   "totalCount": 78
+  },
+  "openPRs": {
+   "totalCount": 0
+  },
+  "mergedPRs": {
+   "totalCount": 150
+  },
+  "releases": {
+   "totalCount": 55,
+   "nodes": [
+    {
+     "tagName": "v0.39.0",
+     "publishedAt": "2026-10-13T08:51:12Z",
+     "description": "**It opens on your last dashboard, not on a spinner.** octoscope now keeps a snapshot of the last dashboard it fetched and paints it the moment it starts, marked as cached, while the live fetch runs. With no network the dashboard stays up and says so, and a failed refresh no longer replaces the dashboard with the error screen.\n\n## The last dashboard, at once\n\nOn a busy account the first fetch takes about ten seconds, and until now those were ten seconds of a launch screen. Now the dashboard you saw last is already there, and the footer says what it is:\n\n```\n⠋  cached 3h ago · refreshing…  ·  auto 60s\n```\n\nThe live answer replaces it when it lands. That switch pulses no card and fires no star or follower notification, because those mean a change seen while the dashboard is open, not everything since your last session. Closes [#65](https://github.com/gfazioli/octoscope/issues/65). ([#238](https://github.com/gfazioli/octoscope/pull/238))\n\nMeasured on the maintainer's account with a dev build: a cold launch showed the dashboard after about 11 seconds, a warm one after 0.8.\n\n## Offline, it stays up\n\nWith no network the snapshot stays on screen, and the footer reads `offline · retrying · cached 3h ago`.\n\nThe same now holds mid-session. Since v0.1.0, any failed refresh replaced the dashboard with the full-screen error, which also meant the footer's `offline · retrying` and `stale — last refresh errored` were never actually seen. A failed refresh now keeps the dashboard, and the footer names the reason and how old the data is (`updated 2m5s ago`). While a retry runs, the footer shows that instead of the last error.\n\nThe full-screen error remains in two cases. One is when there is nothing to show yet. The other is when GitHub rejects the token: a dashboard badged \"authenticated\" for a token GitHub no longer accepts would be the wrong thing to keep up, and the error screen names the fix.\n\n## A cache with rules\n\n- **What it holds.** The last successful fetch, minus the rate-limit reading, in your user cache folder: `~/Library/Caches/octoscope` on macOS, `~/.cache/octoscope` on Linux, `%LocalAppData%\\octoscope` on Windows. It holds what the dashboard shows, private repository names included, so the file is readable only by you. That is `0600` on macOS and Linux, and on Windows the per-user permissions of your AppData folder.\n- **When a launch starts from it.** Only when the snapshot is under a week old, was written by the same octoscope version with the same data layout, and belongs to the same token looking at the same account. Its name is derived from your token without containing it, so another token, or `octoscope <user>`, never paints a dashboard that is not its own. Anything else is ignored, exactly like a first run, which is why the first launch after this upgrade still waits for the network.\n- **Where it is never used.** `--public-only` never reads or writes it, the same rule the update check follows, so screenshot sessions stay reproducible. Neither do `--json`, `--plain` or `--scan`: a script wants the live answer.\n- **How to turn it off.** `dashboard_cache = false` turns it off and deletes any snapshot already written at the next launch, and says so if it cannot.\n\nThe [privacy policy](https://gfazioli.github.io/octoscope/guide/privacy.html) lists it among what octoscope keeps on your machine.\n\n## Notable polish\n\n- **The guide, the README and the landing say all of the above.** The guide covers it in *Live & reliable*, *Settings* and the privacy policy. The landing gains an *Instant start* card, and its auto-refresh card no longer claims the numbers are never more than a minute old.\n- **The landing's Product Hunt badge** uses its dark theme.\n\n## Tests\n\n- **Every field of the dashboard survives the round trip.** A reflection test fills every field, nested ones included, and fails on one the cache could drop silently, so a field added later is covered without anyone remembering to add it.\n- **The cache's rules are tested one by one:**\n  - another version, another data layout, another key, too old, saved in the future;\n  - corrupt, empty or without a login;\n  - a key carrying a path, a FIFO in its place;\n  - file mode, atomic writes, pruning, purging.\n- **The dashboard is tested through its real paths:** the cached first paint; the quiet switch to live; a failure keeping the dashboard; a rejected token dropping it; `r` after a failure; the narrow footer; public-only neither reading nor writing.\n- **Mutation-tested.** 48 mutants over the cache, the key, the dashboard and the config: every one fails a test.\n- **Reviewed by Codex in two passes.** Every finding was verified against the code before it was applied or answered, and the answers are on the pull request.\n\n## Upgrade\n\n```\nbrew upgrade gfazioli/tap/octoscope\n```\n"
+    },
+    {
+     "tagName": "v0.38.0",
+     "publishedAt": "2026-10-09T13:00:56Z",
+     "description": "**Is anything of mine compromised? One command asks.** `octoscope --scan` runs the supply-chain scan over every repository you own or watch and prints one report. The repo drill-in gains traffic and Dependabot alerts, the PR drill-in shows the stack a pull request belongs to, scripts ride out a GitHub 502, and the scan stops calling your own workflows' commits forged.\n\n## `octoscope --scan` — every repository at once\n\nThe security scan answered \"is this repository compromised?\" one repository at a time, from the dashboard. `--scan` asks it of all of them: the default branch of every repository you own, then of every entry in your `watch_repos` list, so an organisation's repositories are included the way they are in the dashboard. It prints a report and exits. Closes [#66](https://github.com/gfazioli/octoscope/issues/66) and [#59](https://github.com/gfazioli/octoscope/issues/59). ([#231](https://github.com/gfazioli/octoscope/pull/231))\n\n```sh\noctoscope --scan\noctoscope --scan --json | jq '.summary'\n```\n\nMeasured on the maintainer's account: 95 repositories in about 17 seconds, ten at a time.\n\n- **Every repository is a row.** One the sweep cannot read (refused, no commits yet, a default branch out of reach) is listed as *not scanned*, with why. It is never counted clean, and the JSON summary's counts add up to the number of repositories for that reason.\n- **A file it could not read is listed**, whatever the verdict. The obfuscation of such a file was not checked, so a clean verdict over it is a narrower claim.\n- **Default branch only, and no comparison with earlier scans.** The dashboard's scan still walks up to 20 branches and keeps the history; run it on anything the sweep flags.\n- **`--json` is a contract of its own**, versioned apart from the dashboard report (`schema_version: 1`). Lists are always arrays, verdicts read `clean`, `watch`, `suspicious` or `likely_compromised`.\n- **`--public-only`** names a repository only when GitHub said it is public. A watched entry neither the dashboard nor the scan could place is counted in `watched_left_out`, not named.\n- It needs a token, retries a transient GitHub 5xx, writes its progress line only to a terminal, and refuses a username, `--activity`, `--inbox` and `--theme list`.\n\n## Traffic and Dependabot alerts in the repo drill-in\n\n- **Traffic**: views and clones over the last 14 days, one sparkline each, on the repositories GitHub shows them to you on (push access). Closes [#73](https://github.com/gfazioli/octoscope/issues/73). ([#227](https://github.com/gfazioli/octoscope/pull/227))\n- **Dependabot alerts**: the open ones by severity, the five most severe with the package, the advisory linked to the alert, and whether a fixed version exists. They appear where GitHub shows them to you: write access or above, unless an organisation keeps them to its admins. Closes [#58](https://github.com/gfazioli/octoscope/issues/58). ([#229](https://github.com/gfazioli/octoscope/pull/229))\n\nWhere your role does not reach either section, it is absent rather than an error; where your token is what falls short, the section says so. A fine-grained token needs `Administration: Read` for traffic and `Dependabot alerts: Read` for the alerts.\n\n## Stacked pull requests, layer by layer\n\nA pull request that is a layer of a [stacked pull request](https://github.blog/changelog/2026-10-06-stacked-pull-requests-generally-available/) gets a **Stack** section in its drill-in: up to 20 layers in order from the base branch, each with its state, this one marked. In the PRs tab a layer carries its place, `2/4`, ahead of its title, for your PRs and the review requests alike. The marker comes from a query of its own that the dashboard does not wait on: if GitHub cannot answer it, the markers are missing for one refresh and nothing else is. Closes [#99](https://github.com/gfazioli/octoscope/issues/99). ([#228](https://github.com/gfazioli/octoscope/pull/228))\n\n## Scripts ride out a 502\n\n`--json` and `--plain` now retry what the dashboard already retried: a `500`, `502`, `503` or `504` from GitHub, or a dropped HTTP/2 stream, up to three attempts in all with a short backoff. A rejected token, a rate limit, a user that does not exist or a network timeout still fails at once. Before, the first 502 failed a scheduled run. Closes [#224](https://github.com/gfazioli/octoscope/issues/224). ([#225](https://github.com/gfazioli/octoscope/pull/225))\n\n## A workflow's own commits stop reading as forged\n\nThe scan scored every branch tip that wore the `github-actions[bot]` identity without GitHub's signature as forged, which is *suspicious* on its own. That is also exactly the commit any workflow produces when it pushes with `git`. On a branch whose tip is such a commit, the scan now reads the last ten changes of every file there that can run code: hooks, tasks, package manifests, workflows, devcontainers. It scores the identity when an unsigned bot commit is among them, when the branch carries an anomalous payload, or when it cannot tell. Otherwise the tip is a note, the branch table says *unsigned bot*, and the tip still meets the unsigned-tip rule an unsigned human tip would. Closes [#230](https://github.com/gfazioli/octoscope/issues/230). ([#233](https://github.com/gfazioli/octoscope/pull/233))\n\nThe design doc states what this gives up: an implant delivered under another identity beneath a harmless bot tip is no longer caught by the bot tip alone. [#234](https://github.com/gfazioli/octoscope/issues/234) keeps that decision open for review.\n\n## Notable polish\n\n- **The scan, for everyone.** An empty default branch no longer fails the scan: git's empty tree is never fetched. A file whose content did not arrive is declared under *Not checked* instead of counting as read. Content the scan never analysed is no longer scored as binary. The catalog of files that run code is matched without regard to case, since `.vscode/Tasks.json` is the same file on macOS and Windows. A workflow sharing its bytes with another file is parsed as a workflow ([#232](https://github.com/gfazioli/octoscope/issues/232)).\n- **The token stays on GitHub.** Requests follow a redirect only to the same host, so a cross-host redirect cannot carry the `Authorization` header elsewhere.\n- **The dashboard makes one more GraphQL query per refresh** when authenticated: the stack placements above.\n- **The website** gained a Download button that names the archive for your machine, an octopus that walks the landing and leaves notes in the guide, an invitation to the maintainer's Discord server, and a layout that fits a 320px screen. ([#219](https://github.com/gfazioli/octoscope/pull/219), [#220](https://github.com/gfazioli/octoscope/pull/220), [#221](https://github.com/gfazioli/octoscope/pull/221), [#222](https://github.com/gfazioli/octoscope/pull/222), [#223](https://github.com/gfazioli/octoscope/pull/223))\n- **Built on Go 1.26.9** with `golang.org/x/net` v0.60.0, for [GO-2026-6617](https://pkg.go.dev/vuln/GO-2026-6617). Building from source now needs Go 1.26.9 or later. ([#226](https://github.com/gfazioli/octoscope/pull/226))\n\n## Tests\n\n- The sweep runs against a fixture that serves several repositories. The tests cover every outcome, the retry, the bound on concurrency with scans made to overlap, cancellation, the configured watch list over the resolved one, and every `--public-only` path.\n- The bot-identity rule is tested end to end against the per-file history queries:\n  - a data commit over no such file;\n  - a hook a person changed;\n  - an implant one commit beneath a data tip;\n  - a delivery laundered through a later change;\n  - a refused, an empty and a capped history;\n  - a truncated tree.\n- Each change was mutation-tested: break what an assertion protects, require the test to fail. More than a hundred mutants over the cycle, each caught.\n- Codex reviewed the cycle's feature pull requests, up to three passes each; every finding was verified against the code before it was applied or answered.\n\n## Upgrade\n\n```\nbrew upgrade gfazioli/tap/octoscope\n```\n"
+    },
+    {
+     "tagName": "v0.37.0",
+     "publishedAt": "2026-10-06T12:41:30Z",
+     "description": "**Your inbox reaches your scripts.** `--inbox` puts your unread notifications in the `--plain` and `--json` report, beside the activity feed `--activity` added in 0.35.0. Underneath, the container image's `latest` tag now moves only after a release is verified, and a release stuck as a draft can be finished without bypassing the checks.\n\n## Your unread notifications in `--json` and `--plain`\n\n`--inbox` adds the Inbox tab's page to the report: up to 50 unread threads, newest first, each with GitHub's own `reason` and `type`. Closes [#185](https://github.com/gfazioli/octoscope/issues/185). ([#218](https://github.com/gfazioli/octoscope/pull/218))\n\n```sh\noctoscope --json --inbox | jq '[.inbox[] | select(.reason == \"review_requested\")] | length'\noctoscope --plain --inbox\n```\n\nIt follows the rules `--activity` set:\n\n- **Opt-in.** It costs one extra request, so nothing asks for it unless you do.\n- **Absent is not empty.** No `inbox` key means the flag was not passed; `[]` means it was and your inbox is empty. A requested inbox that cannot be fetched fails the run rather than reading as either.\n- **It needs an output mode.** On its own it is a usage error, since the TUI shows the tab anyway.\n\nAnd it differs in two ways, which is why it is a flag of its own:\n\n- **It is always your inbox.** `/notifications` has no login parameter, so beside a username it would print your notifications under somebody else's name. That combination is a usage error.\n- **It needs a classic token.** GitHub's notifications endpoint refuses a fine-grained token whatever its permissions, as the Inbox tab already explains. When that happens, the error names the token you need — a classic personal access token or `gh`'s own, with the `notifications` or `repo` scope — instead of a bare 403.\n\nUnder `--public-only`, threads from private repositories are left out. Each thread carries nine fields: `id`, `reason`, `type`, `title`, `repo`, `url`, `unread`, `updated_at`, `private`. The addition is additive, so `schema_version` stays at 1.\n\n## `latest` moves only after a release is verified\n\ngoreleaser used to push `ghcr.io/gfazioli/octoscope:latest` before anything had verified the release, so if verification then failed, `docker pull` already handed out a version whose release was never published. Now goreleaser pushes only the versioned tag. For a stable release, once it is public and the tap carries it, the pipeline runs the versioned image, requires it to report its own version, and only then points `latest` at the same digest. Nothing is rebuilt or re-uploaded. Closes [#191](https://github.com/gfazioli/octoscope/issues/191). ([#217](https://github.com/gfazioli/octoscope/pull/217))\n\nThe visible difference: `latest` arrives a few minutes later than it used to. A prerelease never moves it, as before.\n\n## A stuck draft can be finished through the checks\n\nIf the release job went red after creating the draft, the tag was stuck: re-running the workflow died on the existing release, and re-running the failed jobs did nothing. The only way out was to publish the draft by hand, skipping verification. A manual dispatch of the release workflow for that tag now finishes it — macOS verification, the cask, publication, the tap — and only if verification passes. The cask comes from the tag's own push run, whose artifact is kept for 90 days. Closes [#192](https://github.com/gfazioli/octoscope/issues/192). ([#216](https://github.com/gfazioli/octoscope/pull/216))\n\n## Notable polish\n\n- The scripting guide's README link pointed at an anchor GitHub never generated; it now lands on the Scripting section.\n- The guide's flags reference and the landing's Scripting card gained `--inbox`.\n\n## Tests\n\n- `--inbox` is tested through the real report path with a fake source that counts requests: not asked means zero, asked means exactly one. Deleting the fetch, the public-only filter, the token hint, either refusal, the `null` guard, the plain section or the `unread` field each fails a test.\n- The release workflow's tests name the two new `latest` steps among those a prerelease must not run, and CI rehearses the `latest` move against a local registry on every pull request.\n\n## Upgrade\n\n```\nbrew upgrade gfazioli/tap/octoscope\n```\n"
+    },
+    {
+     "tagName": "v0.36.1",
+     "publishedAt": "2026-10-06T12:11:34Z",
+     "description": "**A What's new tab that fits a narrow terminal, and the first release through a reworked pipeline.** One fix you can see; the rest is how a release gets made, which this tag is the first to exercise.\n\n## The What's new tab stays inside its pane\n\nAt a 24-column terminal — 20 usable cells, the floor every narrower terminal shares — seven lines of the tab ran past the pane. Four of them were bugs, and they are fixed:\n\n- **An off-by-one that was lipgloss's.** `Style.Width` wraps at word boundaries but keeps the space a line broke on — measured: `Width(18)` renders `\"Recent activity in \"` at 19 cells — so any wrapped line could run one cell past its budget. Every wrap in the tab now trims that space.\n- The tab's title wraps instead of overhanging.\n- The sponsor labels wrap under themselves, three cells in, clear of their key.\n- The key-hint row breaks between entries, never inside one.\n\nThe three URL lines still run past on purpose, so they stay whole and copy-pasteable. Closes [#195](https://github.com/gfazioli/octoscope/issues/195). ([#213](https://github.com/gfazioli/octoscope/pull/213))\n\n## How a release is made\n\nNone of this changes the binary; all of it runs for the first time on this tag.\n\n- **A tag is classified once, the way goreleaser classifies it.** Whether a release is a prerelease used to be decided by a hyphen in the tag, which is not what SemVer says: `v1.2.3+build-1` carries a hyphen in its build metadata and is a stable release. One job now reads the tag with the same SemVer rule goreleaser applies, every later job reads its answer, and the job that publishes refuses when the two disagree. Closes [#193](https://github.com/gfazioli/octoscope/issues/193). ([#210](https://github.com/gfazioli/octoscope/pull/210))\n- **A prerelease rehearses what a stable tag checks.** The smoke run of the Linux binary, the anonymous image pull and the cask's fetch and check looked stable-only and were not; they now run for every tag. Only what a prerelease must not touch — the tap, the cask's install check, the `gh` extension mirror — stays stable-only. ([#215](https://github.com/gfazioli/octoscope/pull/215))\n- **The cask's handoff between jobs is tested on every pull request**, through the same actions the release uses, now on upload-artifact v7 and download-artifact v8. ([#209](https://github.com/gfazioli/octoscope/pull/209), [#199](https://github.com/gfazioli/octoscope/pull/199))\n- **Every workflow is linted.** CI runs actionlint, with its shellcheck pinned to 0.11.0 so the gate cannot move when the runner image updates its own. ([#214](https://github.com/gfazioli/octoscope/pull/214))\n\n## The site\n\n- **Fonts come from the site itself**, not from Google Fonts, which saw every visitor's address. ([#208](https://github.com/gfazioli/octoscope/pull/208))\n- A publisher line under every page, with a legal notice and a privacy policy that describes what the binary does: the two hosts it talks to, the token sent only to GitHub's API, the three files it keeps on disk. ([#208](https://github.com/gfazioli/octoscope/pull/208))\n- **Lighter**: every image quantised, 8.86 MB → 3.24 MB at SSIM ≥ 0.998 ([#206](https://github.com/gfazioli/octoscope/pull/206)); the carousel loads each shot a dwell ahead of its turn instead of all ten with the page, and only the cards a reader can see catch the animated ring. ([#205](https://github.com/gfazioli/octoscope/pull/205))\n- The hero holds still while the logo loads, the landing has one `main` landmark, and the sitemap lists every page with its canonical. ([#205](https://github.com/gfazioli/octoscope/pull/205))\n\n## Tests\n\n- The What's new tab renders at 80, 50 and 24 columns; the wrap helper is pinned at every width from 10 to 40. Each fix was mutated back and fails a test.\n- The release workflow is read by Go tests as parsed YAML: the classification against 29 tags — stable, prerelease, and malformed ones it must refuse — every stable-only gate named, and every job that reads the classification required to depend on it.\n- The site's pages are read with an HTML parser, and every PNG and JPEG under `docs/` is decoded in full and held to a palette or quality 85.\n\n## Upgrade\n\n```\nbrew upgrade gfazioli/tap/octoscope\n```\n"
+    },
+    {
+     "tagName": "v0.36.0",
+     "publishedAt": "2026-09-28T18:49:55Z",
+     "description": "**Someone to wait with, a refresh that follows yours, and a scan that stops mixing branches.** octoscope has a face now — an octopus with a periscope, drawn in the terminal's own block characters — and two quieter changes underneath it: pressing `r` finally moves the automatic refresh, and the supply-chain scan no longer scores a capability that exists on no single branch.\n\n## An octopus heads every screen before the dashboard\n\nEvery screen before the dashboard — loading, the sponsor splash, help, a first-fetch error — now opens with a small octopus and its periscope. While your data loads it looks around, turns its periscope with its eyes, blinks and curls its tentacles, and the splash now says it is loading too. ([#200](https://github.com/gfazioli/octoscope/pull/200))\n\nOnce the dashboard is up, a smaller one stays beside the banner when the window is wide enough, facing ahead, and looks around again whenever a refresh runs — yours or the automatic one. ([#201](https://github.com/gfazioli/octoscope/pull/201))\n\nBoth take your theme's colours, monochromatic themes and `NO_COLOR` draw them as a one-colour silhouette, and they add no delay: they move with the spinner and stop with it.\n\nThey are drawn with Unicode's quadrant block characters (U+2596–U+259F), four pixels to a cell, which octoscope uses for the first time in this release. A terminal font without those glyphs will show replacement characters where the octopus should be; nothing else in the interface uses them.\n\n## Your refresh moves the automatic one\n\nOnly the answer to a fetch the timer itself had started used to reschedule the next automatic refresh, so pressing `r`, the startup fetch and a settings refetch never moved the timer already pending. After an `r` that came back rate-limited, the automatic refresh fired on the old cadence anyway and spent one more request against the limit. Closes [#202](https://github.com/gfazioli/octoscope/issues/202). ([#204](https://github.com/gfazioli/octoscope/pull/204))\n\nNow the answer to every fetch arms the next automatic refresh from what that answer said — the interval, or the back-off after a primary rate limit — and supersedes the tick pending before, so exactly one stays live. An interval change keeps a back-off that is still in force. Measured against GitHub with a 30-second interval, pressing `r` five seconds after the startup answer: before, the next automatic fetch went out 7 seconds after `r`'s answer, on the old cadence; now it goes out 30 seconds after it.\n\nThe automatic refresh also no longer starts a second fetch while yours is still running, which stopped the spinner early and could let an older answer replace a newer one. ([#201](https://github.com/gfazioli/octoscope/pull/201))\n\nOne limit is older than this release, and now documented rather than fixed: the reset time arrives with a successful refresh, so a session whose very first fetch already hits the primary limit has none to wait for, and retries at the interval.\n\n## The scan stops mixing branches\n\nThe capability axis parses workflows from every branch it walks, and scored them as if every copy were reachable. Two corrections:\n\n- **A trigger scores only where its branch can start it.** GitHub starts outsider events only from the default branch — `pull_request_target` included, on github.com, checked against the event reference's own `GITHUB_REF` column — so a privileged workflow sitting on a topic branch no longer counts. It is still listed, with the branch it would have to reach, and an unknown default branch filters nothing, so the axis cannot go silent by accident. Closes [#188](https://github.com/gfazioli/octoscope/issues/188). ([#196](https://github.com/gfazioli/octoscope/pull/196))\n- **A trigger and a secret must share a branch.** The per-branch results were merged by path, so a trigger from one branch's copy of a workflow was scored with a secret or a write grant from another branch's copy — two harmless files could add up to a score of 3 for a capability that existed on neither. Each branch's copy is judged on its own now. Closes [#197](https://github.com/gfazioli/octoscope/issues/197). ([#198](https://github.com/gfazioli/octoscope/pull/198))\n\nThis moves scores **down** for repositories with long-lived branches. That is the correction, not a lost signal.\n\n## The site moves\n\nThe landing's sections now arrive on the same springs as the promo films, sampled into CSS `linear()` curves by a Go test rather than typed by hand, and nothing is hidden before the script has run and measured it off screen: a script that fails costs the motion, never the content. The launch octopus — the TUI's own drawing, held to `mascot.go` by a test — walks in beside the screenshot carousel and says what each shot shows. It stays away at 64em or below, where its bubble would run into the next section; under Reduce Motion it arrives standing; and keyboard focus reveals whatever it lands on. ([#203](https://github.com/gfazioli/octoscope/pull/203))\n\n## Notable polish\n\n- Every landing still was regenerated with the mini octopus in the banner, and \"At a glance\" gained a card for it.\n- The \"At a glance\" cards are only as tall as their content.\n- Reduce Motion now also stops smooth anchor scrolling and the transitions of the carousel dots and the newsletter prompt.\n\n## Tests\n\n- The refresh timer's tests read what was armed — its delay and its generation — through the `tickCmd` seam instead of inferring it from a non-nil batch, and count dispatched fetches through `fetchCmd`; the rate-limit sequence starts from the `r` key itself. Ten mutations each fail a test, among them the old self-re-arming tick, the race it prevented, an answer that arms nothing and arming without the generation bump.\n- The landing is held by Go tests: the springs must be the generated ones; no rule may hide a reveal element unless it requires a scope the script armed, checked on what each rule declares at any depth of `@media` and `@supports`; every variant has a pose; the site's octopus must be the TUI's. Each was validated by breaking what it protects, and they pass on the Windows runner's CRLF checkout, which failed their first run.\n- The scan's new behaviour tests each assert a control on the default branch first: \"it does not score\" passes just as well when the axis has stopped working.\n- The mascot is tested to take its colours from the active theme.\n\n## Upgrade\n\n```\nbrew upgrade gfazioli/tap/octoscope\n```\n"
+    }
+   ]
+  },
+  "defaultBranchRef": {
+   "name": "main",
+   "target": {
+    "history": {
+     "totalCount": 633,
+     "nodes": [
+      {
+       "abbreviatedOid": "fcdf6c4",
+       "messageHeadline": "docs: the repository card under the README's title",
+       "authoredDate": "2026-10-14T14:19:49Z",
+       "author": {
+        "name": "Giovambattista Fazioli",
+        "user": {
+         "login": "gfazioli"
+        }
+       }
+      },
+      {
+       "abbreviatedOid": "1d3a605",
+       "messageHeadline": "chore(release): refresh landing hero screenshot for v0.39.0",
+       "authoredDate": "2026-10-13T08:46:47Z",
+       "author": {
+        "name": "Giovambattista Fazioli",
+        "user": {
+         "login": "gfazioli"
+        }
+       }
+      },
+      {
+       "abbreviatedOid": "d57b685",
+       "messageHeadline": "test: the snapshot fingerprint and the retry take their real paths",
+       "authoredDate": "2026-10-13T08:31:33Z",
+       "author": {
+        "name": "Giovambattista Fazioli",
+        "user": {
+         "login": "gfazioli"
+        }
+       }
+      },
+      {
+       "abbreviatedOid": "29eb3fb",
+       "messageHeadline": "fix: answers to Codex's first pass on the dashboard snapshot",
+       "authoredDate": "2026-10-13T08:25:13Z",
+       "author": {
+        "name": "Giovambattista Fazioli",
+        "user": {
+         "login": "gfazioli"
+        }
+       }
+      },
+      {
+       "abbreviatedOid": "f5205ea",
+       "messageHeadline": "test(dashcache): on Windows the snapshot is private by ACL, not mode",
+       "authoredDate": "2026-10-13T08:14:02Z",
+       "author": {
+        "name": "Giovambattista Fazioli",
+        "user": {
+         "login": "gfazioli"
+        }
+       }
+      },
+      {
+       "abbreviatedOid": "0306313",
+       "messageHeadline": "docs, chore(release): the dashboard snapshot; prep 0.39.0",
+       "authoredDate": "2026-10-13T08:05:21Z",
+       "author": {
+        "name": "Giovambattista Fazioli",
+        "user": {
+         "login": "gfazioli"
+        }
+       }
+      }
+     ]
+    }
+   }
+  }
+ },
+ "history": {
+  "dates": [
+   "2026-10-14T14:19:49Z",
+   "2026-10-13T08:46:47Z",
+   "2026-10-13T08:31:33Z",
+   "2026-10-13T08:25:13Z",
+   "2026-10-13T08:14:02Z",
+   "2026-10-13T08:05:21Z",
+   "2026-10-13T07:57:44Z",
+   "2026-10-11T10:43:39Z",
+   "2026-10-10T09:07:23Z",
+   "2026-10-10T08:18:39Z",
+   "2026-10-09T15:51:54Z",
+   "2026-10-09T12:05:16Z",
+   "2026-10-09T11:16:22Z",
+   "2026-10-09T11:09:07Z",
+   "2026-10-09T10:45:53Z",
+   "2026-10-09T10:12:32Z",
+   "2026-10-09T09:52:00Z",
+   "2026-10-09T09:45:53Z",
+   "2026-10-09T09:27:45Z",
+   "2026-10-09T09:27:44Z",
+   "2026-10-09T09:22:29Z",
+   "2026-10-09T09:00:12Z",
+   "2026-10-09T09:17:59Z",
+   "2026-10-09T09:17:37Z",
+   "2026-10-09T08:59:37Z",
+   "2026-10-09T08:59:02Z",
+   "2026-10-09T08:53:06Z",
+   "2026-10-09T08:45:29Z",
+   "2026-10-09T08:15:12Z",
+   "2026-10-09T09:05:05Z",
+   "2026-10-09T09:04:53Z",
+   "2026-10-09T08:57:12Z",
+   "2026-10-09T08:38:13Z",
+   "2026-10-09T08:21:11Z",
+   "2026-10-09T08:07:27Z",
+   "2026-10-09T08:17:45Z",
+   "2026-10-09T08:11:16Z",
+   "2026-10-09T07:59:07Z",
+   "2026-10-09T07:55:24Z",
+   "2026-10-09T07:55:18Z",
+   "2026-10-09T07:52:35Z",
+   "2026-10-09T07:52:26Z",
+   "2026-10-09T07:51:54Z",
+   "2026-10-09T07:46:28Z",
+   "2026-10-09T07:45:26Z",
+   "2026-10-09T07:44:03Z",
+   "2026-10-09T07:58:36Z",
+   "2026-10-08T15:51:19Z",
+   "2026-10-06T15:49:23Z",
+   "2026-10-06T15:29:34Z",
+   "2026-10-06T15:27:03Z",
+   "2026-10-08T12:28:23Z",
+   "2026-10-08T12:16:00Z",
+   "2026-10-08T10:44:17Z",
+   "2026-10-08T10:34:50Z",
+   "2026-10-06T14:59:52Z",
+   "2026-10-06T14:52:34Z",
+   "2026-10-06T14:33:11Z",
+   "2026-10-06T14:38:58Z",
+   "2026-10-06T14:32:25Z",
+   "2026-10-06T14:25:56Z",
+   "2026-10-06T14:15:50Z",
+   "2026-10-06T12:34:51Z",
+   "2026-10-06T10:13:21Z",
+   "2026-10-06T10:04:08Z",
+   "2026-10-06T10:03:56Z",
+   "2026-10-06T10:13:53Z",
+   "2026-10-06T09:36:24Z",
+   "2026-10-06T09:31:49Z",
+   "2026-10-06T09:25:32Z",
+   "2026-10-06T09:15:13Z",
+   "2026-10-06T09:08:21Z",
+   "2026-10-06T09:06:28Z",
+   "2026-10-06T09:00:35Z",
+   "2026-10-06T08:56:15Z",
+   "2026-10-06T08:51:01Z",
+   "2026-10-06T08:45:07Z",
+   "2026-10-06T08:44:34Z",
+   "2026-10-06T08:08:58Z",
+   "2026-10-06T08:03:26Z",
+   "2026-10-06T07:50:39Z",
+   "2026-10-06T07:18:14Z",
+   "2026-10-06T07:12:52Z",
+   "2026-10-06T06:19:51Z",
+   "2026-10-06T06:47:34Z",
+   "2026-10-06T06:36:24Z",
+   "2026-10-06T06:29:58Z",
+   "2026-10-06T06:18:54Z",
+   "2026-10-06T06:08:33Z",
+   "2026-10-05T14:36:02Z",
+   "2026-10-05T14:28:21Z",
+   "2026-10-05T14:24:09Z",
+   "2026-10-05T14:24:06Z",
+   "2026-10-05T14:23:59Z",
+   "2026-10-05T14:23:04Z",
+   "2026-09-30T12:41:29Z",
+   "2026-09-30T12:40:56Z",
+   "2026-09-30T12:29:19Z",
+   "2026-09-30T12:29:17Z",
+   "2026-09-30T12:10:23Z",
+   "2026-09-30T10:22:49Z",
+   "2026-09-30T10:07:56Z",
+   "2026-09-30T09:46:27Z",
+   "2026-09-30T09:46:15Z",
+   "2026-09-30T07:02:48Z",
+   "2026-09-30T06:55:30Z",
+   "2026-09-30T06:55:30Z",
+   "2026-09-30T06:54:01Z",
+   "2026-09-30T06:52:34Z",
+   "2026-09-30T06:52:34Z",
+   "2026-09-30T06:38:41Z",
+   "2026-09-30T06:37:45Z",
+   "2026-09-30T06:37:44Z",
+   "2026-09-30T06:37:43Z",
+   "2026-09-30T06:37:40Z",
+   "2026-09-30T06:37:38Z",
+   "2026-09-29T09:05:45Z",
+   "2026-09-29T08:53:07Z",
+   "2026-09-28T18:30:08Z",
+   "2026-09-28T18:21:32Z",
+   "2026-09-28T18:17:36Z",
+   "2026-09-28T18:09:04Z",
+   "2026-09-28T18:09:00Z",
+   "2026-09-28T18:28:09Z",
+   "2026-09-28T18:23:26Z",
+   "2026-09-28T18:23:25Z",
+   "2026-09-28T17:37:48Z",
+   "2026-09-28T17:19:34Z",
+   "2026-09-28T17:25:05Z",
+   "2026-09-28T17:25:05Z",
+   "2026-09-28T17:17:04Z",
+   "2026-09-28T17:17:03Z",
+   "2026-09-28T16:54:52Z",
+   "2026-09-28T16:49:16Z",
+   "2026-09-28T14:45:10Z",
+   "2026-09-28T14:01:45Z",
+   "2026-09-28T13:46:24Z",
+   "2026-09-16T11:16:31Z",
+   "2026-09-16T11:10:00Z",
+   "2026-09-16T10:18:42Z",
+   "2026-09-16T10:12:17Z",
+   "2026-09-16T09:47:03Z",
+   "2026-09-16T09:39:54Z",
+   "2026-09-16T09:34:21Z",
+   "2026-09-16T09:26:44Z",
+   "2026-09-16T09:23:35Z",
+   "2026-09-16T06:44:52Z",
+   "2026-09-16T06:22:00Z",
+   "2026-09-16T06:12:08Z",
+   "2026-09-16T06:08:47Z",
+   "2026-09-16T06:03:05Z",
+   "2026-09-15T16:22:16Z",
+   "2026-09-15T16:15:02Z",
+   "2026-09-15T15:59:33Z",
+   "2026-09-15T15:50:29Z",
+   "2026-09-15T15:38:57Z",
+   "2026-09-15T15:02:00Z",
+   "2026-09-15T14:53:52Z",
+   "2026-09-15T15:16:32Z",
+   "2026-09-15T14:45:33Z",
+   "2026-09-15T14:39:57Z",
+   "2026-09-15T14:29:25Z",
+   "2026-09-15T13:57:18Z",
+   "2026-09-15T13:46:18Z",
+   "2026-09-15T13:40:13Z",
+   "2026-09-15T13:06:29Z",
+   "2026-09-15T12:45:41Z",
+   "2026-09-15T12:30:10Z",
+   "2026-09-15T12:30:09Z",
+   "2026-09-15T12:29:47Z",
+   "2026-09-15T12:29:45Z",
+   "2026-09-15T12:07:04Z",
+   "2026-09-15T12:06:46Z",
+   "2026-09-15T12:06:28Z",
+   "2026-09-13T16:40:32Z",
+   "2026-09-13T16:40:20Z",
+   "2026-09-13T16:35:52Z",
+   "2026-09-13T16:27:43Z",
+   "2026-09-13T15:41:19Z",
+   "2026-09-13T15:34:40Z",
+   "2026-09-13T15:32:58Z",
+   "2026-09-13T15:30:57Z",
+   "2026-09-13T15:22:49Z",
+   "2026-09-13T15:21:10Z",
+   "2026-09-13T15:16:08Z",
+   "2026-09-13T15:16:00Z",
+   "2026-09-13T15:12:21Z",
+   "2026-09-13T15:08:21Z",
+   "2026-09-13T10:55:11Z",
+   "2026-09-13T10:55:11Z",
+   "2026-09-13T08:39:31Z",
+   "2026-09-13T08:38:11Z",
+   "2026-09-13T08:25:18Z",
+   "2026-09-13T07:24:41Z",
+   "2026-09-13T07:23:26Z",
+   "2026-09-13T07:19:21Z",
+   "2026-09-13T07:11:33Z",
+   "2026-09-13T07:09:48Z",
+   "2026-09-13T07:02:10Z",
+   "2026-09-13T06:29:28Z",
+   "2026-09-12T18:48:04Z",
+   "2026-09-12T17:59:43Z",
+   "2026-09-12T17:51:45Z",
+   "2026-09-12T17:46:17Z",
+   "2026-09-12T17:37:57Z",
+   "2026-09-12T17:39:35Z",
+   "2026-09-12T17:34:58Z",
+   "2026-09-12T17:27:27Z",
+   "2026-09-12T17:20:03Z",
+   "2026-09-12T17:13:47Z",
+   "2026-09-12T12:45:21Z",
+   "2026-09-12T12:44:50Z",
+   "2026-09-12T12:41:16Z",
+   "2026-09-12T12:19:12Z",
+   "2026-09-12T09:38:03Z",
+   "2026-09-12T09:29:31Z",
+   "2026-09-12T09:19:17Z",
+   "2026-09-12T09:16:33Z",
+   "2026-09-12T09:11:38Z",
+   "2026-09-12T09:04:52Z",
+   "2026-09-12T08:28:35Z",
+   "2026-09-12T08:27:14Z",
+   "2026-09-12T08:25:37Z",
+   "2026-09-12T08:24:23Z",
+   "2026-09-12T08:20:23Z",
+   "2026-09-12T08:14:25Z",
+   "2026-09-11T15:15:48Z",
+   "2026-09-11T15:11:45Z",
+   "2026-09-11T14:51:32Z",
+   "2026-09-08T11:51:14Z",
+   "2026-09-08T11:43:24Z",
+   "2026-09-08T10:38:19Z",
+   "2026-09-08T10:01:54Z",
+   "2026-09-08T09:48:18Z",
+   "2026-09-08T09:46:15Z",
+   "2026-09-08T09:36:50Z",
+   "2026-09-08T09:27:12Z",
+   "2026-09-08T09:22:31Z",
+   "2026-09-08T09:21:58Z",
+   "2026-09-08T08:52:31Z",
+   "2026-09-08T08:51:25Z",
+   "2026-09-07T11:37:36Z",
+   "2026-09-06T18:30:51Z",
+   "2026-09-06T17:33:48Z",
+   "2026-09-06T17:14:49Z",
+   "2026-09-06T17:08:20Z",
+   "2026-09-06T15:28:58Z",
+   "2026-09-06T09:43:26Z",
+   "2026-09-06T09:36:00Z",
+   "2026-09-06T09:35:45Z",
+   "2026-09-06T09:16:46Z",
+   "2026-09-06T08:09:52Z",
+   "2026-09-06T08:03:57Z",
+   "2026-09-06T07:56:05Z",
+   "2026-09-06T08:53:16Z",
+   "2026-09-06T06:24:56Z",
+   "2026-09-06T06:19:13Z",
+   "2026-09-06T06:19:02Z",
+   "2026-09-02T08:42:33Z",
+   "2026-09-02T08:28:34Z",
+   "2026-09-02T08:25:16Z",
+   "2026-09-02T08:14:31Z",
+   "2026-09-02T07:45:23Z",
+   "2026-09-02T07:23:45Z",
+   "2026-09-02T07:15:59Z",
+   "2026-09-02T07:03:01Z",
+   "2026-09-02T06:56:29Z",
+   "2026-09-02T05:21:02Z",
+   "2026-09-02T05:18:35Z",
+   "2026-09-02T05:02:07Z",
+   "2026-09-02T04:50:53Z",
+   "2026-09-01T16:03:51Z",
+   "2026-09-01T15:29:47Z",
+   "2026-09-01T13:42:33Z",
+   "2026-09-01T13:36:33Z",
+   "2026-09-01T13:14:57Z",
+   "2026-09-01T12:16:31Z",
+   "2026-09-01T10:50:56Z",
+   "2026-09-01T10:44:33Z",
+   "2026-09-01T10:18:47Z",
+   "2026-09-01T09:36:27Z",
+   "2026-09-01T09:33:36Z",
+   "2026-09-01T09:24:52Z",
+   "2026-08-31T14:11:15Z",
+   "2026-08-31T14:10:57Z",
+   "2026-08-31T14:08:46Z",
+   "2026-08-31T13:41:07Z",
+   "2026-08-31T12:52:59Z",
+   "2026-08-31T12:49:07Z",
+   "2026-08-31T10:01:58Z",
+   "2026-08-31T10:01:12Z",
+   "2026-08-31T09:54:10Z",
+   "2026-08-31T09:46:43Z",
+   "2026-08-31T08:19:26Z",
+   "2026-08-31T08:10:12Z",
+   "2026-08-31T06:32:37Z",
+   "2026-08-31T06:23:07Z",
+   "2026-08-30T05:42:02Z",
+   "2026-08-30T05:32:18Z",
+   "2026-08-29T16:31:59Z",
+   "2026-08-29T16:14:46Z",
+   "2026-08-29T16:06:07Z",
+   "2026-08-29T08:53:36Z",
+   "2026-08-29T08:09:53Z",
+   "2026-08-29T06:58:33Z",
+   "2026-08-20T11:20:39Z",
+   "2026-08-20T10:46:57Z",
+   "2026-08-20T09:32:08Z",
+   "2026-08-20T09:23:57Z",
+   "2026-08-20T09:00:41Z",
+   "2026-08-20T08:38:40Z",
+   "2026-08-20T08:38:04Z",
+   "2026-08-20T08:19:37Z",
+   "2026-08-20T05:55:41Z",
+   "2026-08-20T05:50:59Z",
+   "2026-08-20T05:47:37Z",
+   "2026-08-19T17:37:01Z",
+   "2026-08-19T17:26:56Z",
+   "2026-08-19T17:32:44Z",
+   "2026-08-08T12:02:57Z",
+   "2026-08-08T11:50:44Z",
+   "2026-08-08T11:43:51Z",
+   "2026-08-08T11:36:29Z",
+   "2026-08-08T10:15:41Z",
+   "2026-08-08T09:52:10Z",
+   "2026-08-08T08:16:48Z",
+   "2026-08-07T09:59:17Z",
+   "2026-08-07T09:54:22Z",
+   "2026-08-07T09:44:30Z",
+   "2026-08-06T14:50:25Z",
+   "2026-08-06T14:48:23Z",
+   "2026-08-06T14:22:05Z",
+   "2026-08-05T14:04:10Z",
+   "2026-08-05T12:09:35Z",
+   "2026-08-05T11:50:53Z",
+   "2026-08-05T10:30:00Z",
+   "2026-08-05T10:22:38Z",
+   "2026-08-05T09:04:15Z",
+   "2026-08-05T08:49:17Z",
+   "2026-08-05T09:17:40Z",
+   "2026-08-05T09:11:38Z",
+   "2026-08-05T08:10:19Z",
+   "2026-08-05T06:49:34Z",
+   "2026-08-05T06:23:04Z",
+   "2026-08-04T15:16:46Z",
+   "2026-08-04T15:06:17Z",
+   "2026-08-04T14:50:15Z",
+   "2026-08-04T14:15:07Z",
+   "2026-08-04T13:49:46Z",
+   "2026-08-04T13:27:01Z",
+   "2026-08-04T13:22:32Z",
+   "2026-08-04T12:00:02Z",
+   "2026-08-04T11:52:56Z",
+   "2026-08-04T10:49:11Z",
+   "2026-08-03T12:30:00Z",
+   "2026-08-03T12:12:18Z",
+   "2026-08-03T11:32:11Z",
+   "2026-08-03T11:24:05Z",
+   "2026-08-03T10:13:44Z",
+   "2026-08-03T06:31:03Z",
+   "2026-08-03T06:27:58Z",
+   "2026-08-03T06:09:36Z",
+   "2026-08-03T05:59:47Z",
+   "2026-08-02T10:40:45Z",
+   "2026-08-02T10:26:09Z",
+   "2026-08-02T09:00:26Z",
+   "2026-08-01T19:38:31Z",
+   "2026-08-01T18:29:22Z",
+   "2026-08-01T05:44:30Z",
+   "2026-07-31T17:58:03Z",
+   "2026-07-31T15:10:35Z",
+   "2026-07-31T15:06:35Z",
+   "2026-07-31T15:03:08Z",
+   "2026-07-31T15:03:08Z",
+   "2026-07-31T05:21:18Z",
+   "2026-07-31T05:20:24Z",
+   "2026-07-31T05:18:58Z",
+   "2026-07-31T04:57:26Z",
+   "2026-07-31T04:57:16Z",
+   "2026-07-30T13:40:35Z",
+   "2026-07-30T11:09:41Z",
+   "2026-07-30T11:09:41Z",
+   "2026-07-30T11:01:59Z",
+   "2026-07-30T10:57:35Z",
+   "2026-07-30T10:47:41Z",
+   "2026-07-30T10:41:23Z",
+   "2026-07-30T10:35:50Z",
+   "2026-07-30T10:26:18Z",
+   "2026-07-30T10:20:37Z",
+   "2026-07-30T10:09:50Z",
+   "2026-07-30T10:01:50Z",
+   "2026-07-30T09:57:44Z",
+   "2026-07-30T09:57:44Z",
+   "2026-07-30T09:34:03Z",
+   "2026-07-30T09:26:53Z",
+   "2026-07-30T09:26:53Z",
+   "2026-07-30T08:32:30Z",
+   "2026-07-30T06:06:51Z",
+   "2026-07-29T18:01:09Z",
+   "2026-07-29T17:46:05Z",
+   "2026-07-29T17:38:52Z",
+   "2026-07-29T17:30:22Z",
+   "2026-07-29T17:25:18Z",
+   "2026-07-29T17:25:06Z",
+   "2026-07-29T17:12:13Z",
+   "2026-07-29T17:04:13Z",
+   "2026-07-29T16:00:52Z",
+   "2026-07-29T10:12:39Z",
+   "2026-07-29T09:44:20Z",
+   "2026-07-28T17:41:44Z",
+   "2026-07-14T13:09:41Z",
+   "2026-07-14T13:03:04Z",
+   "2026-07-14T12:56:28Z",
+   "2026-07-14T12:56:28Z",
+   "2026-07-11T06:59:41Z",
+   "2026-07-10T16:31:36Z",
+   "2026-07-10T16:24:20Z",
+   "2026-07-10T13:36:39Z",
+   "2026-07-10T12:55:40Z",
+   "2026-07-10T15:57:06Z",
+   "2026-07-10T12:30:12Z",
+   "2026-07-10T12:10:36Z",
+   "2026-07-10T15:50:13Z",
+   "2026-07-10T11:59:52Z",
+   "2026-07-08T16:28:30Z",
+   "2026-07-08T15:58:48Z",
+   "2026-07-08T15:44:39Z",
+   "2026-07-08T15:36:16Z",
+   "2026-07-08T15:36:16Z",
+   "2026-07-08T15:26:18Z",
+   "2026-07-05T10:42:33Z",
+   "2026-07-05T11:13:11Z",
+   "2026-07-04T10:49:55Z",
+   "2026-07-04T10:44:05Z",
+   "2026-07-04T10:10:46Z",
+   "2026-07-04T06:45:59Z",
+   "2026-07-03T14:39:13Z",
+   "2026-07-03T14:37:00Z",
+   "2026-07-03T14:17:58Z",
+   "2026-07-03T14:10:21Z",
+   "2026-07-03T13:49:49Z",
+   "2026-07-03T13:27:31Z",
+   "2026-07-03T05:53:14Z",
+   "2026-06-28T18:43:25Z",
+   "2026-06-28T15:57:54Z",
+   "2026-06-28T14:56:08Z",
+   "2026-06-28T14:43:08Z",
+   "2026-06-28T11:29:30Z",
+   "2026-06-25T16:01:44Z",
+   "2026-06-21T10:33:36Z",
+   "2026-06-21T10:31:55Z",
+   "2026-06-21T10:30:29Z",
+   "2026-06-21T08:51:29Z",
+   "2026-06-21T08:44:28Z",
+   "2026-06-21T08:32:11Z",
+   "2026-06-21T06:47:15Z",
+   "2026-06-21T06:33:32Z",
+   "2026-06-20T15:56:57Z",
+   "2026-06-20T15:07:54Z",
+   "2026-06-20T13:51:08Z",
+   "2026-06-20T13:50:31Z",
+   "2026-06-20T13:31:38Z",
+   "2026-06-20T10:56:30Z",
+   "2026-06-20T10:16:09Z",
+   "2026-06-20T10:16:01Z",
+   "2026-06-20T08:40:47Z",
+   "2026-06-16T13:04:02Z",
+   "2026-06-16T12:57:53Z",
+   "2026-06-16T13:05:06Z",
+   "2026-06-16T12:57:02Z",
+   "2026-06-16T12:53:57Z",
+   "2026-06-16T10:22:25Z",
+   "2026-06-11T14:39:15Z",
+   "2026-06-11T11:45:59Z",
+   "2026-06-11T10:58:49Z",
+   "2026-06-11T10:43:33Z",
+   "2026-06-11T10:43:17Z",
+   "2026-06-10T13:47:14Z",
+   "2026-06-10T13:07:13Z",
+   "2026-06-10T13:05:35Z",
+   "2026-06-10T13:02:53Z",
+   "2026-06-10T12:54:22Z",
+   "2026-06-10T12:48:10Z",
+   "2026-06-10T12:12:29Z",
+   "2026-06-10T11:54:19Z",
+   "2026-06-10T11:52:26Z",
+   "2026-06-10T11:24:04Z",
+   "2026-06-10T08:52:35Z",
+   "2026-06-10T08:47:22Z",
+   "2026-06-10T06:01:09Z",
+   "2026-06-09T07:41:11Z",
+   "2026-06-06T05:57:54Z",
+   "2026-06-06T05:51:51Z",
+   "2026-06-06T05:36:55Z",
+   "2026-06-05T17:32:12Z",
+   "2026-06-05T17:11:28Z",
+   "2026-06-05T16:43:08Z",
+   "2026-06-05T16:34:17Z",
+   "2026-06-05T16:04:30Z",
+   "2026-06-05T15:55:14Z",
+   "2026-06-05T15:43:09Z",
+   "2026-06-05T15:38:44Z",
+   "2026-06-05T15:33:46Z",
+   "2026-06-05T15:24:51Z",
+   "2026-06-05T13:10:01Z",
+   "2026-06-05T12:29:23Z",
+   "2026-06-04T11:44:05Z",
+   "2026-06-02T15:27:58Z",
+   "2026-06-02T15:04:08Z",
+   "2026-06-02T15:01:18Z",
+   "2026-06-02T14:53:21Z",
+   "2026-06-02T14:21:34Z",
+   "2026-06-02T14:19:06Z",
+   "2026-06-02T14:11:10Z",
+   "2026-06-02T14:09:36Z",
+   "2026-06-02T13:58:33Z",
+   "2026-06-02T13:56:39Z",
+   "2026-06-02T13:52:30Z",
+   "2026-06-02T13:49:36Z",
+   "2026-06-02T13:45:36Z",
+   "2026-06-02T13:37:44Z",
+   "2026-06-01T12:17:35Z",
+   "2026-06-01T12:06:15Z",
+   "2026-06-01T11:58:21Z",
+   "2026-06-01T09:37:08Z",
+   "2026-06-01T09:29:27Z",
+   "2026-06-01T09:21:29Z",
+   "2026-06-01T09:03:58Z",
+   "2026-06-01T09:02:22Z",
+   "2026-06-01T08:25:31Z",
+   "2026-05-29T21:17:23Z",
+   "2026-05-29T20:52:48Z",
+   "2026-05-29T17:17:22Z",
+   "2026-05-29T16:50:46Z",
+   "2026-05-29T16:50:46Z",
+   "2026-05-29T16:50:46Z",
+   "2026-05-28T12:27:11Z",
+   "2026-05-28T11:57:17Z",
+   "2026-05-23T16:42:54Z",
+   "2026-05-23T16:28:57Z",
+   "2026-05-20T09:10:31Z",
+   "2026-05-20T07:18:26Z",
+   "2026-05-20T06:13:58Z",
+   "2026-05-19T16:51:24Z",
+   "2026-05-19T16:23:08Z",
+   "2026-05-15T15:32:54Z",
+   "2026-05-15T15:22:11Z",
+   "2026-05-15T15:14:06Z",
+   "2026-05-15T15:00:08Z",
+   "2026-05-15T09:05:55Z",
+   "2026-05-15T08:56:09Z",
+   "2026-05-15T08:53:50Z",
+   "2026-05-15T08:31:36Z",
+   "2026-05-15T08:15:36Z",
+   "2026-05-15T06:55:01Z",
+   "2026-05-09T15:54:00Z",
+   "2026-05-09T14:27:30Z",
+   "2026-05-09T13:31:06Z",
+   "2026-05-09T13:30:27Z",
+   "2026-05-09T12:53:54Z",
+   "2026-05-09T12:31:23Z",
+   "2026-05-09T11:59:15Z",
+   "2026-05-09T11:28:11Z",
+   "2026-05-09T10:47:34Z",
+   "2026-05-09T10:22:30Z",
+   "2026-05-09T09:44:12Z",
+   "2026-05-09T08:01:06Z",
+   "2026-05-09T07:43:47Z",
+   "2026-05-09T07:31:58Z",
+   "2026-05-08T09:04:17Z",
+   "2026-05-07T14:47:33Z",
+   "2026-05-07T14:43:30Z",
+   "2026-05-07T14:41:21Z",
+   "2026-05-07T14:11:23Z",
+   "2026-05-07T14:08:00Z",
+   "2026-05-07T13:54:17Z",
+   "2026-05-05T05:24:37Z",
+   "2026-05-05T05:13:55Z",
+   "2026-05-02T12:30:08Z",
+   "2026-04-30T07:41:34Z",
+   "2026-04-30T05:28:40Z",
+   "2026-04-28T09:17:17Z",
+   "2026-04-28T06:06:35Z",
+   "2026-04-27T10:02:01Z",
+   "2026-04-26T16:22:16Z",
+   "2026-04-26T15:00:28Z",
+   "2026-04-26T14:38:07Z",
+   "2026-04-25T08:25:53Z",
+   "2026-04-24T13:01:03Z",
+   "2026-04-24T13:00:41Z",
+   "2026-04-24T08:19:48Z",
+   "2026-04-23T14:43:42Z",
+   "2026-04-23T14:16:13Z",
+   "2026-04-23T14:14:18Z",
+   "2026-04-23T13:51:17Z",
+   "2026-04-23T13:20:28Z",
+   "2026-04-23T12:07:01Z",
+   "2026-04-23T12:04:18Z",
+   "2026-04-22T17:04:58Z",
+   "2026-04-22T16:05:25Z",
+   "2026-04-22T16:03:21Z",
+   "2026-04-22T16:02:28Z",
+   "2026-04-22T15:58:43Z",
+   "2026-04-22T15:41:52Z",
+   "2026-04-22T15:39:59Z",
+   "2026-04-22T15:35:04Z",
+   "2026-04-22T15:34:31Z",
+   "2026-04-22T15:28:55Z",
+   "2026-04-22T15:22:36Z",
+   "2026-04-22T15:11:00Z",
+   "2026-04-22T15:07:28Z",
+   "2026-04-22T14:47:49Z",
+   "2026-04-22T13:19:03Z",
+   "2026-04-22T12:40:05Z",
+   "2026-04-22T12:17:22Z",
+   "2026-04-22T11:52:17Z",
+   "2026-04-22T09:57:20Z",
+   "2026-04-22T09:50:04Z",
+   "2026-04-22T09:46:12Z",
+   "2026-04-22T09:14:11Z",
+   "2026-04-22T09:12:10Z",
+   "2026-04-22T09:02:40Z",
+   "2026-04-22T09:00:43Z",
+   "2026-04-22T08:57:28Z",
+   "2026-04-22T08:49:56Z",
+   "2026-04-22T06:51:07Z",
+   "2026-04-22T06:48:17Z",
+   "2026-04-21T18:46:42Z",
+   "2026-04-21T18:31:43Z",
+   "2026-04-21T17:58:17Z",
+   "2026-04-21T17:48:05Z",
+   "2026-04-21T17:46:00Z",
+   "2026-04-21T17:12:42Z"
+  ],
+  "capped": false
+ },
+ "releases": [
+  {
+   "publishedAt": "2026-10-13T08:51:12Z",
+   "downloads": 24
+  },
+  {
+   "publishedAt": "2026-10-09T13:00:56Z",
+   "downloads": 30
+  },
+  {
+   "publishedAt": "2026-10-06T12:41:30Z",
+   "downloads": 39
+  },
+  {
+   "publishedAt": "2026-10-06T12:11:34Z",
+   "downloads": 10
+  },
+  {
+   "publishedAt": "2026-09-28T18:49:55Z",
+   "downloads": 53
+  },
+  {
+   "publishedAt": "2026-09-16T07:06:36Z",
+   "downloads": 49
+  },
+  {
+   "publishedAt": "2026-09-13T16:14:51Z",
+   "downloads": 27
+  },
+  {
+   "publishedAt": "2026-09-13T09:06:46Z",
+   "downloads": 44
+  },
+  {
+   "publishedAt": "2026-09-13T06:49:23Z",
+   "downloads": 22
+  },
+  {
+   "publishedAt": "2026-09-12T18:45:13Z",
+   "downloads": 16
+  },
+  {
+   "publishedAt": "2026-09-08T11:55:02Z",
+   "downloads": 43
+  },
+  {
+   "publishedAt": "2026-09-06T18:33:39Z",
+   "downloads": 34
+  },
+  {
+   "publishedAt": "2026-09-06T06:33:09Z",
+   "downloads": 29
+  },
+  {
+   "publishedAt": "2026-09-02T07:49:47Z",
+   "downloads": 33
+  },
+  {
+   "publishedAt": "2026-08-31T13:45:48Z",
+   "downloads": 16
+  },
+  {
+   "publishedAt": "2026-08-31T13:09:12Z",
+   "downloads": 0
+  },
+  {
+   "publishedAt": "2026-08-20T09:36:54Z",
+   "downloads": 25
+  },
+  {
+   "publishedAt": "2026-08-05T12:05:38Z",
+   "downloads": 28
+  },
+  {
+   "publishedAt": "2026-08-03T07:28:48Z",
+   "downloads": 22
+  },
+  {
+   "publishedAt": "2026-07-31T05:01:12Z",
+   "downloads": 46
+  },
+  {
+   "publishedAt": "2026-07-30T06:09:13Z",
+   "downloads": 18
+  },
+  {
+   "publishedAt": "2026-07-14T13:11:54Z",
+   "downloads": 32
+  },
+  {
+   "publishedAt": "2026-07-10T16:45:48Z",
+   "downloads": 42
+  },
+  {
+   "publishedAt": "2026-07-08T16:01:04Z",
+   "downloads": 24
+  },
+  {
+   "publishedAt": "2026-07-04T10:54:37Z",
+   "downloads": 22
+  },
+  {
+   "publishedAt": "2026-06-28T16:02:16Z",
+   "downloads": 15
+  },
+  {
+   "publishedAt": "2026-06-22T05:28:22Z",
+   "downloads": 19
+  },
+  {
+   "publishedAt": "2026-06-21T06:36:21Z",
+   "downloads": 14
+  },
+  {
+   "publishedAt": "2026-06-16T13:08:36Z",
+   "downloads": 19
+  },
+  {
+   "publishedAt": "2026-06-11T11:50:02Z",
+   "downloads": 28
+  },
+  {
+   "publishedAt": "2026-06-10T12:24:59Z",
+   "downloads": 14
+  },
+  {
+   "publishedAt": "2026-06-06T05:54:18Z",
+   "downloads": 36
+  },
+  {
+   "publishedAt": "2026-06-02T15:51:32Z",
+   "downloads": 22
+  },
+  {
+   "publishedAt": "2026-06-01T12:29:22Z",
+   "downloads": 14
+  },
+  {
+   "publishedAt": "2026-05-29T21:38:34Z",
+   "downloads": 16
+  },
+  {
+   "publishedAt": "2026-05-28T12:45:49Z",
+   "downloads": 13
+  },
+  {
+   "publishedAt": "2026-05-25T09:12:24Z",
+   "downloads": 20
+  },
+  {
+   "publishedAt": "2026-05-20T10:31:45Z",
+   "downloads": 23
+  },
+  {
+   "publishedAt": "2026-05-15T15:55:33Z",
+   "downloads": 18
+  },
+  {
+   "publishedAt": "2026-05-09T16:14:42Z",
+   "downloads": 20
+  },
+  {
+   "publishedAt": "2026-05-07T14:45:13Z",
+   "downloads": 19
+  },
+  {
+   "publishedAt": "2026-05-07T13:56:09Z",
+   "downloads": 1
+  },
+  {
+   "publishedAt": "2026-05-05T05:15:35Z",
+   "downloads": 17
+  },
+  {
+   "publishedAt": "2026-05-04T07:11:24Z",
+   "downloads": 11
+  },
+  {
+   "publishedAt": "2026-04-28T09:19:14Z",
+   "downloads": 47
+  },
+  {
+   "publishedAt": "2026-04-28T06:08:37Z",
+   "downloads": 1
+  },
+  {
+   "publishedAt": "2026-04-27T10:03:37Z",
+   "downloads": 1
+  },
+  {
+   "publishedAt": "2026-04-26T16:24:02Z",
+   "downloads": 0
+  },
+  {
+   "publishedAt": "2026-04-26T14:39:52Z",
+   "downloads": 1
+  },
+  {
+   "publishedAt": "2026-04-24T13:03:00Z",
+   "downloads": 2
+  },
+  {
+   "publishedAt": "2026-04-23T14:22:41Z",
+   "downloads": 1
+  },
+  {
+   "publishedAt": "2026-04-22T15:24:13Z",
+   "downloads": 3
+  },
+  {
+   "publishedAt": "2026-04-22T14:49:41Z",
+   "downloads": 1
+  },
+  {
+   "publishedAt": "2026-04-22T09:51:43Z",
+   "downloads": 3
+  },
+  {
+   "publishedAt": "2026-04-22T08:51:36Z",
+   "downloads": 2
+  }
+ ],
+ "contributors": {
+  "total": 2,
+  "list": [
+   {
+    "login": "gfazioli",
+    "contributions": 629,
+    "type": "User",
+    "avatarUrl": "https://avatars.githubusercontent.com/u/432181?v=4"
+   },
+   {
+    "login": "dependabot[bot]",
+    "contributions": 4,
+    "type": "Bot",
+    "avatarUrl": "https://avatars.githubusercontent.com/in/29110?v=4"
+   }
+  ],
+  "bots": 1
+ },
+ "tree": {
+  "files": 292,
+  "truncated": false,
+  "paths": [
+   ".coderabbit.yaml",
+   ".github",
+   ".github/CLAUDE.md",
+   ".github/ISSUE_TEMPLATE",
+   ".github/PULL_REQUEST_TEMPLATE.md",
+   ".github/dependabot.yml",
+   ".github/workflows",
+   ".github/workflows/ci.yml",
+   ".github/workflows/pages.yml",
+   ".github/workflows/release.yml",
+   ".gitignore",
+   ".goreleaser.yaml",
+   "CLAUDE.md",
+   "CODE_OF_CONDUCT.md",
+   "CONTRIBUTING.md",
+   "Dockerfile",
+   "LICENSE",
+   "Makefile",
+   "README.md",
+   "SECURITY.md",
+   "dashcache_dir_test.go",
+   "docs",
+   "docs/CLAUDE.md",
+   "docs/design",
+   "docs/fonts",
+   "docs/guide",
+   "docs/icons",
+   "docs/index.html",
+   "docs/landing.js",
+   "docs/logo",
+   "docs/screenshots",
+   "docs/sitemap.xml",
+   "docs/themes",
+   "go.mod",
+   "go.sum",
+   "images_test.go",
+   "internal",
+   "landing_test.go",
+   "main.go",
+   "main_test.go",
+   "release_workflow_test.go",
+   "scripts",
+   "site_test.go",
+   "sweep.go",
+   "sweep_test.go",
+   "tapes",
+   "version_test.go",
+   "workflows_test.go"
+  ]
+ }
+}

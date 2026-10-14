@@ -1,0 +1,344 @@
+{
+ "kind": "repo",
+ "fetchedAt": "2026-10-14T16:16:51.744Z",
+ "repo": {
+  "name": "react-switch-button",
+  "nameWithOwner": "gfazioli/react-switch-button",
+  "description": "React Switch Button control",
+  "homepageUrl": "http://gfazioli.github.io/react-switch-button/",
+  "createdAt": "2015-02-24T11:30:22Z",
+  "pushedAt": "2018-11-02T17:45:19Z",
+  "diskUsage": 4025,
+  "isArchived": false,
+  "isPrivate": false,
+  "stargazerCount": 86,
+  "forkCount": 36,
+  "watchers": {
+   "totalCount": 4
+  },
+  "licenseInfo": {
+   "spdxId": "MIT"
+  },
+  "isSecurityPolicyEnabled": false,
+  "repositoryTopics": {
+   "nodes": [
+    {
+     "topic": {
+      "name": "switch-control"
+     }
+    },
+    {
+     "topic": {
+      "name": "javascript"
+     }
+    },
+    {
+     "topic": {
+      "name": "react"
+     }
+    },
+    {
+     "topic": {
+      "name": "css"
+     }
+    },
+    {
+     "topic": {
+      "name": "demo"
+     }
+    },
+    {
+     "topic": {
+      "name": "reactjs"
+     }
+    },
+    {
+     "topic": {
+      "name": "react-components"
+     }
+    }
+   ]
+  },
+  "languages": {
+   "totalSize": 22935,
+   "edges": [
+    {
+     "size": 11803,
+     "node": {
+      "name": "JavaScript",
+      "color": "#f1e05a"
+     }
+    },
+    {
+     "size": 10674,
+     "node": {
+      "name": "CSS",
+      "color": "#663399"
+     }
+    },
+    {
+     "size": 458,
+     "node": {
+      "name": "HTML",
+      "color": "#e34c26"
+     }
+    }
+   ]
+  },
+  "branches": {
+   "totalCount": 2
+  },
+  "tags": {
+   "totalCount": 16,
+   "nodes": [
+    {
+     "name": "v2.3.5"
+    }
+   ]
+  },
+  "openIssues": {
+   "totalCount": 0
+  },
+  "closedIssues": {
+   "totalCount": 22
+  },
+  "openPRs": {
+   "totalCount": 0
+  },
+  "mergedPRs": {
+   "totalCount": 13
+  },
+  "releases": {
+   "totalCount": 15,
+   "nodes": [
+    {
+     "tagName": "v2.3.5",
+     "publishedAt": "2018-07-06T16:36:46Z",
+     "description": ""
+    },
+    {
+     "tagName": "v2.3.4",
+     "publishedAt": "2018-07-06T16:28:55Z",
+     "description": ""
+    },
+    {
+     "tagName": "v2.3.1",
+     "publishedAt": "2017-11-06T17:24:12Z",
+     "description": "Try to fix #31 "
+    },
+    {
+     "tagName": "v2.3.0",
+     "publishedAt": "2017-11-05T14:50:44Z",
+     "description": "## What's new in version 2.3.0\r\n\r\n* Rewritten in ES6 version\r\n* Add Laravel-Mix\r\n* The props `defaultChecked` is deprecated in favor of `checked`"
+    },
+    {
+     "tagName": "v2.2.1",
+     "publishedAt": "2017-03-02T10:43:18Z",
+     "description": "Minor update in doc and source\n"
+    }
+   ]
+  },
+  "defaultBranchRef": {
+   "name": "master",
+   "target": {
+    "history": {
+     "totalCount": 125,
+     "nodes": [
+      {
+       "abbreviatedOid": "9cbcccb",
+       "messageHeadline": "deprecated",
+       "authoredDate": "2018-11-02T17:45:10Z",
+       "author": {
+        "name": "Giovambattista Fazioli",
+        "user": {
+         "login": "gfazioli"
+        }
+       }
+      },
+      {
+       "abbreviatedOid": "90e34e0",
+       "messageHeadline": "wip",
+       "authoredDate": "2018-11-02T17:42:50Z",
+       "author": {
+        "name": "Giovambattista Fazioli",
+        "user": {
+         "login": "gfazioli"
+        }
+       }
+      },
+      {
+       "abbreviatedOid": "e8324f6",
+       "messageHeadline": "Update README.md",
+       "authoredDate": "2018-11-02T17:42:14Z",
+       "author": {
+        "name": "Giovambattista Fazioli",
+        "user": {
+         "login": "gfazioli"
+        }
+       }
+      },
+      {
+       "abbreviatedOid": "4a0d8a5",
+       "messageHeadline": "wip",
+       "authoredDate": "2018-11-02T17:40:52Z",
+       "author": {
+        "name": "Giovambattista Fazioli",
+        "user": {
+         "login": "gfazioli"
+        }
+       }
+      },
+      {
+       "abbreviatedOid": "a0faf44",
+       "messageHeadline": "Update README.md",
+       "authoredDate": "2018-11-02T17:38:58Z",
+       "author": {
+        "name": "Giovambattista Fazioli",
+        "user": {
+         "login": "gfazioli"
+        }
+       }
+      },
+      {
+       "abbreviatedOid": "e317a6a",
+       "messageHeadline": "Update README.md",
+       "authoredDate": "2018-11-02T07:50:32Z",
+       "author": {
+        "name": "Giovambattista Fazioli",
+        "user": {
+         "login": "gfazioli"
+        }
+       }
+      }
+     ]
+    }
+   }
+  }
+ },
+ "history": {
+  "dates": [],
+  "capped": false
+ },
+ "releases": [
+  {
+   "publishedAt": "2018-07-06T16:36:46Z",
+   "downloads": 0
+  },
+  {
+   "publishedAt": "2018-07-06T16:28:55Z",
+   "downloads": 0
+  },
+  {
+   "publishedAt": "2017-11-06T17:24:12Z",
+   "downloads": 0
+  },
+  {
+   "publishedAt": "2017-11-05T14:50:44Z",
+   "downloads": 0
+  },
+  {
+   "publishedAt": "2017-03-02T10:43:18Z",
+   "downloads": 0
+  },
+  {
+   "publishedAt": "2017-02-20T09:26:04Z",
+   "downloads": 0
+  },
+  {
+   "publishedAt": "2017-01-20T18:29:45Z",
+   "downloads": 0
+  },
+  {
+   "publishedAt": "2016-12-30T12:39:52Z",
+   "downloads": 0
+  },
+  {
+   "publishedAt": "2016-12-30T10:56:32Z",
+   "downloads": 0
+  },
+  {
+   "publishedAt": "2016-12-28T20:51:37Z",
+   "downloads": 0
+  },
+  {
+   "publishedAt": "2016-12-28T20:59:31Z",
+   "downloads": 0
+  },
+  {
+   "publishedAt": "2016-09-16T13:47:37Z",
+   "downloads": 0
+  },
+  {
+   "publishedAt": "2015-07-24T09:43:36Z",
+   "downloads": 0
+  },
+  {
+   "publishedAt": "2015-06-26T16:22:46Z",
+   "downloads": 0
+  },
+  {
+   "publishedAt": "2015-03-16T17:09:01Z",
+   "downloads": 0
+  }
+ ],
+ "contributors": {
+  "total": 9,
+  "list": [
+   {
+    "login": "gfazioli",
+    "contributions": 77,
+    "type": "User",
+    "avatarUrl": "https://avatars.githubusercontent.com/u/432181?v=4"
+   },
+   {
+    "login": "Manuel-Manoury",
+    "contributions": 6,
+    "type": "User",
+    "avatarUrl": "https://avatars.githubusercontent.com/u/3438543?v=4"
+   },
+   {
+    "login": "bmaland",
+    "contributions": 2,
+    "type": "User",
+    "avatarUrl": "https://avatars.githubusercontent.com/u/2651?v=4"
+   },
+   {
+    "login": "pierrefourgeaud",
+    "contributions": 2,
+    "type": "User",
+    "avatarUrl": "https://avatars.githubusercontent.com/u/776262?v=4"
+   },
+   {
+    "login": "Reggino",
+    "contributions": 2,
+    "type": "User",
+    "avatarUrl": "https://avatars.githubusercontent.com/u/174358?v=4"
+   },
+   {
+    "login": "lironess",
+    "contributions": 1,
+    "type": "User",
+    "avatarUrl": "https://avatars.githubusercontent.com/u/4243338?v=4"
+   }
+  ],
+  "bots": 0
+ },
+ "tree": {
+  "files": 21,
+  "truncated": false,
+  "paths": [
+   ".babelrc",
+   ".gitattributes",
+   ".gitignore",
+   "LICENSE",
+   "README.md",
+   "dist",
+   "example",
+   "less",
+   "mix-manifest.json",
+   "package.json",
+   "src",
+   "webpack.mix.js"
+  ]
+ }
+}
