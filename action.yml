@@ -1,0 +1,60 @@
+name: Glancecard
+description: Your GitHub profile and repositories, at a glance — daily SVG cards for your READMEs, rendered by GitHub Actions.
+author: Giovambattista Fazioli
+branding:
+  icon: activity
+  color: green
+
+inputs:
+  repos:
+    description: Repositories to render a card for, as owner/name, separated by newlines, commas or spaces.
+    required: false
+  profile:
+    description: A GitHub login to render a profile card for.
+    required: false
+  out-dir:
+    description: Folder, relative to the workspace, the cards are written to.
+    required: false
+    default: glancecard
+  theme:
+    description: dark, light, or both (one file each, <name>-dark.svg and <name>-light.svg).
+    required: false
+    default: both
+  time-zone:
+    description: IANA time zone the commit calendar and rhythm are read in, such as Europe/Rome.
+    required: false
+    default: UTC
+  sections:
+    description: Repository card sections, or all — hero, tiles, activity, rhythm, code, commits, releases, contributors.
+    required: false
+    default: all
+  max-commits:
+    description: Commits read for the last year, at most; a busier repository says so on its card.
+    required: false
+    default: "5000"
+  allow-private:
+    description: Render private repositories too. Their card publishes their data wherever it is committed.
+    required: false
+    default: "false"
+  commit:
+    description: Commit and push the cards. Never on a pull request, where they are only rendered.
+    required: false
+    default: "true"
+  commit-message:
+    description: Message of that commit.
+    required: false
+    default: "chore: refresh glancecard"
+  token:
+    description: Token the GitHub API is read with.
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  files:
+    description: The cards written, one path per line, relative to the workspace.
+  committed:
+    description: true when a commit was pushed.
+
+runs:
+  using: node24
+  main: src/action.js

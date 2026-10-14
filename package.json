@@ -1,0 +1,38 @@
+{
+  "name": "glancecard",
+  "version": "0.1.0",
+  "description": "Your GitHub profile and repositories, at a glance: daily SVG cards for your READMEs, rendered by GitHub Actions.",
+  "type": "module",
+  "bin": {
+    "glancecard": "src/cli.js"
+  },
+  "files": [
+    "src",
+    "action.yml"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test",
+    "golden": "node scripts/update-golden.js",
+    "preview": "node scripts/preview.js"
+  },
+  "keywords": [
+    "github-actions",
+    "readme",
+    "svg",
+    "github-stats",
+    "profile-readme",
+    "repository",
+    "dashboard"
+  ],
+  "author": "Giovambattista Fazioli",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gfazioli/glancecard.git"
+  },
+  "homepage": "https://github.com/gfazioli/glancecard#readme",
+  "bugs": "https://github.com/gfazioli/glancecard/issues"
+}

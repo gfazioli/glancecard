@@ -1,0 +1,5 @@
+node_modules/
+/glancecard/
+/preview/
+*.tmp-*
+.DS_Store
