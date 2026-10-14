@@ -1,0 +1,1307 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>glancecard: GitHub cards for your README, updated daily</title>
+    <meta name="description" content="Daily SVG cards of your GitHub profile and repositories for your READMEs, in nine looks. A GitHub Action: no server, no dependencies, free." />
+    <link rel="canonical" href="https://gfazioli.github.io/glancecard/" />
+    <meta name="theme-color" content="#090c16" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="glancecard" />
+    <meta property="og:title" content="glancecard: your GitHub, at a glance" />
+    <meta property="og:description" content="Daily SVG cards of your GitHub profile and repositories for your READMEs, in nine looks. A GitHub Action: no server, no dependencies, free." />
+    <meta property="og:url" content="https://gfazioli.github.io/glancecard/" />
+    <meta property="og:image" content="https://gfazioli.github.io/glancecard/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="A glancecard profile card: tiles, a contribution calendar, top repositories and languages" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "glancecard",
+        "description": "Daily SVG cards of your GitHub profile and repositories for your READMEs, rendered by a GitHub Action in your own repository.",
+        "url": "https://gfazioli.github.io/glancecard/",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "GitHub Actions",
+        "isAccessibleForFree": true,
+        "license": "https://opensource.org/licenses/MIT",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "author": { "@type": "Person", "name": "Giovambattista Fazioli", "url": "https://gfazioli.github.io/" },
+        "sameAs": ["https://github.com/gfazioli/glancecard", "https://github.com/marketplace/actions/glancecard"]
+      }
+    </script>
+    <style>
+      :root {
+        --bg: #090c16;
+        --bg-2: #0e1324;
+        --panel: rgba(255, 255, 255, 0.035);
+        --line: rgba(255, 255, 255, 0.09);
+        --text: #e6edf3;
+        --muted: rgba(230, 237, 243, 0.64);
+        --faint: rgba(230, 237, 243, 0.45);
+        --green: #4ade80;
+        --blue: #60a5fa;
+        --violet: #a78bfa;
+        --pink: #f472b6;
+        --radius: 18px;
+        --maxw: 1120px;
+        color-scheme: dark;
+
+        /* The springs the scroll reveals land on, sampled into linear()
+           stops. Generated, never typed: scripts/springs.js prints this
+           block and test/site.test.js fails when it differs by a digit. */
+        /* springs:begin */
+        /* f=1.4 Hz, zeta=0.5: overshoot 16.3%, 1255 ms -- a card landing: overshoots and settles */
+        --gc-spring-duration: 1255ms;
+        --gc-spring: linear(
+          0,
+          0.0244 2.08%,
+          0.0898 4.17%,
+          0.1845 6.25%,
+          0.2982 8.33%,
+          0.4216 10.42%,
+          0.5468 12.5%,
+          0.6676 14.58%,
+          0.7792 16.67%,
+          0.8783 18.75%,
+          0.9628 20.83%,
+          1.0316 22.92%,
+          1.0848 25%,
+          1.1231 27.08%,
+          1.1477 29.17%,
+          1.1603 31.25%,
+          1.1628 33.33%,
+          1.1571 35.42%,
+          1.1452 37.5%,
+          1.1289 39.58%,
+          1.1098 41.67%,
+          1.0896 43.75%,
+          1.0692 45.83%,
+          1.0498 47.92%,
+          1.032 50%,
+          1.0164 52.08%,
+          1.0032 54.17%,
+          0.9926 56.25%,
+          0.9845 58.33%,
+          0.9788 60.42%,
+          0.9753 62.5%,
+          0.9736 64.58%,
+          0.9736 66.67%,
+          0.9748 68.75%,
+          0.9769 70.83%,
+          0.9797 72.92%,
+          0.9828 75%,
+          0.9862 77.08%,
+          0.9895 79.17%,
+          0.9926 81.25%,
+          0.9954 83.33%,
+          0.9979 85.42%,
+          0.9999 87.5%,
+          1.0015 89.58%,
+          1.0028 91.67%,
+          1.0036 93.75%,
+          1.0041 95.83%,
+          1.0043 97.92%,
+          1
+        );
+        /* f=1.8 Hz, zeta=0.75: overshoot 2.8%, 651 ms -- a heading rising: barely overshoots */
+        --gc-spring-soft-duration: 651ms;
+        --gc-spring-soft: linear(
+          0,
+          0.0109 2.08%,
+          0.0403 4.17%,
+          0.0838 6.25%,
+          0.1375 8.33%,
+          0.1983 10.42%,
+          0.2634 12.5%,
+          0.3306 14.58%,
+          0.398 16.67%,
+          0.4642 18.75%,
+          0.528 20.83%,
+          0.5886 22.92%,
+          0.6454 25%,
+          0.698 27.08%,
+          0.746 29.17%,
+          0.7896 31.25%,
+          0.8286 33.33%,
+          0.8631 35.42%,
+          0.8935 37.5%,
+          0.9198 39.58%,
+          0.9424 41.67%,
+          0.9616 43.75%,
+          0.9776 45.83%,
+          0.9908 47.92%,
+          1.0015 50%,
+          1.01 52.08%,
+          1.0165 54.17%,
+          1.0213 56.25%,
+          1.0247 58.33%,
+          1.0269 60.42%,
+          1.028 62.5%,
+          1.0284 64.58%,
+          1.028 66.67%,
+          1.0272 68.75%,
+          1.026 70.83%,
+          1.0244 72.92%,
+          1.0227 75%,
+          1.0208 77.08%,
+          1.0189 79.17%,
+          1.017 81.25%,
+          1.0151 83.33%,
+          1.0133 85.42%,
+          1.0116 87.5%,
+          1.01 89.58%,
+          1.0085 91.67%,
+          1.0072 93.75%,
+          1.0059 95.83%,
+          1.0048 97.92%,
+          1
+        );
+        /* springs:end */
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+        -webkit-text-size-adjust: 100%;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: clip;
+      }
+      a {
+        color: inherit;
+      }
+      img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+      code,
+      pre {
+        font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+      }
+      .wrap {
+        width: min(var(--maxw), 100% - 32px);
+        margin-inline: auto;
+      }
+      .skip {
+        position: absolute;
+        left: -999px;
+      }
+      .skip:focus {
+        left: 16px;
+        top: 16px;
+        z-index: 10;
+        background: var(--text);
+        color: var(--bg);
+        padding: 8px 12px;
+        border-radius: 8px;
+      }
+      :focus-visible {
+        outline: 2px solid var(--blue);
+        outline-offset: 3px;
+      }
+
+      /* ---------- Navigation ---------- */
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        backdrop-filter: saturate(160%) blur(14px);
+        -webkit-backdrop-filter: saturate(160%) blur(14px);
+        background: rgba(9, 12, 22, 0.72);
+        border-bottom: 1px solid var(--line);
+      }
+      .nav .wrap {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        height: 60px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        font-size: 17px;
+        text-decoration: none;
+        letter-spacing: -0.01em;
+      }
+      .brand svg {
+        width: 26px;
+        height: 26px;
+      }
+      .nav-links {
+        display: flex;
+        gap: 20px;
+        margin-left: auto;
+        font-size: 14px;
+      }
+      .nav-links a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+      .nav-links a:hover {
+        color: var(--text);
+      }
+      .nav-gh {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 14px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        background: var(--panel);
+      }
+      .nav-gh:hover {
+        border-color: rgba(255, 255, 255, 0.24);
+      }
+      .nav-gh svg {
+        width: 16px;
+        height: 16px;
+      }
+      @media (max-width: 720px) {
+        .nav-links {
+          display: none;
+        }
+        .nav-gh {
+          margin-left: auto;
+        }
+      }
+
+      /* ---------- Hero ---------- */
+      .hero {
+        position: relative;
+        padding: 72px 0 40px;
+        isolation: isolate;
+      }
+      /* The light behind the hero: static gradients, painted once. */
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: -120px 0 -260px;
+        z-index: -1;
+        background:
+          radial-gradient(600px 380px at 18% 12%, rgba(59, 91, 219, 0.32), transparent 70%),
+          radial-gradient(520px 360px at 86% 30%, rgba(112, 72, 232, 0.28), transparent 70%),
+          radial-gradient(520px 320px at 60% 70%, rgba(18, 184, 134, 0.14), transparent 70%);
+        pointer-events: none;
+      }
+      .hero .wrap {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+        gap: 56px;
+        align-items: center;
+      }
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 12px;
+        border: 1px solid rgba(74, 222, 128, 0.3);
+        background: rgba(74, 222, 128, 0.08);
+        color: var(--green);
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .eyebrow::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--green);
+      }
+      h1 {
+        font-size: clamp(40px, 6vw, 68px);
+        line-height: 1.02;
+        letter-spacing: -0.035em;
+        margin: 18px 0 18px;
+      }
+      .grad {
+        white-space: nowrap;
+        background: linear-gradient(100deg, #74c0fc 0%, #b197fc 45%, #63e6be 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .lead {
+        font-size: clamp(17px, 1.6vw, 19px);
+        color: var(--muted);
+        max-width: 34em;
+        margin: 0 0 28px;
+      }
+      .ctas {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        padding: 12px 20px;
+        border-radius: 12px;
+        font-weight: 650;
+        font-size: 15px;
+        text-decoration: none;
+        border: 1px solid transparent;
+        transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+      }
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+      .btn svg {
+        width: 18px;
+        height: 18px;
+      }
+      .btn-primary {
+        background: linear-gradient(180deg, #5ee08f, #2fb866);
+        color: #062313;
+      }
+      .btn-ghost {
+        border-color: var(--line);
+        background: var(--panel);
+      }
+      .btn-ghost:hover {
+        border-color: rgba(255, 255, 255, 0.24);
+      }
+      .facts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 18px;
+        margin-top: 22px;
+        padding: 0;
+        list-style: none;
+        color: var(--faint);
+        font-size: 14px;
+      }
+      .facts a {
+        color: var(--muted);
+      }
+      .stage {
+        position: relative;
+        perspective: 1400px;
+      }
+      .card-frame {
+        position: relative;
+        border-radius: 22px;
+        box-shadow:
+          0 30px 80px -20px rgba(0, 0, 0, 0.7),
+          0 0 0 1px rgba(255, 255, 255, 0.06);
+        overflow: hidden;
+        background: #1a2140;
+      }
+      .card-frame img {
+        width: 100%;
+      }
+      @media (max-width: 900px) {
+        .hero {
+          padding-top: 44px;
+        }
+        .hero .wrap {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 40px;
+        }
+      }
+
+      /* ---------- Sections ---------- */
+      section {
+        padding: 88px 0;
+        scroll-margin-top: 60px;
+      }
+      .kicker {
+        color: var(--green);
+        font-weight: 650;
+        font-size: 14px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin: 0 0 10px;
+      }
+      h2 {
+        font-size: clamp(30px, 4vw, 44px);
+        line-height: 1.1;
+        letter-spacing: -0.025em;
+        margin: 0 0 16px;
+      }
+      h3 {
+        font-size: 19px;
+        line-height: 1.3;
+        margin: 0 0 8px;
+      }
+      .section-lead {
+        color: var(--muted);
+        font-size: 18px;
+        max-width: 40em;
+        margin: 0 0 40px;
+      }
+      .split {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+        gap: 56px;
+        align-items: start;
+      }
+      @media (max-width: 900px) {
+        section {
+          padding: 64px 0;
+        }
+        .split {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 36px;
+        }
+      }
+      /* A tall card, cropped where it gets long, fading into the page. */
+      .crop {
+        position: relative;
+        max-height: 640px;
+        overflow: hidden;
+        border-radius: 22px;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+      }
+      .crop::after {
+        content: "";
+        position: absolute;
+        inset: auto 0 0;
+        height: 140px;
+        background: linear-gradient(transparent, var(--bg));
+      }
+      .ticks {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 14px;
+      }
+      .ticks li {
+        position: relative;
+        padding-left: 30px;
+        color: var(--muted);
+      }
+      .ticks li b {
+        color: var(--text);
+        font-weight: 650;
+      }
+      .ticks li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 4px;
+        width: 18px;
+        height: 18px;
+        border-radius: 6px;
+        background: rgba(74, 222, 128, 0.14);
+        box-shadow: inset 0 0 0 1px rgba(74, 222, 128, 0.35);
+      }
+      .ticks li::after {
+        content: "";
+        position: absolute;
+        left: 6px;
+        top: 8px;
+        width: 5px;
+        height: 8px;
+        border: solid var(--green);
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
+      .aside {
+        margin-top: 32px;
+        padding: 20px 22px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--panel);
+        color: var(--muted);
+      }
+      .aside b {
+        color: var(--text);
+      }
+
+      /* ---------- Looks ---------- */
+      .looks {
+        display: grid;
+        grid-template-columns: 300px minmax(0, 1fr);
+        gap: 48px;
+        align-items: start;
+      }
+      .families {
+        display: grid;
+        gap: 22px;
+      }
+      .family h3 {
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--faint);
+        margin: 0 0 10px;
+      }
+      .swatches {
+        display: grid;
+        gap: 8px;
+      }
+      .swatch {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        padding: 9px 12px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        color: var(--text);
+        font: inherit;
+        font-size: 15px;
+        font-weight: 600;
+        text-align: left;
+        cursor: pointer;
+        transition: border-color 0.15s ease, background-color 0.15s ease;
+      }
+      .swatch:hover {
+        border-color: rgba(255, 255, 255, 0.22);
+      }
+      .swatch[aria-pressed="true"] {
+        border-color: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.08);
+      }
+      .swatch i {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        flex: none;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+      }
+      .swatch small {
+        margin-left: auto;
+        color: var(--faint);
+        font-weight: 500;
+        font-size: 12px;
+      }
+      .look-stage {
+        position: relative;
+        aspect-ratio: 880 / 898;
+      }
+      .look-stage img {
+        position: absolute;
+        inset: 0 0 auto;
+        width: 100%;
+        border-radius: 18px;
+        box-shadow: 0 30px 80px -24px rgba(0, 0, 0, 0.75);
+        opacity: 0;
+        scale: 0.96;
+        pointer-events: none;
+        transition:
+          opacity 260ms ease,
+          scale 260ms ease;
+      }
+      .look-stage img.on {
+        opacity: 1;
+        scale: 1;
+        transition:
+          opacity 420ms cubic-bezier(0.2, 0.7, 0.2, 1),
+          scale var(--gc-spring-duration) var(--gc-spring);
+      }
+      .look-code {
+        margin-top: 18px;
+        font-size: 15px;
+        color: var(--muted);
+      }
+      .look-code code {
+        color: var(--text);
+        background: var(--panel);
+        border: 1px solid var(--line);
+        padding: 3px 9px;
+        border-radius: 8px;
+      }
+      @media (max-width: 900px) {
+        .looks {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 28px;
+        }
+        .families {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 14px;
+        }
+      }
+      @media (max-width: 560px) {
+        .families {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .swatches {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      /* A seasonal look's month does not fit beside its name in half of
+         a 320px phone: one look a row there. */
+      @media (max-width: 420px) {
+        .swatches {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      /* ---------- Steps and code ---------- */
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+      }
+      .step {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        border-radius: var(--radius);
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .step .n {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        color: #062313;
+        background: linear-gradient(180deg, #5ee08f, #2fb866);
+        margin-bottom: 8px;
+      }
+      .step p {
+        color: var(--muted);
+        margin: 0 0 12px;
+      }
+      pre {
+        margin: 0;
+        padding: 16px 18px;
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid var(--line);
+        overflow-x: auto;
+        font-size: 13px;
+        line-height: 1.55;
+        color: #cdd6e3;
+      }
+      .step pre {
+        margin-top: auto;
+      }
+      @media (max-width: 900px) {
+        .steps {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+      .prompt {
+        position: relative;
+        border: 1px solid rgba(74, 222, 128, 0.28);
+        border-radius: var(--radius);
+        background: linear-gradient(180deg, rgba(74, 222, 128, 0.06), rgba(74, 222, 128, 0.015));
+        padding: 20px;
+      }
+      .prompt pre {
+        max-height: 380px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .prompt-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .prompt-bar span {
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .copy {
+        font: inherit;
+        cursor: pointer;
+      }
+      .copy[data-copied] {
+        background: linear-gradient(180deg, #9af0b8, #5ee08f);
+      }
+
+      /* ---------- Why ---------- */
+      .tiles {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 18px;
+      }
+      .tile {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        border-radius: var(--radius);
+        padding: 22px;
+      }
+      .tile .ico {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        margin-bottom: 14px;
+      }
+      .tile .ico svg {
+        width: 20px;
+        height: 20px;
+      }
+      .tile p {
+        color: var(--muted);
+        margin: 0;
+        font-size: 15px;
+      }
+      @media (max-width: 900px) {
+        .tiles {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      @media (max-width: 560px) {
+        .tiles {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      /* ---------- FAQ ---------- */
+      .faq {
+        max-width: 820px;
+      }
+      details {
+        border-bottom: 1px solid var(--line);
+        padding: 18px 0;
+      }
+      summary {
+        cursor: pointer;
+        font-weight: 650;
+        font-size: 17px;
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      summary::-webkit-details-marker {
+        display: none;
+      }
+      summary::after {
+        content: "+";
+        color: var(--faint);
+        font-weight: 400;
+        font-size: 22px;
+        line-height: 1;
+      }
+      details[open] summary::after {
+        content: "–";
+      }
+      details p {
+        color: var(--muted);
+        margin: 12px 0 0;
+      }
+
+      /* ---------- Support and footer ---------- */
+      .support {
+        margin: 24px auto 0;
+        max-width: 820px;
+        text-align: center;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 40px 28px;
+        background:
+          radial-gradient(400px 200px at 50% 0%, rgba(244, 114, 182, 0.12), transparent 70%),
+          var(--panel);
+      }
+      .support h2 {
+        font-size: clamp(26px, 3.4vw, 34px);
+      }
+      .support p {
+        color: var(--muted);
+        margin: 0 auto 24px;
+        max-width: 36em;
+      }
+      .support .ctas {
+        justify-content: center;
+      }
+      .btn-sponsor {
+        background: linear-gradient(180deg, #f9a8d4, #ec4899);
+        color: #3b0920;
+      }
+      footer {
+        padding: 56px 0 48px;
+        border-top: 1px solid var(--line);
+        margin-top: 88px;
+        font-size: 14px;
+      }
+      .footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px 26px;
+      }
+      .footer-links a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+      .footer-links a:hover {
+        color: var(--text);
+      }
+      .footer-attribution {
+        margin-top: 22px;
+        text-align: center;
+        color: var(--muted);
+      }
+      .footer-attribution a {
+        color: var(--text);
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .footer-attribution .heart {
+        color: var(--pink);
+      }
+      /* Who publishes the site, as every Undolog site states it: the VAT
+         number belongs on the home page of an Italian business's site
+         (art. 35 DPR 633/72). */
+      .footer-legal {
+        margin-top: 0.75rem;
+        text-align: center;
+        color: var(--faint);
+        font-size: 0.75rem;
+      }
+      .footer-legal .dot {
+        margin: 0 0.5em;
+      }
+      .footer-legal a {
+        color: var(--faint);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+
+      /* ---------- Motion ----------
+         Scroll reveals, on the sibling sites' springs. A SCOPE is what
+         site.js watches; an ITEM (data-reveal) is what moves, and an item
+         with no scope above it is its own. At REST a scope is where the
+         layout put it: the served HTML, and what stays if the script never
+         runs. Once the script has run, a scope entirely off screen is
+         ARMED (data-armed) and its items snap to their starting pose where
+         nobody sees it; the first time it comes into view it is REVEALED
+         (data-revealed) and they spring home. Every hiding rule requires
+         data-armed, and only translate, scale and opacity move, which the
+         compositor runs: no blur, no animated custom property. */
+      @media screen and (prefers-reduced-motion: no-preference) {
+        [data-reveal] {
+          transform-origin: 50% 100%;
+        }
+        [data-revealed] [data-reveal],
+        [data-reveal][data-revealed] {
+          transition:
+            opacity 520ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms),
+            translate var(--gc-spring-duration) var(--gc-spring) var(--reveal-delay, 0ms),
+            scale var(--gc-spring-duration) var(--gc-spring) var(--reveal-delay, 0ms);
+        }
+        [data-revealed] [data-reveal="rise"],
+        [data-reveal="rise"][data-revealed] {
+          transition:
+            opacity 520ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms),
+            translate var(--gc-spring-soft-duration) var(--gc-spring-soft) var(--reveal-delay, 0ms),
+            scale var(--gc-spring-soft-duration) var(--gc-spring-soft) var(--reveal-delay, 0ms);
+        }
+        [data-armed]:not([data-revealed]) [data-reveal],
+        [data-reveal][data-armed]:not([data-revealed]) {
+          opacity: 0;
+        }
+        /* A card: squashed and low, it lands and wobbles into shape. */
+        [data-armed]:not([data-revealed]) [data-reveal="morph"],
+        [data-reveal="morph"][data-armed]:not([data-revealed]) {
+          translate: 0 48px;
+          scale: 0.9 0.7;
+        }
+        /* Text: a short lift, almost no overshoot, readable as it lands. */
+        [data-armed]:not([data-revealed]) [data-reveal="rise"],
+        [data-reveal="rise"][data-armed]:not([data-revealed]) {
+          translate: 0 28px;
+          scale: 0.98;
+        }
+        /* A chip or an icon: from a point, past its size, back. */
+        [data-armed]:not([data-revealed]) [data-reveal="pop"],
+        [data-reveal="pop"][data-armed]:not([data-revealed]) {
+          scale: 0.4;
+        }
+
+        /* Scroll-driven, where the browser can: the hero's card tips back
+           as the page leaves the top, and the cropped repository card
+           straightens as it crosses the window. Linked to the scroll on
+           the compositor, so nothing runs while the page is still. */
+        @supports (animation-timeline: scroll()) {
+          .stage .card-frame {
+            animation: tip linear both;
+            animation-timeline: scroll(root);
+            animation-range: 0 70vh;
+          }
+          @keyframes tip {
+            to {
+              transform: rotateX(14deg) scale(0.92);
+              opacity: 0.55;
+            }
+          }
+          .crop img {
+            animation: settle linear both;
+            animation-timeline: view();
+            animation-range: entry 10% cover 45%;
+          }
+          @keyframes settle {
+            from {
+              transform: perspective(1200px) rotateX(16deg) scale(0.94);
+            }
+          }
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="nav">
+      <div class="wrap">
+        <a class="brand" href="./" aria-label="glancecard home">
+          <svg viewBox="0 0 32 32" aria-hidden="true">
+            <defs>
+              <linearGradient id="bm" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#74c0fc" />
+                <stop offset="0.5" stop-color="#b197fc" />
+                <stop offset="1" stop-color="#63e6be" />
+              </linearGradient>
+            </defs>
+            <rect x="1" y="1" width="30" height="30" rx="8" fill="url(#bm)" />
+            <rect x="6" y="7" width="20" height="5" rx="2" fill="#0b1020" opacity="0.85" />
+            <rect x="6" y="15" width="9" height="10" rx="2" fill="#0b1020" opacity="0.7" />
+            <rect x="17" y="15" width="9" height="4" rx="1.5" fill="#0b1020" opacity="0.55" />
+            <rect x="17" y="21" width="9" height="4" rx="1.5" fill="#0b1020" opacity="0.4" />
+          </svg>
+          glancecard
+        </a>
+        <nav class="nav-links" aria-label="Sections">
+          <a href="#cards">Cards</a>
+          <a href="#looks">Looks</a>
+          <a href="#how">How it works</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+        <a class="nav-gh" href="https://github.com/gfazioli/glancecard">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z" /></svg>
+          GitHub
+        </a>
+      </div>
+    </header>
+
+    <main id="main">
+      <div class="hero">
+        <div class="wrap">
+          <div>
+            <span class="eyebrow">A GitHub Action, free and open source</span>
+            <h1>Your GitHub, <span class="grad">at a glance.</span></h1>
+            <p class="lead">Daily SVG cards of your profile and your repositories, for every README you own. A GitHub Action draws them in your own repository: no server, no third-party service, no dependencies.</p>
+            <div class="ctas">
+              <a class="btn btn-primary" href="#setup">Set it up in one paste</a>
+              <a class="btn btn-ghost" href="https://github.com/gfazioli/glancecard">View on GitHub</a>
+            </div>
+            <ul class="facts">
+              <li>MIT licensed</li>
+              <li>Nine looks</li>
+              <li>On the <a href="https://github.com/marketplace/actions/glancecard">GitHub Marketplace</a></li>
+            </ul>
+          </div>
+          <div class="stage">
+            <div class="card-frame">
+              <img data-card="profile-midnight" src="cards/profile-midnight.svg" width="880" height="824" alt="A profile card: followers, stars, repositories, pull requests, issues and commits, the contribution calendar, the most starred repositories and their languages" fetchpriority="high" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section id="cards" aria-labelledby="cards-title">
+        <div class="wrap split">
+          <div class="crop" data-reveal="morph">
+            <img data-card="repo-midnight" src="cards/repo-midnight.svg" width="880" height="1609" alt="glancecard's own repository card: commits in the last 30 days, twelve tiles, a year of activity, the weekly rhythm, languages and essentials, latest commits and releases, contributors" loading="lazy" decoding="async" />
+          </div>
+          <div data-scope>
+            <p class="kicker" data-reveal="rise">The cards</p>
+            <h2 id="cards-title" data-reveal="rise">A dashboard for every repository</h2>
+            <p class="section-lead" data-reveal="rise">Name a repository and its README gets the whole picture, redrawn every morning.</p>
+            <ul class="ticks">
+              <li data-reveal="rise" style="--reveal-delay: 60ms"><b>Status at a glance:</b> active or quiet, age, latest tag, and the last 30 days with a 26-week sparkline.</li>
+              <li data-reveal="rise" style="--reveal-delay: 120ms"><b>Twelve tiles:</b> commits, contributors, branches, tags, releases, downloads, stars, forks, watchers, issues, pull requests and size.</li>
+              <li data-reveal="rise" style="--reveal-delay: 180ms"><b>A year of commits</b> with streaks, and the week's rhythm by day and hour.</li>
+              <li data-reveal="rise" style="--reveal-delay: 240ms"><b>Languages and essentials:</b> README, license, contributing guide, security policy, CI.</li>
+              <li data-reveal="rise" style="--reveal-delay: 300ms"><b>The latest commits and releases</b>, with their cadence, and who contributed.</li>
+            </ul>
+            <p class="aside" data-reveal="rise" style="--reveal-delay: 360ms"><b>And one for you.</b> The profile card shows your followers, stars, pull requests, issues and commits, the contribution calendar, your most starred repositories and their languages.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="looks" aria-labelledby="looks-title">
+        <div class="wrap">
+          <div data-scope>
+            <p class="kicker" data-reveal="rise">Looks</p>
+            <h2 id="looks-title" data-reveal="rise">Nine looks, for both cards</h2>
+            <p class="section-lead" data-reveal="rise">The looks of FinderGit's Profile Card: three classics, four from out of this world, and two that come out only in their season. Pick one, or a few, with <code>theme</code>.</p>
+          </div>
+          <div class="looks">
+            <div class="families" data-scope>
+              <div class="family" data-reveal="rise">
+                <h3>Classic</h3>
+                <div class="swatches">
+                  <button class="swatch" type="button" data-look="midnight" aria-pressed="true"><i style="background: linear-gradient(135deg, #1a2140, #2e5199 55%, #a61e9c)"></i>Midnight</button>
+                  <button class="swatch" type="button" data-look="aurora" aria-pressed="false"><i style="background: linear-gradient(135deg, #0a2a30, #0f5f66 55%, #6741d9)"></i>Aurora</button>
+                  <button class="swatch" type="button" data-look="daylight" aria-pressed="false"><i style="background: linear-gradient(135deg, #f7f9fd, #dce8ff 55%, #fcc2d7)"></i>Daylight</button>
+                </div>
+              </div>
+              <div class="family" data-reveal="rise" style="--reveal-delay: 80ms">
+                <h3>Out of this world</h3>
+                <div class="swatches">
+                  <button class="swatch" type="button" data-look="upside-down" aria-pressed="false"><i style="background: linear-gradient(135deg, #07040a, #2a0a0e 55%, #b3001b)"></i>Upside Down</button>
+                  <button class="swatch" type="button" data-look="hyperspace" aria-pressed="false"><i style="background: linear-gradient(135deg, #02030a, #0b1026 55%, #1c2e6e)"></i>Hyperspace</button>
+                  <button class="swatch" type="button" data-look="bridge" aria-pressed="false"><i style="background: linear-gradient(135deg, #000, #16110c 55%, #3a2a55)"></i>Bridge</button>
+                  <button class="swatch" type="button" data-look="nebula" aria-pressed="false"><i style="background: linear-gradient(135deg, #0b0620, #2a1650 55%, #c2255c)"></i>Nebula</button>
+                </div>
+              </div>
+              <div class="family" data-reveal="rise" style="--reveal-delay: 160ms">
+                <h3>Seasonal</h3>
+                <div class="swatches">
+                  <button class="swatch" type="button" data-look="halloween" aria-pressed="false"><i style="background: linear-gradient(135deg, #0d0612, #3c096c 55%, #e85d04)"></i>Halloween<small>October</small></button>
+                  <button class="swatch" type="button" data-look="christmas" aria-pressed="false"><i style="background: linear-gradient(135deg, #081c15, #1b4332 55%, #c1121f)"></i>Christmas<small>December</small></button>
+                </div>
+              </div>
+            </div>
+            <div data-reveal="morph">
+              <div class="look-stage" aria-live="polite">
+                <img class="on" data-card="profile-midnight" data-look="midnight" src="cards/profile-midnight.svg" width="880" height="824" alt="The profile card in the Midnight look" loading="lazy" decoding="async" />
+                <img data-card="profile-aurora" data-look="aurora" data-src="cards/profile-aurora.svg" width="880" height="824" alt="The profile card in the Aurora look" decoding="async" />
+                <img data-card="profile-daylight" data-look="daylight" data-src="cards/profile-daylight.svg" width="880" height="824" alt="The profile card in the Daylight look" decoding="async" />
+                <img data-card="profile-upside-down" data-look="upside-down" data-src="cards/profile-upside-down.svg" width="880" height="858" alt="The profile card in the Upside Down look, with fairy lights and spores" decoding="async" />
+                <img data-card="profile-hyperspace" data-look="hyperspace" data-src="cards/profile-hyperspace.svg" width="880" height="824" alt="The profile card in the Hyperspace look, with the streaks of a jump" decoding="async" />
+                <img data-card="profile-bridge" data-look="bridge" data-src="cards/profile-bridge.svg" width="880" height="824" alt="The profile card in the Bridge look, framed by console rails" decoding="async" />
+                <img data-card="profile-nebula" data-look="nebula" data-src="cards/profile-nebula.svg" width="880" height="824" alt="The profile card in the Nebula look, with gas and stars" decoding="async" />
+                <img data-card="profile-halloween" data-look="halloween" data-src="cards/profile-halloween.svg" width="880" height="898" alt="The profile card in the Halloween look, with a moon, bats and pumpkins" decoding="async" />
+                <img data-card="profile-christmas" data-look="christmas" data-src="cards/profile-christmas.svg" width="880" height="894" alt="The profile card in the Christmas look, with snow, baubles and a tree" decoding="async" />
+              </div>
+              <p class="look-code">In your workflow: <code id="look-code">theme: midnight</code>. <code>dark</code> and <code>light</code> are Midnight and Daylight, and <code>both</code> gives you the pair that follows the reader's GitHub theme. The seasonal looks are worn in their season only, and are Midnight the rest of the year.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="how" aria-labelledby="how-title">
+        <div class="wrap">
+          <div data-scope>
+            <p class="kicker" data-reveal="rise">How it works</p>
+            <h2 id="how-title" data-reveal="rise">Three steps, once</h2>
+            <p class="section-lead" data-reveal="rise">Your profile repository is a good home for the cards: its README is the first one people see, and every other README can show a card from there.</p>
+          </div>
+          <div class="steps" data-scope>
+            <div class="step" data-reveal="morph">
+              <span class="n">1</span>
+              <h3>Add the workflow</h3>
+              <p>One file in <code>.github/workflows/</code>, naming your login and your repositories.</p>
+              <pre><code>- uses: gfazioli/glancecard@v0.2.0
+  with:
+    profile: your-login
+    repos: |
+      your-login/your-repo
+    theme: both</code></pre>
+            </div>
+            <div class="step" data-reveal="morph" style="--reveal-delay: 90ms">
+              <span class="n">2</span>
+              <h3>Run it once</h3>
+              <p>From the Actions tab, or wait for the morning. It commits the cards to <code>glancecard/</code>, then refreshes them every day.</p>
+              <pre><code>glancecard/profile-dark.svg
+glancecard/profile-light.svg
+glancecard/your-repo-dark.svg
+glancecard/your-repo-light.svg</code></pre>
+            </div>
+            <div class="step" data-reveal="morph" style="--reveal-delay: 180ms">
+              <span class="n">3</span>
+              <h3>Show the cards</h3>
+              <p>A <code>&lt;picture&gt;</code> in any README, so the card follows the reader's theme.</p>
+              <pre><code>&lt;picture&gt;
+  &lt;source media="(prefers-color-scheme: dark)"
+    srcset="glancecard/your-repo-dark.svg"&gt;
+  &lt;img src="glancecard/your-repo-light.svg"
+    width="880" alt="your-repo at a glance"&gt;
+&lt;/picture&gt;</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="setup" aria-labelledby="setup-title">
+        <div class="wrap">
+          <div data-scope>
+            <p class="kicker" data-reveal="rise">The quickest way</p>
+            <h2 id="setup-title" data-reveal="rise">Or set it up in one paste</h2>
+            <p class="section-lead" data-reveal="rise">Paste this into Claude Code, Codex or any coding agent that can run a shell. With the GitHub CLI signed in, it does the three steps for you, adds Dependabot to keep the action current, and shows you every change before it pushes.</p>
+          </div>
+          <div class="prompt" data-reveal="morph">
+            <div class="prompt-bar">
+              <span>Fill in the second line, or leave it: the agent picks your three most-starred repositories.</span>
+              <button class="btn btn-primary copy" type="button" data-copy="prompt-text">Copy prompt</button>
+            </div>
+            <pre id="prompt-text"><!-- prompt:begin -->Set up glancecard for me (https://github.com/gfazioli/glancecard): it renders SVG cards of my GitHub profile and of my repositories once a day, with a GitHub Action, for my READMEs.
+
+Repositories that get a card: &lt;owner/name, owner/name — or leave this line as it is, and pick my 3 most-starred public repositories that are not forks&gt;
+
+Use the gh CLI; if it is missing or not signed in, stop and tell me how to fix it. Show me every diff and wait for my OK before each push.
+
+1. Find my login with `gh api user --jq .login`. The cards will live in my profile repository, &lt;login&gt;/&lt;login&gt;: clone it into a temporary folder and note its default branch. If it does not exist, stop and ask me before creating it.
+
+2. Add .github/workflows/glancecard.yml with exactly this content, filling in my login, the repositories (one per line) and this machine's IANA time zone:
+
+   name: glancecard
+   on:
+     schedule:
+       - cron: "30 5 * * *"
+     workflow_dispatch:
+   permissions:
+     contents: write
+   jobs:
+     cards:
+       runs-on: ubuntu-latest
+       timeout-minutes: 10
+       steps:
+         - uses: actions/checkout@v7
+         - uses: gfazioli/glancecard@v0.2.0
+           with:
+             profile: &lt;login&gt;
+             repos: |
+               &lt;owner/name&gt;
+             time-zone: &lt;zone&gt;
+
+   Then make sure .github/dependabot.yml keeps the action up to date: if the file is missing, create it with exactly this; if it exists, add the github-actions entry to its updates:
+
+   version: 2
+   updates:
+     - package-ecosystem: github-actions
+       directory: /
+       schedule:
+         interval: weekly
+
+   Commit both as "ci: render glancecard cards" and push.
+
+3. Run it once with `gh workflow run glancecard.yml -R &lt;login&gt;/&lt;login&gt;`, follow it with `gh run watch`, and check that glancecard/profile-dark.svg is now on the default branch. If the run fails, show me its log and stop.
+
+4. Add my profile card to my profile README where it fits best (ask me if unsure), then commit and push:
+
+   &lt;picture&gt;
+     &lt;source media="(prefers-color-scheme: dark)" srcset="glancecard/profile-dark.svg"&gt;
+     &lt;img src="glancecard/profile-light.svg" width="880" alt="&lt;login&gt;'s GitHub activity"&gt;
+   &lt;/picture&gt;
+
+5. For each repository above, open a pull request that adds its card right under the README's title, with the same &lt;picture&gt; pointing at https://raw.githubusercontent.com/&lt;login&gt;/&lt;login&gt;/&lt;default branch&gt;/glancecard/&lt;name&gt;-dark.svg and -light.svg. Don't merge them: give me their links.
+
+Change nothing else, and add no tokens or secrets: the workflow uses the token GitHub Actions already provides.<!-- prompt:end --></pre>
+          </div>
+        </div>
+      </section>
+
+      <section id="why" aria-labelledby="why-title">
+        <div class="wrap">
+          <div data-scope>
+            <p class="kicker" data-reveal="rise">Why glancecard</p>
+            <h2 id="why-title" data-reveal="rise">Yours, and nothing in between</h2>
+          </div>
+          <div class="tiles" data-scope>
+            <div class="tile" data-reveal="morph">
+              <div class="ico" style="background: rgba(96, 165, 250, 0.14); color: var(--blue)"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M1.75 1h12.5c.966 0 1.75.784 1.75 1.75v4c0 .372-.116.717-.314 1 .198.283.314.628.314 1v4a1.75 1.75 0 0 1-1.75 1.75H1.75A1.75 1.75 0 0 1 0 12.75v-4c0-.358.109-.707.314-1a1.739 1.739 0 0 1-.314-1v-4C0 1.784.784 1 1.75 1ZM1.5 2.75v4c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25v-4a.25.25 0 0 0-.25-.25H1.75a.25.25 0 0 0-.25.25Zm.25 5.75a.25.25 0 0 0-.25.25v4c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25v-4a.25.25 0 0 0-.25-.25ZM7 4.75A.75.75 0 0 1 7.75 4h4.5a.75.75 0 0 1 0 1.5h-4.5A.75.75 0 0 1 7 4.75ZM7.75 10h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM3 4.75A.75.75 0 0 1 3.75 4h.5a.75.75 0 0 1 0 1.5h-.5A.75.75 0 0 1 3 4.75ZM3.75 10h.5a.75.75 0 0 1 0 1.5h-.5a.75.75 0 0 1 0-1.5Z" /></svg></div>
+              <h3>No server</h3>
+              <p>Nothing to host, and no third-party service that can go down or start charging: the cards are files in your repository.</p>
+            </div>
+            <div class="tile" data-reveal="morph" style="--reveal-delay: 80ms">
+              <div class="ico" style="background: rgba(74, 222, 128, 0.14); color: var(--green)"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8.878.392a1.75 1.75 0 0 0-1.756 0l-5.25 3.045A1.75 1.75 0 0 0 1 4.951v6.098c0 .624.332 1.2.872 1.514l5.25 3.045a1.75 1.75 0 0 0 1.756 0l5.25-3.045c.54-.313.872-.89.872-1.514V4.951c0-.624-.332-1.2-.872-1.514ZM7.875 1.69a.25.25 0 0 1 .25 0l4.63 2.685L8 7.133 3.245 4.375l4.63-2.685ZM2.5 5.677v5.372c0 .09.047.171.125.216l4.625 2.683V8.432Zm6.25 8.271 4.625-2.683a.25.25 0 0 0 .125-.216V5.677L8.75 8.432Z" /></svg></div>
+              <h3>No dependencies</h3>
+              <p>Plain Node with nothing to install, and every action in its CI pinned to a commit.</p>
+            </div>
+            <div class="tile" data-reveal="morph" style="--reveal-delay: 160ms">
+              <div class="ico" style="background: rgba(167, 139, 250, 0.16); color: var(--violet)"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M7.467.133a1.748 1.748 0 0 1 1.066 0l5.25 1.68A1.75 1.75 0 0 1 15 3.48V7c0 1.566-.32 3.182-1.303 4.682-.983 1.498-2.585 2.813-5.032 3.855a1.697 1.697 0 0 1-1.33 0c-2.447-1.042-4.049-2.357-5.032-3.855C1.32 10.182 1 8.566 1 7V3.48a1.755 1.755 0 0 1 1.217-1.667Zm.61 1.429a.25.25 0 0 0-.153 0l-5.25 1.68a.25.25 0 0 0-.174.238V7c0 1.358.275 2.666 1.057 3.86.784 1.194 2.121 2.34 4.366 3.297a.196.196 0 0 0 .154 0c2.245-.956 3.582-2.104 4.366-3.298C13.225 9.666 13.5 8.36 13.5 7V3.48a.251.251 0 0 0-.174-.237l-5.25-1.68ZM8.75 4.75v3a.75.75 0 0 1-1.5 0v-3a.75.75 0 0 1 1.5 0ZM9 10.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z" /></svg></div>
+              <h3>Public by default</h3>
+              <p>With the workflow's own token a card shows what anyone can see. Private repositories are refused unless you ask.</p>
+            </div>
+            <div class="tile" data-reveal="morph" style="--reveal-delay: 240ms">
+              <div class="ico" style="background: rgba(244, 114, 182, 0.14); color: var(--pink)"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M1.5 1.75V13.5h13.75a.75.75 0 0 1 0 1.5H.75a.75.75 0 0 1-.75-.75V1.75a.75.75 0 0 1 1.5 0Zm14.28 2.53-5.25 5.25a.75.75 0 0 1-1.06 0L7 7.06 4.28 9.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.25-3.25a.75.75 0 0 1 1.06 0L10 7.94l4.72-4.72a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042Z" /></svg></div>
+              <h3>Never a surprise</h3>
+              <p>Your workflow runs the version it names. A new release reaches you as a Dependabot pull request you read and merge.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="faq" aria-labelledby="faq-title">
+        <div class="wrap faq" data-scope>
+          <p class="kicker" data-reveal="rise">Questions</p>
+          <h2 id="faq-title" data-reveal="rise">Good to know</h2>
+          <details data-reveal="rise">
+            <summary>Why does it commit to my repository?</summary>
+            <p>A README image has to be a file somewhere. Committing it keeps everything inside GitHub, with no service to trust or keep alive. Commits pushed with the workflow's token start no other workflow, and they keep a public repository active, which stops GitHub from disabling its schedule after 60 quiet days.</p>
+          </details>
+          <details data-reveal="rise">
+            <summary>How fresh is a card?</summary>
+            <p>As fresh as your schedule: once a day by default. GitHub caches a raw file for about five minutes, and scheduled runs often start a little late.</p>
+          </details>
+          <details data-reveal="rise">
+            <summary>Can a card show a private repository?</summary>
+            <p>Only if you ask. glancecard refuses private repositories unless you set <code>allow-private: true</code>, because their card would publish their activity wherever it is committed. The profile card counts public repositories only.</p>
+          </details>
+          <details data-reveal="rise">
+            <summary>What happens when glancecard is updated?</summary>
+            <p>Nothing, until you say so. Your workflow keeps running the version its <code>uses:</code> line names; with Dependabot, a new release becomes a pull request that moves it, and the next run draws with the new version.</p>
+          </details>
+          <details data-reveal="rise">
+            <summary>Why do the commit days look a few hours off?</summary>
+            <p>GitHub returns commit times in UTC and drops the author's offset. Set <code>time-zone</code> to yours, such as <code>Europe/Rome</code>, and the calendar and the rhythm are read there.</p>
+          </details>
+        </div>
+      </section>
+
+      <div class="wrap">
+        <div class="support" data-reveal="morph">
+          <h2>Free, and MIT-licensed</h2>
+          <p>glancecard is made by one developer, in the open. If it has been useful to you or your team, please consider becoming a sponsor: it keeps the project maintained, and the looks coming.</p>
+          <div class="ctas">
+            <a class="btn btn-sponsor" href="https://github.com/sponsors/gfazioli?o=esc">Become a sponsor</a>
+            <a class="btn btn-ghost" href="https://github.com/gfazioli/glancecard">Star on GitHub</a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <nav class="footer-links" aria-label="Elsewhere">
+          <a href="https://github.com/gfazioli/glancecard">GitHub</a>
+          <a href="https://github.com/marketplace/actions/glancecard">Marketplace</a>
+          <a href="https://github.com/gfazioli/glancecard/releases">Releases</a>
+          <a href="https://github.com/gfazioli/glancecard/issues">Report an issue</a>
+          <a href="https://findergit.app">FinderGit</a>
+        </nav>
+        <!-- attribution:begin -->
+            <div class="footer-attribution">
+                Made with <span class="heart">♥</span> by
+                <a href="https://gfazioli.github.io/" target="_blank" rel="noopener noreferrer">Undolog</a>
+            </div>
+            <div class="footer-legal">
+                &copy; <span data-year>2026</span> Undolog &mdash; Giovambattista&nbsp;Fazioli<span class="dot" aria-hidden="true">&middot;</span><wbr>P.IVA&nbsp;12343751009<span class="dot" aria-hidden="true">&middot;</span><wbr><a href="legal.html">Legal</a><span class="dot" aria-hidden="true">&middot;</span><wbr><a href="privacy.html">Privacy</a>
+            </div>
+        <!-- attribution:end -->
+      </div>
+    </footer>
+
+    <script src="site.js" defer></script>
+  </body>
+</html>

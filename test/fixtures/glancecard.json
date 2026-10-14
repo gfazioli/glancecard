@@ -1,0 +1,242 @@
+{
+ "kind": "repo",
+ "fetchedAt": "2026-10-14T18:01:43.383Z",
+ "repo": {
+  "name": "glancecard",
+  "nameWithOwner": "gfazioli/glancecard",
+  "description": "Your GitHub profile and repositories, at a glance: daily SVG cards for your READMEs, rendered by GitHub Actions.",
+  "homepageUrl": null,
+  "createdAt": "2026-10-14T16:08:31Z",
+  "pushedAt": "2026-10-14T17:49:52Z",
+  "diskUsage": 134,
+  "isArchived": false,
+  "isPrivate": false,
+  "stargazerCount": 0,
+  "forkCount": 0,
+  "watchers": {
+   "totalCount": 0
+  },
+  "licenseInfo": {
+   "spdxId": "MIT"
+  },
+  "isSecurityPolicyEnabled": true,
+  "repositoryTopics": {
+   "nodes": [
+    {
+     "topic": {
+      "name": "dashboard"
+     }
+    },
+    {
+     "topic": {
+      "name": "github-actions"
+     }
+    },
+    {
+     "topic": {
+      "name": "github-stats"
+     }
+    },
+    {
+     "topic": {
+      "name": "profile-readme"
+     }
+    },
+    {
+     "topic": {
+      "name": "readme"
+     }
+    },
+    {
+     "topic": {
+      "name": "readme-stats"
+     }
+    },
+    {
+     "topic": {
+      "name": "svg"
+     }
+    }
+   ]
+  },
+  "languages": {
+   "totalSize": 106887,
+   "edges": [
+    {
+     "size": 106887,
+     "node": {
+      "name": "JavaScript",
+      "color": "#f1e05a"
+     }
+    }
+   ]
+  },
+  "branches": {
+   "totalCount": 1
+  },
+  "tags": {
+   "totalCount": 1,
+   "nodes": [
+    {
+     "name": "v0.1.0"
+    }
+   ]
+  },
+  "openIssues": {
+   "totalCount": 0
+  },
+  "closedIssues": {
+   "totalCount": 0
+  },
+  "openPRs": {
+   "totalCount": 0
+  },
+  "mergedPRs": {
+   "totalCount": 1
+  },
+  "releases": {
+   "totalCount": 1,
+   "nodes": [
+    {
+     "tagName": "v0.1.0",
+     "publishedAt": "2026-10-14T17:16:37Z",
+     "description": "**Your GitHub profile and repositories, at a glance.** glancecard renders SVG cards for your READMEs and commits them from a GitHub Action in your own repository: no server, no third-party service, no dependencies.\r\n\r\n<picture>\r\n  <source media=\"(prefers-color-scheme: dark)\" srcset=\"https://raw.githubusercontent.com/gfazioli/glancecard/v0.1.0/docs/examples/octoscope-dark.svg\">\r\n  <img src=\"https://raw.githubusercontent.com/gfazioli/glancecard/v0.1.0/docs/examples/octoscope-light.svg\" width=\"880\" alt=\"A repository card for gfazioli/octoscope\">\r\n</picture>\r\n\r\n### Cards\r\n- **Repository card**: status, age and latest tag, description and topics, commits in the last 30 days with a 26-week sparkline, twelve stat tiles, a year of commits with streaks, the weekly rhythm (day × hour), languages and essentials, the latest commits and releases with their cadence, contributors. Sections can be left out.\r\n- **Profile card**: followers, stars, repositories, pull requests, issues, commits, the contribution calendar, the most starred repositories and their languages.\r\n- **Dark and light**: one file each, for a `<picture>` that follows the reader's GitHub theme.\r\n\r\n### Use it\r\n```yaml\r\n- uses: actions/checkout@v7\r\n- uses: gfazioli/glancecard@v0.1.0\r\n  with:\r\n    profile: your-login\r\n    repos: your-login/your-repo\r\n```\r\nPreview from a terminal: `npx github:gfazioli/glancecard repo owner/name`. Inputs, the `<picture>` snippet and the FAQ are in the [README](https://github.com/gfazioli/glancecard#readme).\r\n\r\n### Safe by default\r\n- Private repositories are refused unless `allow-private: true`: their card would publish their data.\r\n- A history longer than `max-commits` is stated on the card instead of undercounted.\r\n- Every request has a deadline: a stalled host fails one card instead of hanging the job.\r\n- On a pull request the cards are rendered, never committed.\r\n"
+    }
+   ]
+  },
+  "defaultBranchRef": {
+   "name": "main",
+   "target": {
+    "history": {
+     "totalCount": 12,
+     "nodes": [
+      {
+       "abbreviatedOid": "f62891b",
+       "messageHeadline": "docs: staying up to date, and Dependabot in the one-paste setup",
+       "authoredDate": "2026-10-14T17:49:50Z",
+       "author": {
+        "name": "Giovambattista Fazioli",
+        "user": {
+         "login": "gfazioli"
+        }
+       }
+      },
+      {
+       "abbreviatedOid": "5a14086",
+       "messageHeadline": "docs: a contributing guide and a security policy",
+       "authoredDate": "2026-10-14T17:43:27Z",
+       "author": {
+        "name": "Giovambattista Fazioli",
+        "user": {
+         "login": "gfazioli"
+        }
+       }
+      },
+      {
+       "abbreviatedOid": "bc68510",
+       "messageHeadline": "docs: link the GitHub Marketplace listing",
+       "authoredDate": "2026-10-14T17:40:23Z",
+       "author": {
+        "name": "Giovambattista Fazioli",
+        "user": {
+         "login": "gfazioli"
+        }
+       }
+      },
+      {
+       "abbreviatedOid": "1ba6fbb",
+       "messageHeadline": "docs: a sponsor section, as in octoscope's README",
+       "authoredDate": "2026-10-14T17:34:03Z",
+       "author": {
+        "name": "Giovambattista Fazioli",
+        "user": {
+         "login": "gfazioli"
+        }
+       }
+      },
+      {
+       "abbreviatedOid": "c7b7561",
+       "messageHeadline": "docs: glancecard's own card, and a setup in one paste",
+       "authoredDate": "2026-10-14T17:33:35Z",
+       "author": {
+        "name": "Giovambattista Fazioli",
+        "user": {
+         "login": "gfazioli"
+        }
+       }
+      },
+      {
+       "abbreviatedOid": "f9ed9a2",
+       "messageHeadline": "chore(release): 0.1.0",
+       "authoredDate": "2026-10-14T17:14:02Z",
+       "author": {
+        "name": "Giovambattista Fazioli",
+        "user": {
+         "login": "gfazioli"
+        }
+       }
+      }
+     ]
+    }
+   }
+  }
+ },
+ "history": {
+  "dates": [
+   "2026-10-14T17:49:50Z",
+   "2026-10-14T17:43:27Z",
+   "2026-10-14T17:40:23Z",
+   "2026-10-14T17:34:03Z",
+   "2026-10-14T17:33:35Z",
+   "2026-10-14T17:14:02Z",
+   "2026-10-14T16:39:38Z",
+   "2026-10-14T16:32:11Z",
+   "2026-10-14T16:21:33Z",
+   "2026-10-14T16:21:33Z",
+   "2026-10-14T16:21:33Z",
+   "2026-10-14T16:08:32Z"
+  ],
+  "capped": false
+ },
+ "releases": [
+  {
+   "publishedAt": "2026-10-14T17:16:37Z",
+   "downloads": 0
+  }
+ ],
+ "contributors": {
+  "total": 1,
+  "list": [
+   {
+    "login": "gfazioli",
+    "contributions": 7,
+    "type": "User",
+    "avatarUrl": "https://avatars.githubusercontent.com/u/432181?v=4"
+   }
+  ],
+  "bots": 0
+ },
+ "tree": {
+  "files": 48,
+  "truncated": false,
+  "paths": [
+   ".gitattributes",
+   ".github",
+   ".github/dependabot.yml",
+   ".github/workflows",
+   ".github/workflows/ci.yml",
+   ".gitignore",
+   "CHANGELOG.md",
+   "CLAUDE.md",
+   "CONTRIBUTING.md",
+   "LICENSE",
+   "README.md",
+   "SECURITY.md",
+   "action.yml",
+   "package.json",
+   "scripts",
+   "src",
+   "test"
+  ]
+ }
+}
