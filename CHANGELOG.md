@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 — unreleased
+
+**Nine looks, and a website.**
+
+- `theme` takes looks, after the nine of FinderGit's Profile Card: `midnight`, `aurora`, `daylight`, `upside-down`, `hyperspace`, `bridge`, `nebula`, `halloween` and `christmas`, each with its palette, lettering and decorations, on both cards. Several can be asked for at once, comma-separated. `halloween` and `christmas` are worn in their season only and are Midnight otherwise; the CLI's `--all-seasons` lifts that for a preview.
+- `dark` and `light` are now Midnight and Daylight: the default cards change colour slightly. Their file names do not.
+- A website, https://gfazioli.github.io/glancecard/, with every look to switch between and the one-paste setup.
+
 ## 0.1.0 — 2026-10-14
 
 First release.

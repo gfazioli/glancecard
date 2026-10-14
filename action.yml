@@ -17,7 +17,7 @@ inputs:
     required: false
     default: glancecard
   theme:
-    description: dark, light, or both (one file each, <name>-dark.svg and <name>-light.svg).
+    description: both (dark and light), or looks, comma-separated — dark, light, midnight, aurora, daylight, upside-down, hyperspace, bridge, nebula, halloween, christmas. Several themes write <name>-<theme>.svg.
     required: false
     default: both
   time-zone:

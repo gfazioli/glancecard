@@ -1,6 +1,6 @@
 {
   "name": "glancecard",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Your GitHub profile and repositories, at a glance: daily SVG cards for your READMEs, rendered by GitHub Actions.",
   "type": "module",
   "bin": {

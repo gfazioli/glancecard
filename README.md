@@ -7,6 +7,8 @@ Daily SVG cards for your READMEs, rendered by GitHub Actions in your own reposit
 
 [![CI](https://github.com/gfazioli/glancecard/actions/workflows/ci.yml/badge.svg)](https://github.com/gfazioli/glancecard/actions/workflows/ci.yml)
 ![License](https://img.shields.io/badge/license-MIT-green)
+**[Website](https://gfazioli.github.io/glancecard/)** · [GitHub Marketplace](https://github.com/marketplace/actions/glancecard)
+
 [![GitHub Marketplace](https://img.shields.io/badge/marketplace-glancecard-2088FF?logo=github)](https://github.com/marketplace/actions/glancecard)
 ![Node](https://img.shields.io/badge/node-%E2%89%A520-339933)
 
@@ -25,7 +27,7 @@ Daily SVG cards for your READMEs, rendered by GitHub Actions in your own reposit
 
 - **A repository card** for any public repository: status, age and latest tag, description and topics, commits in the last 30 days with a 26-week sparkline, twelve stat tiles, a year of commits with streaks, the weekly rhythm (day × hour), languages and essentials (README, license, contributing guide, security policy, CI), the latest commits and releases with their cadence, contributors.
 - **A profile card** for any user: followers, stars, repositories, pull requests, issues, commits, the contribution calendar, the most starred repositories and their languages.
-- **Both themes**: a dark and a light file per card, and a `<picture>` that shows the one matching the reader's GitHub theme.
+- **Nine looks**, after the ones of [FinderGit](https://findergit.app)'s Profile Card, for both cards: Midnight, Aurora and Daylight; Upside Down, Hyperspace, Bridge and Nebula; Halloween and Christmas in their season. `dark` and `light` are Midnight and Daylight, a pair of files for a `<picture>` that shows the one matching the reader's GitHub theme.
 - **Refreshed by your own workflow**, on your schedule, with the token GitHub Actions already gives every run. The cards are plain files committed to your repository.
 
 ## Set it up in one paste
@@ -56,7 +58,7 @@ Use the gh CLI; if it is missing or not signed in, stop and tell me how to fix i
        timeout-minutes: 10
        steps:
          - uses: actions/checkout@v7
-         - uses: gfazioli/glancecard@v0.1.0
+         - uses: gfazioli/glancecard@v0.2.0
            with:
              profile: <login>
              repos: |
@@ -110,7 +112,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
-      - uses: gfazioli/glancecard@v0.1.0
+      - uses: gfazioli/glancecard@v0.2.0
         with:
           profile: your-login
           repos: |
@@ -147,7 +149,7 @@ updates:
       interval: weekly
 ```
 
-Dependabot also follows a line pinned to a commit SHA with the version as a comment (`gfazioli/glancecard@<sha> # v0.1.0`), the safest way to pin an action that runs with a write token. To be told about releases without Dependabot, watch the repository for releases (*Watch → Custom → Releases*). The README embeds in your other repositories need nothing: they point at the files, not at a version.
+Dependabot also follows a line pinned to a commit SHA with the version as a comment (`gfazioli/glancecard@<sha> # v0.2.0`), the safest way to pin an action that runs with a write token. To be told about releases without Dependabot, watch the repository for releases (*Watch → Custom → Releases*). The README embeds in your other repositories need nothing: they point at the files, not at a version.
 
 ## Inputs
 
@@ -156,7 +158,7 @@ Dependabot also follows a line pinned to a commit SHA with the version as a comm
 | `repos` | | Repositories, as `owner/name`, separated by newlines, commas or spaces. |
 | `profile` | | A login to render a profile card for. |
 | `out-dir` | `glancecard` | Folder the cards are written to, relative to the workspace. |
-| `theme` | `both` | `dark`, `light`, or `both`. With one theme the file is `<name>.svg`. |
+| `theme` | `both` | `both` (`dark` and `light`), or looks, comma-separated: `dark`, `light`, `midnight`, `aurora`, `daylight`, `upside-down`, `hyperspace`, `bridge`, `nebula`, `halloween`, `christmas`. With one theme the file is `<name>.svg`, with several `<name>-<theme>.svg`. See [Looks](#looks). |
 | `time-zone` | `UTC` | IANA zone, such as `Europe/Rome`, for the commit calendar and rhythm. |
 | `sections` | `all` | Repository card sections to draw: `hero`, `tiles`, `activity`, `rhythm`, `code`, `commits`, `releases`, `contributors`. When one of a side-by-side pair is left out, the other takes the full width. |
 | `max-commits` | `5000` | Commits read for the last year, at most. A busier repository says so on its card. |
@@ -168,6 +170,18 @@ Dependabot also follows a line pinned to a commit SHA with the version as a comm
 **Outputs:** `files`, the cards written (one path per line), and `committed`, `true` when a commit was pushed.
 
 Repository cards are named after the repository (`octoscope-dark.svg`); two repositories with the same name from different owners become `owner-name`. The profile card is `profile-dark.svg` and `profile-light.svg`.
+
+## Looks
+
+Nine looks, after the ones of [FinderGit](https://findergit.app)'s Profile Card: each sets every colour a card draws, and most past the classics a lettering and decorations of their own. They work on both cards. See them all, and switch between them, on the [website](https://gfazioli.github.io/glancecard/#looks).
+
+| | | |
+|:-:|:-:|:-:|
+| <img src="https://gfazioli.github.io/glancecard/cards/profile-midnight.svg" width="280" alt="Midnight"><br>`midnight` (`dark`) | <img src="https://gfazioli.github.io/glancecard/cards/profile-aurora.svg" width="280" alt="Aurora"><br>`aurora` | <img src="https://gfazioli.github.io/glancecard/cards/profile-daylight.svg" width="280" alt="Daylight"><br>`daylight` (`light`) |
+| <img src="https://gfazioli.github.io/glancecard/cards/profile-upside-down.svg" width="280" alt="Upside Down"><br>`upside-down` | <img src="https://gfazioli.github.io/glancecard/cards/profile-hyperspace.svg" width="280" alt="Hyperspace"><br>`hyperspace` | <img src="https://gfazioli.github.io/glancecard/cards/profile-bridge.svg" width="280" alt="Bridge"><br>`bridge` |
+| <img src="https://gfazioli.github.io/glancecard/cards/profile-nebula.svg" width="280" alt="Nebula"><br>`nebula` | <img src="https://gfazioli.github.io/glancecard/cards/profile-halloween.svg" width="280" alt="Halloween"><br>`halloween` | <img src="https://gfazioli.github.io/glancecard/cards/profile-christmas.svg" width="280" alt="Christmas"><br>`christmas` |
+
+`halloween` and `christmas` are worn in their season only, from 1 October to 2 November and from 1 December to 6 January in the card's `time-zone`; the rest of the year they are Midnight, and they come back on their own next season. The CLI's `--all-seasons` wears them any day, for a preview.
 
 ## Preview from a terminal
 
@@ -194,13 +208,14 @@ The token is read from `GITHUB_TOKEN`, then `GH_TOKEN`, then `gh auth token`. `-
 
 ## Development
 
-Node 20 or later, no dependencies.
+Node 20 or later, no dependencies. The website lives in `site/` and is published to GitHub Pages by `.github/workflows/pages.yml`.
 
 ```sh
 npm test            # unit tests and the golden cards
 npm run golden      # rewrite test/golden/ after a deliberate change to a card
 npm run preview     # render the golden cases into preview/ and screenshot them with Chrome
 node scripts/record-fixture.js owner/name test/fixtures/name.json   # record a new fixture
+node scripts/site.js build && node scripts/site.js serve              # the website, at http://127.0.0.1:4173/
 ```
 
 The golden cards are rendered from recorded API data at the instant it was recorded, so they only change when the drawing does. Look at `npm run preview` before committing new ones.
@@ -229,7 +244,7 @@ Your help truly matters.
 
 ## Credits
 
-The repository card's layout follows the repository view of [FinderGit](https://findergit.app), a Git-aware file browser for macOS. Icons are [Octicons](https://github.com/primer/octicons) (MIT).
+The repository card's layout follows the repository view of [FinderGit](https://findergit.app), a Git-aware file browser for macOS, and the looks are its Profile Card's. Icons are [Octicons](https://github.com/primer/octicons) (MIT).
 
 ## License
 

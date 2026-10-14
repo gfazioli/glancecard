@@ -33,6 +33,27 @@ even `@actions/core`: the runner protocol is `INPUT_*` variables,
 - **Dates are local days.** GitHub returns UTC and drops the author's offset;
   every day and hour goes through `clock(timeZone)`.
 
+## The looks
+
+`src/theme.js` holds the nine, ported from FinderGit's `ProfileCardTheme.swift`
+(palettes) and `ProfileCardDecor.swift` (`src/decor.js`): keep them in step
+with the app. A look's decorations sit behind the content or in its margins
+and top and bottom bands, never over a figure; `test/theme.test.js` holds the
+content below the top band. The seasonal looks resolve to Midnight out of
+season (`resolveLook`), in the card's time zone.
+
+## The website
+
+`site/` is hand-authored HTML, CSS and one deferred script, published by
+`.github/workflows/pages.yml` after `scripts/site.js build` renders the cards
+it shows. Three blocks in `site/index.html` are copies that a test holds to
+their source: the springs (`scripts/springs.js`, the sibling sites' sampler),
+the one-paste prompt (the README's) and the publisher line (octoscope's).
+Reveals move only `translate`, `scale` and `opacity`, every hiding rule
+requires `data-armed`, and the page loads nothing from another host. A
+significant change is measured before and after with the site-audit
+instrument (Lighthouse, the crawler check, the cost at rest and of a scroll).
+
 ## Changing how a card looks
 
 1. Change the drawing.
@@ -42,7 +63,7 @@ even `@actions/core`: the runner protocol is `INPUT_*` variables,
 
 ## Releases
 
-Pinned tags only (`v0.1.0`, …), no moving `v0` tag: users pin a version or a
+Pinned tags only (`v0.1.0`, `v0.2.0`, …), no moving `v0` tag: users pin a version or a
 SHA and Dependabot moves them. `package.json` `version` and `CHANGELOG.md`
 change in the release PR.
 

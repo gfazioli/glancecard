@@ -38,6 +38,7 @@ The other scripts:
 npm run preview     # render the golden cases into preview/ and screenshot them with Chrome
 npm run golden      # rewrite test/golden/ after a deliberate change to how a card looks
 node scripts/record-fixture.js owner/name test/fixtures/name.json   # record a new fixture
+node scripts/site.js build && node scripts/site.js serve              # the website, locally
 ```
 
 ## How the code is laid out
