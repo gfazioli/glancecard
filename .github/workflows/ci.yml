@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test (${{ matrix.os }}, node ${{ matrix.node }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [20, 24]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm test
+
+  # The golden cards rendered and screenshotted with each platform's fonts:
+  # the widths are estimated from macOS measurements, and this is where a
+  # label that overflows on Linux or Windows shows up.
+  preview:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - run: node scripts/preview.js preview
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: preview-${{ runner.os }}
+          path: preview/
+
+  # The action as a workflow uses it, on live data, without committing.
+  action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - id: cards
+        uses: ./
+        with:
+          repos: gfazioli/octoscope
+          profile: gfazioli
+          time-zone: Europe/Rome
+          out-dir: action-out
+          commit: false
+      - name: Check what it wrote
+        env:
+          FILES: ${{ steps.cards.outputs.files }}
+          COMMITTED: ${{ steps.cards.outputs.committed }}
+        run: |
+          printf '%s\n' "$FILES"
+          test "$(printf '%s\n' "$FILES" | grep -c '\.svg$')" -eq 4
+          test "$COMMITTED" = false
+          for f in $FILES; do test -s "$f" && head -c 200 "$f" | grep -q '<svg'; done
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: action-cards
+          path: action-out/
