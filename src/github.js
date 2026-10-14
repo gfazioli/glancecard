@@ -1,24 +1,32 @@
 // A small GitHub API client on the global fetch: GraphQL, REST, and images
-// as data URIs. Retries what GitHub answers with a 5xx now and then, and turns
-// a spent rate limit into an error that says when it resets.
+// as data URIs. Retries what GitHub answers with a 5xx now and then, turns a
+// spent rate limit into an error that says when it resets, and gives every
+// request a deadline: a stalled host must fail a card, not hang the job.
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-export function createClient({ token, userAgent = "glancecard", apiUrl = "https://api.github.com" } = {}) {
+export function createClient({
+  token,
+  userAgent = "glancecard",
+  apiUrl = "https://api.github.com",
+  timeoutMs = 30000,
+  imageTimeoutMs = 10000,
+  retryDelayMs = 2000,
+} = {}) {
   if (!token) throw new Error("A GitHub token is required (GITHUB_TOKEN, GH_TOKEN, or a signed-in gh)");
   const headers = { Authorization: `bearer ${token}`, "User-Agent": userAgent };
 
   async function request(url, init, attempt = 1) {
     let res;
     try {
-      res = await fetch(url, init);
+      res = await fetch(url, { ...init, signal: AbortSignal.timeout(timeoutMs) });
     } catch (err) {
-      if (attempt >= 3) throw err;
-      await sleep(2000 * attempt);
+      if (attempt >= 3) throw err.name === "TimeoutError" ? new Error(`${url} did not answer within ${timeoutMs / 1000} s`) : err;
+      await sleep(retryDelayMs * attempt);
       return request(url, init, attempt + 1);
     }
     if (res.status >= 500 && attempt < 3) {
-      await sleep(2000 * attempt);
+      await sleep(retryDelayMs * attempt);
       return request(url, init, attempt + 1);
     }
     if ((res.status === 403 || res.status === 429) && res.headers.get("x-ratelimit-remaining") === "0") {
@@ -55,7 +63,7 @@ export function createClient({ token, userAgent = "glancecard", apiUrl = "https:
     /** An image as a data URI, or null: a missing avatar must not fail a card. */
     async image(url) {
       try {
-        const res = await fetch(url);
+        const res = await fetch(url, { signal: AbortSignal.timeout(imageTimeoutMs) });
         if (!res.ok) return null;
         const type = res.headers.get("content-type") || "image/png";
         const bytes = Buffer.from(await res.arrayBuffer());

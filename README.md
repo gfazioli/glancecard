@@ -46,6 +46,7 @@ permissions:
 jobs:
   cards:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: gfazioli/glancecard@v0.1.0
