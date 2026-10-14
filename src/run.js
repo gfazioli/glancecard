@@ -10,7 +10,7 @@ import { renderProfile } from "./profile/render.js";
 import { fetchRepo } from "./repo/fetch.js";
 import { repoModel } from "./repo/model.js";
 import { REPO_SECTIONS, renderRepo } from "./repo/render.js";
-import { THEME_NAMES, THEMES } from "./theme.js";
+import { resolveLook, theme as lookTheme, THEME_NAMES } from "./theme.js";
 import { clock } from "./time.js";
 
 /** Items separated by commas, spaces or newlines. */
@@ -19,11 +19,12 @@ export const parseList = (value) =>
     .split(/[\s,]+/)
     .filter(Boolean);
 
+/** Theme names: `both` is `dark` and `light`; any look by its name. */
 export function parseThemes(value) {
-  const v = String(value || "both").trim();
-  if (v === "both") return [...THEME_NAMES];
-  if (THEME_NAMES.includes(v)) return [v];
-  throw new Error(`theme must be dark, light or both, not "${v}"`);
+  const names = parseList(String(value || "both").toLowerCase()).flatMap((v) => (v === "both" ? ["dark", "light"] : [v]));
+  const unknown = names.filter((n) => !THEME_NAMES.includes(n));
+  if (unknown.length) throw new Error(`unknown theme ${unknown.join(", ")} (choose from both, ${THEME_NAMES.join(", ")})`);
+  return [...new Set(names)];
 }
 
 export function parseSections(value) {
@@ -62,15 +63,27 @@ export async function renderCards({
   repos = [],
   profile = null,
   outDir = "glancecard",
-  themes = [...THEME_NAMES],
+  themes = ["dark", "light"],
   timeZone = "UTC",
   sections = REPO_SECTIONS,
   maxCommits = 5000,
   allowPrivate = false,
+  allSeasons = false,
   now = new Date(),
   log = () => {},
 }) {
   clock(timeZone); // an unknown zone fails here, before any request
+
+  // The look each theme name wears today: a seasonal one out of its season
+  // is Midnight, and the log says so.
+  const looks = new Map(
+    themes.map((name) => {
+      const look = resolveLook(name, { now, timeZone, allSeasons });
+      const base = { dark: "midnight", light: "daylight" }[name] ?? name;
+      if (look !== base) log(`${name} is out of season: wearing ${look}`);
+      return [name, lookTheme(look)];
+    }),
+  );
   const files = [];
   const failures = [];
   await mkdir(outDir, { recursive: true });
@@ -92,7 +105,7 @@ export async function renderCards({
       const model = repoModel(data, { now, timeZone });
       const images = await loadImages(client, model.contributors.map((c) => c.avatarUrl), 56);
       for (const [theme, name] of fileNames(bases.get(full), themes)) {
-        await write(name, renderRepo(model, { theme: THEMES[theme], sections, images }));
+        await write(name, renderRepo(model, { theme: looks.get(theme), sections, images }));
       }
       log(`${full}: ${model.totalCommits} commits, ${model.yearCommits} in the last year, ${model.repo.stargazerCount} stars`);
     } catch (error) {
@@ -106,7 +119,7 @@ export async function renderCards({
       const model = profileModel(data, { now, timeZone });
       const images = await loadImages(client, [model.user.avatarUrl], 160);
       for (const [theme, name] of fileNames("profile", themes)) {
-        await write(name, renderProfile(model, { theme: THEMES[theme], images }));
+        await write(name, renderProfile(model, { theme: looks.get(theme), images }));
       }
       log(`@${profile}: ${model.calendar.totalContributions} contributions in the last year, ${model.stars} stars`);
     } catch (error) {

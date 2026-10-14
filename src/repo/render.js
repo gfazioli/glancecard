@@ -4,7 +4,7 @@
 // side-by-side pair is, the other takes the full width.
 
 import { HALF, IW, kit, PAD, SECTION, W } from "../svg.js";
-import { alpha, THEMES } from "../theme.js";
+import { THEMES } from "../theme.js";
 import { compact, esc, excerpt, fit, full, plural, size, SLACK, textWidth, wrap } from "../text.js";
 import { age, ago, formatDay, MONTHS } from "../time.js";
 
@@ -18,8 +18,10 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
 
   // ─── Header ───
 
+  // The name in the look's ink, with its glow where it has one.
+  const ink = `${theme.nameInk ? ` style="fill: ${theme.nameInk}"` : ""}${theme.nameGlow ? ` filter="url(#name-glow)"` : ""}`;
   const header = (y) => `
-  <text x="${PAD + 2}" y="${y + 24}" class="h-name">${esc(r.name)}</text>
+  <text x="${PAD + 2}" y="${y + 24}" class="h-name disp"${ink}>${esc(k.disp(r.name))}</text>
   <text x="${PAD + 2}" y="${y + 46}" class="h-sub">${esc(`${r.nameWithOwner} · ${r.defaultBranchRef.name}`)}</text>
   <text x="${W - PAD - 2}" y="${y + 22}" class="updated" text-anchor="end">Updated ${formatDay(m.today)}</text>`;
 
@@ -76,11 +78,11 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
     return {
       h,
       svg: `
-  <rect x="${x}" y="${y}" width="${IW}" height="${h}" rx="16" fill="url(#hero)" stroke="${alpha(A.green, theme.repoHero.stroke)}"/>
+  <rect x="${x}" y="${y}" width="${IW}" height="${h}" rx="16" fill="url(#hero)" stroke="${theme.repoHero.stroke}"/>
   ${parts.join("")}
-  <text x="${rx}" y="${y + 50}" class="big">${big}</text>
+  <text x="${rx}" y="${y + 50}" class="big disp">${big}</text>
   <text x="${(rx + bigW + 8).toFixed(1)}" y="${y + 50}" class="big-cap">commits in 30 days</text>
-  ${k.sparkline(m.weekly, rx, y + 66, rightW, h - 66 - 38, A.green)}
+  ${k.sparkline(m.weekly, rx, y + 66, rightW, h - 66 - 38, A.contributions)}
   <text x="${rx}" y="${y + h - 16}" class="axis">${m.weekly.length} weeks ago</text>
   <text x="${rx + rightW}" y="${y + h - 16}" class="axis" text-anchor="end">This week</text>`,
     };
@@ -127,7 +129,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
       .flatMap((week, wi) =>
         week.map((d, di) => {
           if (!d) return "";
-          const today = d.day === m.today ? ` stroke="${A.green}" stroke-width="1.5"` : "";
+          const today = d.day === m.today ? ` stroke="${A.contributions}" stroke-width="1.5"` : "";
           return `<rect x="${gx + wi * step}" y="${gy + di * step}" width="${cell}" height="${cell}" rx="2.5" fill="${levels[level(d.count)]}"${today}/>`;
         }),
       )
@@ -163,7 +165,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
     const chips = k.flow(x + 18, y + 44, IW - 36, [
       { label: "Current streak", value: plural(m.streak, "day"), icon: "flame", color: A.orange },
       { label: "Longest streak", value: plural(m.longest, "day"), icon: "trophy", color: A.yellow },
-      { label: "Active days", value: full(m.activeDays), icon: "calendar", color: A.green },
+      { label: "Active days", value: full(m.activeDays), icon: "calendar", color: A.contributions },
     ]);
     const count = m.capped ? `${full(m.yearCommits)}+ commits` : plural(m.yearCommits, "commit");
 
@@ -171,7 +173,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
       h,
       svg: `
   ${k.panel(x, y, IW, h)}
-  ${k.panelTitle(x, y, "apps", A.green, "Activity", { x: x + IW - 18, text: `${count} in the last year` })}
+  ${k.panelTitle(x, y, "apps", A.contributions, "Activity", { x: x + IW - 18, text: `${count} in the last year` })}
   ${chips.svg}
   ${months}${days}${cells}${legend}${capped}`,
     };
@@ -264,7 +266,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
       const none = m.languages.length ? "" : `<text x="${barX}" y="${y + 86}" class="excerpt">No languages detected.</text>`;
       return `
   ${k.panel(x, y, w, h)}
-  ${k.panelTitle(x, y, "code", A.sky, "Code", { x: x + w - 18, text: plural(m.files, "file") })}
+  ${k.panelTitle(x, y, "code", A.languages, "Code", { x: x + w - 18, text: plural(m.files, "file") })}
   <clipPath id="langbar"><rect x="${barX}" y="${barY}" width="${barW}" height="10" rx="5"/></clipPath>
   <g clip-path="url(#langbar)"><rect x="${barX}" y="${barY}" width="${barW}" height="10" fill="${theme.track}"/>${segments}</g>
   ${rows}${none}
@@ -305,7 +307,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
           const ry = top + i * 46;
           const when = ago(rel.day, m.today);
           return `
-    <circle cx="${x + 27}" cy="${ry - 5}" r="9" fill="${theme.tagDisc}" stroke="${A.sky}" stroke-width="1.2"/>
+    <circle cx="${x + 27}" cy="${ry - 5}" r="9" fill="${theme.canvas[1]}" stroke="${A.sky}" stroke-width="1.2"/>
     ${k.icon("tag", x + 21, ry - 11, A.sky, 12)}
     <text x="${x + 46}" y="${ry}" class="tagname">${esc(fit(rel.tagName, w - 80 - textWidth(when, 11), 13, 700, true))}</text>
     <text x="${x + w - 18}" y="${ry}" class="meta" text-anchor="end">${when}</text>
@@ -361,7 +363,8 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
 
   // ─── Assembly ───
 
-  let y = PAD;
+  const contentTop = PAD + theme.topBand;
+  let y = contentTop;
   const parts = [header(y)];
   y += 68;
   const add = (block) => {
@@ -383,7 +386,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
   pair({ name: "rhythm", make: rhythm }, { name: "code", make: code });
   pair({ name: "commits", make: commits }, { name: "releases", make: releases });
   if (on.has("contributors")) add(contributors(y));
-  const height = y - SECTION + PAD;
+  const height = y - SECTION + PAD + theme.bottomBand;
 
   const desc =
     `${r.description ? `${r.description}. ` : ""}` +
@@ -397,9 +400,9 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
     <stop offset="1" stop-color="${theme.repoHero.to[0]}" stop-opacity="${theme.repoHero.to[1]}"/>
   </linearGradient>
   <linearGradient id="spark" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0" stop-color="${A.green}" stop-opacity="${theme.spark}"/>
-    <stop offset="1" stop-color="${A.green}" stop-opacity="0"/>
+    <stop offset="0" stop-color="${A.contributions}" stop-opacity="${theme.spark}"/>
+    <stop offset="1" stop-color="${A.contributions}" stop-opacity="0"/>
   </linearGradient>${k.tileGradients(tileItems.map((t) => t.color))}`;
 
-  return k.frame({ height, title: `${r.nameWithOwner} at a glance`, desc, defs, body: parts.join("\n") });
+  return k.frame({ height, title: `${r.nameWithOwner} at a glance`, desc, defs, body: parts.join("\n"), contentTop, ledge: contentTop + 68 });
 }

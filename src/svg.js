@@ -1,8 +1,10 @@
-// Drawing primitives shared by both cards, bound to a palette: the frame,
-// panels and their titles, pills that flow and wrap, icons, the sparkline.
+// Drawing primitives shared by both cards, bound to a look: the frame and
+// its decorations, panels and their titles, pills that flow and wrap, icons,
+// the sparkline.
 
+import { decorate } from "./decor.js";
 import { OCTICONS } from "./icons.js";
-import { alpha, styles } from "./theme.js";
+import { alpha, display, styles } from "./theme.js";
 import { esc, fit, textWidth } from "./text.js";
 
 export const W = 880;
@@ -20,11 +22,17 @@ export function kit(t) {
 
   const panel = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="14" class="panel"/>`;
 
+  /** Display text in the look's lettering, clipped to `max` px. */
+  const disp = (s, max, size, weight) => {
+    const text = display(t, s);
+    return max ? fit(text, max - t.type.tracking * text.length, size, weight) : text;
+  };
+
   // The title's colour goes in style=, not fill=: the stylesheet's `text`
   // rule outranks a presentation attribute and would paint every title grey.
   const panelTitle = (x, y, name, color, title, right) => `
   ${icon(name, x + 18, y + 16, color)}
-  <text x="${x + 42}" y="${y + 29}" class="title" style="fill: ${color}">${esc(title)}</text>${
+  <text x="${x + 42}" y="${y + 29}" class="title disp" style="fill: ${color}">${esc(disp(title))}</text>${
     right ? `\n  <text x="${right.x}" y="${y + 29}" class="caption" text-anchor="end">${esc(right.text)}</text>` : ""
   }`;
 
@@ -91,33 +99,51 @@ export function kit(t) {
     <circle cx="${cx}" cy="${cy}" r="${r + ringWidth / 2}" fill="none" stroke="${ring}" stroke-width="${ringWidth}"/>`;
   }
 
-  /** The whole document: background, glows, frame, then `body`. */
-  function frame({ height, title, desc, defs = "", body }) {
-    const [g1, g2] = t.glows;
+  /**
+   * The whole document: the look's ground and glows, the decorations behind,
+   * the frame, `body`, then the decorations in front. `contentTop` is where
+   * the content starts, `ledge` the first panel's top edge.
+   */
+  function frame({ height, title, desc, defs = "", body, contentTop = PAD, ledge = PAD }) {
+    const decor = decorate(t.name, { width: W, height, contentTop, ledge });
+    const glows = t.glows
+      .map(
+        ([color, opacity, x, y, r], i) => `
+  <radialGradient id="glow-${i}" gradientUnits="userSpaceOnUse" cx="${(x * W).toFixed(1)}" cy="${(y * height).toFixed(1)}" r="${r}">
+    <stop offset="0" stop-color="${color}" stop-opacity="${opacity}"/>
+    <stop offset="1" stop-color="${color}" stop-opacity="0"/>
+  </radialGradient>`,
+      )
+      .join("");
+    const lit = t.glows.map((_, i) => `<rect width="${W}" height="${height}" rx="18" fill="url(#glow-${i})"/>`).join("\n");
+    const nameGlow = t.nameGlow
+      ? `
+  <filter id="name-glow" x="-20%" y="-60%" width="140%" height="220%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
+    <feFlood flood-color="${t.nameGlow}" flood-opacity="0.85"/>
+    <feComposite in2="blur" operator="in"/>
+    <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>`
+      : "";
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${height}" viewBox="0 0 ${W} ${height}" role="img" aria-labelledby="t d">
 <title id="t">${esc(title)}</title>
 <desc id="d">${esc(desc)}</desc>
 <style>${styles(t)}
 </style>
 <defs>
+  <clipPath id="card"><rect width="${W}" height="${height}" rx="18"/></clipPath>
   <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="${t.bg[0]}"/>
-    <stop offset="1" stop-color="${t.bg[1]}"/>
-  </linearGradient>
-  <radialGradient id="glow-a" cx="0.12" cy="0.06" r="0.5">
-    <stop offset="0" stop-color="${g1[0]}" stop-opacity="${g1[1]}"/>
-    <stop offset="1" stop-color="${g1[0]}" stop-opacity="0"/>
-  </radialGradient>
-  <radialGradient id="glow-b" cx="0.9" cy="0.94" r="0.5">
-    <stop offset="0" stop-color="${g2[0]}" stop-opacity="${g2[1]}"/>
-    <stop offset="1" stop-color="${g2[0]}" stop-opacity="0"/>
-  </radialGradient>${defs}
+    <stop offset="0" stop-color="${t.canvas[0]}"/>
+    <stop offset="0.5" stop-color="${t.canvas[1]}"/>
+    <stop offset="1" stop-color="${t.canvas[2]}"/>
+  </linearGradient>${glows}${nameGlow}${decor.defs ? `\n  ${decor.defs}` : ""}${defs}
 </defs>
-<rect width="${W}" height="${height}" rx="18" fill="url(#bg)"/>
-<rect width="${W}" height="${height}" rx="18" fill="url(#glow-a)"/>
-<rect width="${W}" height="${height}" rx="18" fill="url(#glow-b)"/>
+<g clip-path="url(#card)">
+<rect width="${W}" height="${height}" fill="url(#bg)"/>
+${lit}${decor.behind ? `\n<g aria-hidden="true">${decor.behind}</g>` : ""}
+</g>
 <rect x="0.5" y="0.5" width="${W - 1}" height="${height - 1}" rx="17.5" fill="none" stroke="${t.frame}"/>
-${body}
+${body}${decor.front ? `\n<g clip-path="url(#card)" aria-hidden="true">${decor.front}</g>` : ""}
 </svg>
 `;
   }
@@ -145,10 +171,10 @@ ${body}
         const tx = (Number(x) + 14).toFixed(1);
         return `
   <g>
-    <rect x="${x}" y="${ty}" width="${w.toFixed(1)}" height="${h}" rx="14" fill="url(#tile-${i})" stroke="${t.tile.stroke}"/>
+    <rect x="${x}" y="${ty}" width="${w.toFixed(1)}" height="${h}" rx="14" fill="url(#tile-${i})" stroke="${alpha(item.color, t.tile.stroke)}"/>
     ${icon(item.icon, Number(tx), ty + 14, item.color)}
-    <text x="${tx}" y="${ty + 60}" class="value">${esc(item.value)}${item.unit ? `<tspan dx="4" class="unit">${item.unit}</tspan>` : ""}</text>
-    <text x="${tx}" y="${ty + 78}" class="label">${esc(fit(item.label, w - 28, 12, 600))}</text>
+    <text x="${tx}" y="${ty + 60}" class="value disp">${esc(item.value)}${item.unit ? `<tspan dx="4" class="unit">${item.unit}</tspan>` : ""}</text>
+    <text x="${tx}" y="${ty + 78}" class="label disp">${esc(disp(item.label, w - 28, 12, 600))}</text>
     <text x="${tx}" y="${ty + 91}" class="sub">${esc(fit(item.sub, w - 28, 10.5))}</text>
   </g>`;
       })
@@ -156,5 +182,5 @@ ${body}
     return { svg, h: Math.ceil(items.length / cols) * (h + GAP) - GAP };
   }
 
-  return { t, icon, panel, panelTitle, pill, flow, sparkline, avatar, frame, tileGradients, tiles };
+  return { t, icon, panel, panelTitle, disp, pill, flow, sparkline, avatar, frame, tileGradients, tiles };
 }

@@ -1,0 +1,74 @@
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { profileModel } from "../src/profile/model.js";
+import { renderProfile } from "../src/profile/render.js";
+import { repoModel } from "../src/repo/model.js";
+import { renderRepo } from "../src/repo/render.js";
+import { display, inSeason, LOOK_NAMES, resolveLook, theme, THEME_NAMES } from "../src/theme.js";
+import { fixture } from "./support/cases.js";
+
+const at = (iso) => ({ now: new Date(iso), timeZone: "Europe/Rome" });
+
+test("the nine looks, and dark and light as Midnight and Daylight", () => {
+  assert.deepEqual(LOOK_NAMES, ["midnight", "aurora", "daylight", "upside-down", "hyperspace", "bridge", "nebula", "halloween", "christmas"]);
+  assert.deepEqual(THEME_NAMES.slice(0, 2), ["dark", "light"]);
+  assert.equal(resolveLook("dark"), "midnight");
+  assert.equal(resolveLook("light"), "daylight");
+  assert.throws(() => resolveLook("sepia"), /unknown theme "sepia"/);
+});
+
+test("the seasonal looks are worn only in their season, Midnight otherwise", () => {
+  assert.equal(resolveLook("halloween", at("2026-10-01T08:00:00Z")), "halloween");
+  assert.equal(resolveLook("halloween", at("2026-11-02T20:00:00Z")), "halloween");
+  assert.equal(resolveLook("halloween", at("2026-11-02T23:30:00Z")), "midnight", "already 3 November in Rome");
+  assert.equal(resolveLook("halloween", at("2026-09-30T21:59:00Z")), "midnight");
+  assert.equal(resolveLook("christmas", at("2026-12-01T00:00:00Z")), "christmas");
+  assert.equal(resolveLook("christmas", at("2027-01-06T12:00:00Z")), "christmas");
+  assert.equal(resolveLook("christmas", at("2027-01-07T12:00:00Z")), "midnight");
+  assert.equal(resolveLook("christmas", { ...at("2026-07-01T12:00:00Z"), allSeasons: true }), "christmas");
+  assert.equal(inSeason("nebula", "2026-07-01"), true);
+});
+
+test("a look sets its own lettering", () => {
+  assert.equal(display(theme("hyperspace"), "Followers"), "FOLLOWERS");
+  assert.equal(display(theme("midnight"), "Followers"), "Followers");
+  const svg = renderProfile(profileModel(fixture("profile-gfazioli")), { theme: theme("hyperspace") });
+  assert.match(svg, /class="label disp">FOLLOWERS</);
+  assert.match(svg, /\.disp \{[^}]*letter-spacing: 1\.5px/);
+});
+
+test("a name glows only where its look gives it a glow", () => {
+  const m = profileModel(fixture("profile-gfazioli"));
+  const glowing = renderProfile(m, { theme: theme("upside-down") });
+  assert.match(glowing, /<filter id="name-glow"/);
+  assert.match(glowing, /class="name disp" style="fill: #FF2A2A" filter="url\(#name-glow\)"/);
+  assert.doesNotMatch(renderProfile(m, { theme: theme("midnight") }), /name-glow/);
+});
+
+// Every look on both cards: well formed, every reference resolved, nothing
+// undefined, and the decorations kept out of the content's way.
+const repo = repoModel(fixture("octoscope"), { timeZone: "Europe/Rome" });
+const profile = profileModel(fixture("profile-gfazioli"), { timeZone: "Europe/Rome" });
+for (const look of LOOK_NAMES) {
+  for (const [card, svg] of [
+    ["repository", renderRepo(repo, { theme: theme(look) })],
+    ["profile", renderProfile(profile, { theme: theme(look) })],
+  ]) {
+    test(`${look} draws a sound ${card} card`, () => {
+      assert.doesNotMatch(svg, /undefined|NaN|null/);
+      assert.doesNotMatch(svg, /&(?!amp;|lt;|gt;|quot;|#)/);
+      const ids = [...svg.matchAll(/ id="([^"]+)"/g)].map((m) => m[1]);
+      assert.equal(new Set(ids).size, ids.length, "ids are unique");
+      for (const [, ref] of svg.matchAll(/url\(#([^)]+)\)/g)) assert.ok(ids.includes(ref), `url(#${ref}) points nowhere`);
+      const height = Number(svg.match(/<svg[^>]* height="(\d+)"/)[1]);
+      const t = theme(look);
+      // The content starts below the top band, so a hanging decoration never
+      // crosses it: the repository's name, or the profile's header panel.
+      const top = card === "repository"
+        ? Number(svg.match(/<text x="26" y="(\d+)" class="h-name/)[1]) - 24
+        : Number(svg.match(/<rect x="24" y="(\d+)"[^>]*fill="url\(#hero\)"/)[1]);
+      assert.equal(top, 24 + t.topBand);
+      assert.ok(height > 0);
+    });
+  }
+}

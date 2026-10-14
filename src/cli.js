@@ -17,7 +17,10 @@ Usage:
 
 Options:
   --out <dir>          where the cards go (default: glancecard)
-  --theme <theme>      dark, light or both (default: both)
+  --theme <list>       both (dark and light), or looks, comma-separated (default: both):
+                       dark, light, midnight, aurora, daylight, upside-down,
+                       hyperspace, bridge, nebula, halloween, christmas
+  --all-seasons        wear Halloween and Christmas out of their season
   --time-zone <zone>   IANA zone for commit days and hours (default: this machine's)
   --sections <list>    repository card sections, comma-separated (default: all):
                        hero, tiles, activity, rhythm, code, commits, releases, contributors
@@ -41,6 +44,7 @@ function parseArgs(argv) {
       if (value === undefined) throw new Error(`${flag} needs a value`);
       options[flag.slice(2)] = value;
     } else if (flag === "--allow-private") options["allow-private"] = true;
+    else if (flag === "--all-seasons") options["all-seasons"] = true;
     else if (flag === "-h" || flag === "--help") options.help = true;
     else if (flag === "-v" || flag === "--version") options.version = true;
     else if (arg.startsWith("-")) throw new Error(`unknown option ${arg}`);
@@ -78,6 +82,7 @@ async function main() {
     sections: parseSections(options.sections),
     maxCommits: parseCount(options["max-commits"], "--max-commits", 5000),
     allowPrivate: Boolean(options["allow-private"]),
+    allSeasons: Boolean(options["all-seasons"]),
     log: (line) => console.log(line),
   });
   for (const file of files) console.log(`  ${file}`);

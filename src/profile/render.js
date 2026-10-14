@@ -13,6 +13,9 @@ export function renderProfile(m, { theme = THEMES.dark, images = {} } = {}) {
   const A = theme.accent;
   const u = m.user;
 
+  // The name in the look's ink, with its glow where it has one.
+  const ink = `${theme.nameInk ? ` style="fill: ${theme.nameInk}"` : ""}${theme.nameGlow ? ` filter="url(#name-glow)"` : ""}`;
+
   function header(y) {
     const h = 104;
     const cx = PAD + 20 + 36;
@@ -23,9 +26,9 @@ export function renderProfile(m, { theme = THEMES.dark, images = {} } = {}) {
     return {
       h,
       svg: `
-  <rect x="${PAD}" y="${y}" width="${IW}" height="${h}" rx="14" fill="url(#hero)" stroke="${theme.profileHero.stroke}"/>
-  ${k.avatar("avatar", images[u.avatarUrl], cx, cy, 36, theme.heroRing, 3)}
-  <text x="${tx}" y="${y + 38}"><tspan class="name">${esc(u.name || u.login)}</tspan><tspan dx="8" class="login">@${esc(u.login)}</tspan></text>
+  <rect x="${PAD}" y="${y}" width="${IW}" height="${h}" rx="14" fill="url(#hero)" stroke="${theme.headerOutline}"/>
+  ${k.avatar("avatar", images[u.avatarUrl], cx, cy, 36, "url(#ring)", 3)}
+  <text x="${tx}" y="${y + 38}"><tspan class="name disp"${ink}>${esc(k.disp(u.name || u.login))}</tspan><tspan dx="8" class="login">@${esc(u.login)}</tspan></text>
   <text x="${tx}" y="${y + 60}" class="bio">${esc(fit((u.bio || "").trim(), textW, 13))}</text>
   <text x="${tx}" y="${y + 84}" class="h-meta">${esc(fit(meta, textW, 11.5))}</text>
   <text x="${PAD + IW - 16}" y="${y + 28}" class="updated" text-anchor="end">Updated ${formatDay(m.today)}</text>`,
@@ -143,13 +146,14 @@ export function renderProfile(m, { theme = THEMES.dark, images = {} } = {}) {
       .join("");
     return `
   ${k.panel(x, y, w, h)}
-  ${k.panelTitle(x, y, "code", A.green, "Languages")}
+  ${k.panelTitle(x, y, "code", A.languages, "Languages")}
   <clipPath id="langbar"><rect x="${barX}" y="${barY}" width="${barW}" height="8" rx="4"/></clipPath>
   <g clip-path="url(#langbar)"><rect x="${barX}" y="${barY}" width="${barW}" height="8" fill="${theme.track}"/>${segments}</g>
   ${rows}`;
   }
 
-  let y = PAD;
+  const contentTop = PAD + theme.topBand;
+  let y = contentTop;
   const parts = [];
   const top = header(y);
   parts.push(top.svg);
@@ -163,7 +167,7 @@ export function renderProfile(m, { theme = THEMES.dark, images = {} } = {}) {
   const bottomH = 80 + (Math.max(m.topRepos.length, m.languages.length, 1) - 1) * 21 + 17;
   parts.push(topRepos(PAD, y, HALF, bottomH));
   parts.push(languages(PAD + HALF + SECTION, y, HALF, bottomH));
-  y += bottomH + PAD;
+  y += bottomH + PAD + theme.bottomBand;
 
   const name = u.name || u.login;
   const desc =
@@ -172,9 +176,13 @@ export function renderProfile(m, { theme = THEMES.dark, images = {} } = {}) {
     `${full(m.counts.prs)} pull requests, ${full(u.followers.totalCount)} followers.`;
   const defs = `
   <linearGradient id="hero" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="${theme.profileHero.from[0]}" stop-opacity="${theme.profileHero.from[1]}"/>
-    <stop offset="1" stop-color="${theme.profileHero.to[0]}" stop-opacity="${theme.profileHero.to[1]}"/>
+    <stop offset="0" stop-color="${theme.header[0]}"/>
+    <stop offset="1" stop-color="${theme.header[1]}"/>
+  </linearGradient>
+  <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="${theme.avatarRing[0]}"/>
+    <stop offset="1" stop-color="${theme.avatarRing[1]}"/>
   </linearGradient>${k.tileGradients(tileItems.map((t) => t.color))}`;
 
-  return k.frame({ height: y, title: `${name}'s GitHub activity`, desc, defs, body: parts.join("\n") });
+  return k.frame({ height: y, title: `${name}'s GitHub activity`, desc, defs, body: parts.join("\n"), contentTop, ledge: contentTop });
 }

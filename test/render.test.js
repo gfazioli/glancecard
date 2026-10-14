@@ -29,8 +29,8 @@ for (const c of CASES) {
 
 test("titles are coloured through style, which the stylesheet cannot override", () => {
   const svg = renderCase(CASES[0]);
-  assert.doesNotMatch(svg, /class="title" fill=/);
-  assert.match(svg, /class="title" style="fill: #/);
+  assert.doesNotMatch(svg, /class="title[^"]*" fill=/);
+  assert.match(svg, /class="title disp" style="fill: #/);
 });
 
 test("a section left out is not drawn, and its partner takes the full width", () => {

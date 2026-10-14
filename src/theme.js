@@ -1,121 +1,303 @@
-// The two palettes. Accents are 6-digit hex so a tint can append an alpha;
-// the dark one keeps the look of the original cards, the light one follows
-// GitHub's light theme so a card sits in a light README without a frame.
+// The looks, after the nine of FinderGit's Profile Card
+// (https://findergit.app): a look sets every colour a card draws, and most
+// past the classics a typeface and decorations (src/decor.js). `dark` and
+// `light` are Midnight and Daylight under the names a <picture> pair uses.
+// Accents are 6-digit hex so a tint can append an alpha.
 
-export const THEMES = {
-  dark: {
-    name: "dark",
-    bg: ["#1a2238", "#232338"],
+import { clock } from "./time.js";
+
+const white = (a) => `rgba(255,255,255,${a})`;
+
+// Each look as FinderGit draws it. Glows are [colour, opacity, x, y, radius]
+// with x and y as a share of the card; tiles are the ten profile figures'
+// colours in the card's order (followers, following, stars, repositories,
+// forks, pull requests, issues, commits, contributed, years), null for the
+// classic set.
+const LOOKS = {
+  midnight: {
+    family: "classic",
+    canvas: ["#1A2140", "#221F44", "#2C2150"],
     glows: [
-      ["#2f6fe0", 0.28],
-      ["#7c3aed", 0.2],
+      ["#3B5BDB", 0.42, 0.08, 0.04, 420],
+      ["#7048E8", 0.36, 0.96, 0.96, 480],
+      ["#1C7ED6", 0.18, 0.92, 0.28, 320],
     ],
-    frame: "rgba(255,255,255,0.10)",
-    panel: { fill: "rgba(255,255,255,0.045)", stroke: "rgba(255,255,255,0.09)" },
-    tile: { stroke: "rgba(255,255,255,0.10)", from: 0.34, to: 0.08 },
-    chip: { fill: "rgba(255,255,255,0.06)", stroke: "rgba(255,255,255,0.08)", tint: 0.15, tintStroke: 0.2 },
-    link: { fill: "rgba(255,255,255,0.05)", icon: "rgba(230,237,243,0.7)" },
-    off: { fill: "rgba(255,255,255,0.03)", icon: "rgba(230,237,243,0.4)" },
-    track: "rgba(255,255,255,0.08)",
-    dot: "rgba(255,255,255,0.16)",
-    ring: "rgba(255,255,255,0.18)",
-    heroRing: "rgba(255,255,255,0.28)",
-    placeholder: "#3b4256",
-    tagDisc: "#0e3a52",
-    levels: ["rgba(255,255,255,0.07)", "#0e4429", "#006d32", "#26a641", "#39d353"],
-    repoHero: { from: ["#16a34a", 0.26], to: ["#0f766e", 0.08], stroke: 0.25 },
-    profileHero: { from: ["#2d63c4", 0.55], to: ["#2d63c4", 0.16], stroke: "rgba(255,255,255,0.10)" },
-    spark: 0.32,
-    text: {
-      base: "#e6edf3",
-      strong: "#ffffff",
-      high: "rgba(230,237,243,0.95)",
-      body: "rgba(230,237,243,0.88)",
-      soft: "rgba(230,237,243,0.75)",
-      muted: "rgba(230,237,243,0.6)",
-      meta: "rgba(230,237,243,0.55)",
-      faint: "rgba(230,237,243,0.5)",
-      off: "rgba(230,237,243,0.45)",
-      ghost: "rgba(230,237,243,0.42)",
-    },
-    accent: {
-      green: "#4ade80",
-      teal: "#2dd4bf",
-      cyan: "#22d3ee",
-      sky: "#38bdf8",
-      blue: "#60a5fa",
-      indigo: "#818cf8",
-      purple: "#c084fc",
-      rose: "#fb7185",
-      orange: "#fb923c",
-      yellow: "#facc15",
-      slate: "#94a3b8",
-      contributions: "#39d353",
-    },
+    header: ["#2E5199", "#243F7A"],
+    avatarRing: ["#74C0FC", white(0.85)],
+    heat: [white(0.08), "#0E4429", "#006D32", "#26A641", "#39D353"],
   },
-  light: {
-    name: "light",
-    bg: ["#f6f8fa", "#eef1f6"],
+  aurora: {
+    family: "classic",
+    canvas: ["#0A2A30", "#13233F", "#2A1846"],
     glows: [
-      ["#0969da", 0.07],
-      ["#8250df", 0.06],
+      ["#12B886", 0.34, 0.06, 0.08, 420],
+      ["#E64980", 0.28, 0.94, 0.94, 480],
+      ["#15AABF", 0.22, 0.88, 0.18, 320],
     ],
-    frame: "rgba(31,35,40,0.12)",
-    panel: { fill: "#ffffff", stroke: "rgba(31,35,40,0.10)" },
-    tile: { stroke: "rgba(31,35,40,0.10)", from: 0.16, to: 0.04 },
-    chip: { fill: "rgba(31,35,40,0.04)", stroke: "rgba(31,35,40,0.10)", tint: 0.1, tintStroke: 0.24 },
-    link: { fill: "rgba(255,255,255,0.7)", icon: "#59636e" },
-    off: { fill: "rgba(31,35,40,0.02)", icon: "rgba(31,35,40,0.35)" },
-    track: "rgba(31,35,40,0.08)",
-    dot: "rgba(31,35,40,0.18)",
-    ring: "rgba(31,35,40,0.14)",
-    heroRing: "rgba(255,255,255,0.9)",
-    placeholder: "#d0d7de",
-    tagDisc: "#ddf4ff",
-    levels: ["#eff2f5", "#aceebb", "#4ac26b", "#2da44e", "#116329"],
-    repoHero: { from: ["#1a7f37", 0.1], to: ["#0f766e", 0.03], stroke: 0.3 },
-    profileHero: { from: ["#0969da", 0.14], to: ["#0969da", 0.04], stroke: "rgba(9,105,218,0.2)" },
-    spark: 0.22,
-    text: {
-      base: "#1f2328",
-      strong: "#1f2328",
-      high: "#1f2328",
-      body: "rgba(31,35,40,0.86)",
-      soft: "rgba(31,35,40,0.72)",
-      muted: "#59636e",
-      meta: "rgba(31,35,40,0.6)",
-      faint: "rgba(31,35,40,0.55)",
-      off: "rgba(31,35,40,0.45)",
-      ghost: "rgba(31,35,40,0.45)",
-    },
-    accent: {
-      green: "#1a7f37",
-      teal: "#0f766e",
-      cyan: "#0e7490",
-      sky: "#0969da",
-      blue: "#0969da",
-      indigo: "#4f46e5",
-      purple: "#8250df",
-      rose: "#cf2255",
-      orange: "#bc4c00",
-      yellow: "#9a6700",
-      slate: "#59636e",
-      contributions: "#1a7f37",
-    },
+    header: ["#0F5F66", "#3A2A7C"],
+    avatarRing: ["#63E6BE", "#F783AC"],
+    heat: [white(0.08), "#0B4F4A", "#0E7C6B", "#20C997", "#63E6BE"],
+  },
+  daylight: {
+    family: "classic",
+    isDark: false,
+    canvas: ["#F7F9FD", "#EFF2FB", "#F3EEFC"],
+    glows: [
+      ["#74C0FC", 0.34, 0.06, 0.04, 420],
+      ["#B197FC", 0.3, 0.96, 0.96, 480],
+      ["#63E6BE", 0.16, 0.9, 0.26, 320],
+    ],
+    header: ["#DCE8FF", "#E8E1FF"],
+    avatarRing: ["#4C6EF5", "#B197FC"],
+    heat: ["#EBEDF0", "#9BE9A8", "#40C463", "#30A14E", "#216E39"],
+  },
+  "upside-down": {
+    family: "cosmic",
+    canvas: ["#07040A", "#12060B", "#1E0508"],
+    glows: [
+      ["#FF1E1E", 0.32, 0.5, 1.08, 560],
+      ["#8B0000", 0.4, 0.08, 0.12, 380],
+      ["#2B6CB0", 0.12, 0.95, 0.3, 300],
+    ],
+    header: ["#2A0A0E", "#14070A"],
+    headerOutline: "rgba(255,42,42,0.35)",
+    avatarRing: ["#FF2A2A", "#8B0000"],
+    heat: [white(0.06), "#3B0A0D", "#7A1015", "#C4161C", "#FF3B3B"],
+    tiles: ["#FF3B3B", "#FF9F0A", "#FFD60A", "#E5484D", "#0A84FF", "#C4161C", "#30D158", "#FF7A45", "#BF5AF2", "#9A8C98"],
+    accent: "#FF3B3B",
+    secondAccent: "#FFD60A",
+    type: { design: "serif" },
+    nameInk: "#FF2A2A",
+    nameGlow: "#FF0000",
+    topBand: 34,
+    surface: "rgba(10,4,6,0.62)",
+  },
+  hyperspace: {
+    family: "cosmic",
+    canvas: ["#02030A", "#050816", "#0A0F24"],
+    glows: [
+      ["#FFE81F", 0.12, 0.08, 0.04, 380],
+      ["#3FA9F5", 0.22, 0.92, 0.92, 460],
+      ["#FFFFFF", 0.06, 0.5, 0.45, 600],
+    ],
+    header: ["#0B1026", "#14193A"],
+    headerOutline: "rgba(255,232,31,0.35)",
+    avatarRing: ["#FFE81F", "#3FA9F5"],
+    heat: [white(0.06), "#0B2545", "#1565C0", "#3FA9F5", "#CFEFFF"],
+    tiles: ["#FFE81F", "#3FA9F5", "#FFE81F", "#4CFF7A", "#B57BFF", "#FF3B30", "#5CE1E6", "#FF9F1C", "#3FA9F5", "#A0A8C0"],
+    accent: "#3FA9F5",
+    secondAccent: "#FFE81F",
+    type: { uppercase: true, tracking: 1.5 },
+    nameInk: "#FFE81F",
+    surface: "rgba(4,6,15,0.72)",
+  },
+  bridge: {
+    family: "cosmic",
+    canvas: ["#000000", "#05050A", "#0A0A14"],
+    glows: [
+      ["#FF9966", 0.1, 0.1, 0.08, 360],
+      ["#9999FF", 0.12, 0.92, 0.92, 420],
+    ],
+    header: ["#16110C", "#0E0B16"],
+    headerOutline: "rgba(255,153,102,0.5)",
+    avatarRing: ["#FF9966", "#CC99CC"],
+    heat: [white(0.06), "#4D3319", "#996633", "#FF9966", "#FFCC99"],
+    tiles: ["#FF9966", "#FFCC99", "#CC99CC", "#9999FF", "#FF9900", "#CC6666", "#99CCFF", "#FFCC66", "#CC99FF", "#9999CC"],
+    accent: "#FF9966",
+    secondAccent: "#9999FF",
+    type: { width: "compressed", uppercase: true, tracking: 1 },
+    nameInk: "#FF9966",
+    surface: "rgba(8,8,14,0.92)",
+  },
+  nebula: {
+    family: "cosmic",
+    canvas: ["#0B0620", "#160A35", "#0A1530"],
+    glows: [
+      ["#E64980", 0.32, 0.12, 0.18, 420],
+      ["#7048E8", 0.38, 0.88, 0.36, 480],
+      ["#15AABF", 0.26, 0.28, 0.86, 420],
+      ["#F783AC", 0.18, 0.92, 0.96, 360],
+    ],
+    header: ["#2A1650", "#1A2A5A"],
+    avatarRing: ["#F783AC", "#74C0FC"],
+    heat: [white(0.07), "#2B1D5C", "#5F3DC4", "#B197FC", "#F8F0FC"],
+    tiles: ["#B197FC", "#74C0FC", "#F783AC", "#9775FA", "#63E6BE", "#DA77F2", "#66D9E8", "#FFA8A8", "#E599F7", "#A5B4CB"],
+    accent: "#B197FC",
+    secondAccent: "#63E6BE",
+    nameGlow: "#B197FC",
+    surface: "rgba(14,7,38,0.55)",
+  },
+  halloween: {
+    family: "seasonal",
+    canvas: ["#0D0612", "#1A0B24", "#140A0A"],
+    glows: [
+      ["#FF8C1A", 0.3, 0.9, 0.02, 360],
+      ["#7B2CBF", 0.32, 0.08, 0.6, 420],
+      ["#2D6A4F", 0.16, 0.5, 1.02, 400],
+    ],
+    header: ["#2A1236", "#1E0F1A"],
+    headerOutline: "rgba(255,140,26,0.4)",
+    avatarRing: ["#FF8C1A", "#9D4EDD"],
+    // GitHub's own Halloween calendar.
+    heat: [white(0.07), "#631C03", "#BD561D", "#FA7A18", "#FDDF68"],
+    tiles: ["#FF8C1A", "#9D4EDD", "#FFB627", "#52B788", "#C77DFF", "#FF6D00", "#80ED99", "#FF9E00", "#E0AAFF", "#B8B8B8"],
+    accent: "#FA7A18",
+    secondAccent: "#9D4EDD",
+    type: { design: "serif" },
+    nameInk: "#FF8C1A",
+    nameGlow: "#FF6D00",
+    topBand: 34,
+    bottomBand: 40,
+    surface: "rgba(18,8,24,0.6)",
+  },
+  christmas: {
+    family: "seasonal",
+    canvas: ["#06281D", "#0B1F33", "#081426"],
+    glows: [
+      ["#FFD166", 0.22, 0.86, 0.04, 360],
+      ["#E63946", 0.22, 0.08, 0.9, 420],
+      ["#2D6A4F", 0.32, 0.1, 0.14, 420],
+    ],
+    header: ["#1B4332", "#14213D"],
+    headerOutline: white(0.22),
+    avatarRing: ["#E63946", "#FFD166"],
+    heat: [white(0.07), "#1B4332", "#2D6A4F", "#52B788", "#FFD166"],
+    tiles: ["#E63946", "#52B788", "#FFD166", "#74C0FC", "#E63946", "#52B788", "#FFD166", "#FF8FA3", "#95D5B2", "#D4D4D4"],
+    accent: "#52B788",
+    secondAccent: "#FFD166",
+    type: { design: "rounded" },
+    topBand: 30,
+    bottomBand: 40,
+    surface: "rgba(8,35,25,0.55)",
   },
 };
 
-export const THEME_NAMES = Object.keys(THEMES);
+/** Every look's name, in FinderGit's order. */
+export const LOOK_NAMES = Object.keys(LOOKS);
+
+/** What a theme input may name: the looks, and `dark` and `light`. */
+export const ALIASES = { dark: "midnight", light: "daylight" };
+export const THEME_NAMES = ["dark", "light", ...LOOK_NAMES];
+
+// The accents the classic looks give the cards' figures and panels, bright
+// on a dark ground and deeper on paper, where a bright yellow all but
+// disappears.
+const CLASSIC = {
+  dark: { blue: "#60a5fa", cyan: "#22d3ee", yellow: "#facc15", indigo: "#818cf8", teal: "#2dd4bf", purple: "#c084fc", green: "#4ade80", orange: "#fb923c", rose: "#fb7185", slate: "#94a3b8", sky: "#38bdf8" },
+  light: { blue: "#0969da", cyan: "#0e7490", yellow: "#9a6700", indigo: "#4f46e5", teal: "#0f766e", purple: "#8250df", green: "#1a7f37", orange: "#bc4c00", rose: "#cf2255", slate: "#59636e", sky: "#0969da" },
+};
+// The order of a look's ten tiles, as named accents.
+const TILE_ROLES = ["blue", "cyan", "yellow", "indigo", "teal", "purple", "green", "orange", "rose", "slate"];
+
+const FONT = `-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif`;
+const FACES = {
+  default: FONT,
+  serif: `"New York", ui-serif, "Iowan Old Style", Georgia, "Times New Roman", serif`,
+  rounded: `ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", Quicksand, ${FONT}`,
+};
 
 /** `hex` with an alpha channel, for tints of an accent. */
 export const alpha = (hex, a) => `${hex}${Math.round(a * 255).toString(16).padStart(2, "0")}`;
 
-/** The stylesheet both cards share, filled from a palette. */
+/**
+ * Whether a look is worn on `day` (YYYY-MM-DD): always, but Halloween only
+ * from 1 October to 2 November and Christmas from 1 December to 6 January.
+ */
+export function inSeason(look, day) {
+  const [, m, d] = day.split("-").map(Number);
+  if (look === "halloween") return m === 10 || (m === 11 && d <= 2);
+  if (look === "christmas") return m === 12 || (m === 1 && d <= 6);
+  return true;
+}
+
+/**
+ * The look a theme name wears at `now` in `timeZone`: its alias resolved,
+ * and Midnight for a seasonal look out of its season, so a Halloween card is
+ * Midnight in November and Halloween again next October.
+ */
+export function resolveLook(name, { now = new Date(), timeZone = "UTC", allSeasons = false } = {}) {
+  const look = ALIASES[name] ?? name;
+  if (!LOOKS[look]) throw new Error(`unknown theme "${name}" (choose from ${THEME_NAMES.join(", ")})`);
+  return allSeasons || inSeason(look, clock(timeZone).day(now)) ? look : "midnight";
+}
+
+/** Everything the renderers draw with, for one look. */
+export function theme(look) {
+  const L = LOOKS[look];
+  if (!L) throw new Error(`unknown look "${look}"`);
+  const dark = L.isDark !== false;
+  const ink = dark ? "#e6edf3" : "#111827";
+  const shade = (a) => (dark ? `rgba(230,237,243,${a})` : `rgba(17,24,39,${a})`);
+  const named = L.tiles ? Object.fromEntries(TILE_ROLES.map((role, i) => [role, L.tiles[i]])) : { ...CLASSIC[dark ? "dark" : "light"] };
+  if (L.tiles) named.sky = L.tiles[1];
+  const accent = {
+    ...named,
+    // The calendar's own colour, and the languages'.
+    contributions: L.accent ?? L.heat[dark ? 4 : 3],
+    languages: L.secondAccent ?? (dark ? "#38D9A9" : "#0CA678"),
+  };
+  const type = { design: "default", width: "standard", uppercase: false, tracking: 0, ...L.type };
+  return {
+    name: look,
+    family: L.family,
+    isDark: dark,
+    canvas: L.canvas,
+    glows: L.glows,
+    frame: dark ? white(0.1) : "rgba(0,0,0,0.08)",
+    panel: { fill: L.surface ?? (dark ? white(0.045) : white(0.74)), stroke: dark ? white(0.09) : "rgba(0,0,0,0.08)" },
+    tile: { from: dark ? 0.3 : 0.17, to: dark ? 0.11 : 0.05, stroke: dark ? 0.3 : 0.26 },
+    chip: { fill: dark ? white(0.06) : "rgba(0,0,0,0.045)", stroke: dark ? white(0.08) : "rgba(0,0,0,0.08)", tint: dark ? 0.15 : 0.1, tintStroke: dark ? 0.2 : 0.24 },
+    link: { fill: dark ? white(0.05) : white(0.7), icon: shade(0.7) },
+    off: { fill: dark ? white(0.03) : "rgba(0,0,0,0.02)", icon: shade(0.4) },
+    track: dark ? white(0.08) : "rgba(0,0,0,0.08)",
+    dot: dark ? white(0.16) : "rgba(0,0,0,0.18)",
+    ring: dark ? white(0.18) : "rgba(0,0,0,0.14)",
+    placeholder: dark ? "#3b4256" : "#d0d7de",
+    levels: L.heat,
+    header: L.header,
+    headerOutline: L.headerOutline ?? (dark ? white(0.16) : "rgba(0,0,0,0.06)"),
+    avatarRing: L.avatarRing,
+    repoHero: { from: [accent.contributions, dark ? 0.26 : 0.1], to: [accent.languages, dark ? 0.08 : 0.04], stroke: alpha(accent.contributions, dark ? 0.25 : 0.3) },
+    spark: dark ? 0.32 : 0.22,
+    text: {
+      base: ink,
+      strong: dark ? "#ffffff" : ink,
+      high: dark ? shade(0.95) : ink,
+      body: shade(0.88),
+      soft: shade(0.75),
+      muted: shade(dark ? 0.6 : 0.66),
+      meta: shade(dark ? 0.55 : 0.6),
+      faint: shade(dark ? 0.5 : 0.48),
+      off: shade(0.45),
+      ghost: shade(dark ? 0.42 : 0.45),
+    },
+    accent,
+    type,
+    face: type.width === "compressed" ? FONT : FACES[type.design],
+    nameInk: L.nameInk ?? null,
+    nameGlow: L.nameGlow ?? null,
+    topBand: L.topBand ?? 0,
+    bottomBand: L.bottomBand ?? 0,
+  };
+}
+
+/** The look's own lettering for display text: capitals where it sets them. */
+export const display = (t, s) => (t.type.uppercase ? String(s).toUpperCase() : String(s));
+
+/** The stylesheet both cards share, filled from a look. */
 export function styles(t) {
   const x = t.text;
+  const disp = [
+    `font-family: ${t.face};`,
+    t.type.width === "compressed" ? "font-stretch: condensed;" : "",
+    t.type.tracking ? `letter-spacing: ${t.type.tracking}px;` : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
   return `
-  text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif; fill: ${x.base}; }
+  text { font-family: ${FONT}; fill: ${x.base}; }
   .mono, .tagname { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; }
+  .disp { ${disp} }
   .h-name { font-size: 26px; font-weight: 700; fill: ${x.strong}; }
   .h-sub { font-size: 12.5px; fill: ${x.muted}; }
   .name { font-size: 20px; font-weight: 700; fill: ${x.strong}; }
@@ -150,3 +332,7 @@ export function styles(t) {
   .foot { font-size: 11px; fill: ${x.ghost}; }
   .panel { fill: ${t.panel.fill}; stroke: ${t.panel.stroke}; }`;
 }
+
+// The two the cards render by default, kept by name for the tests and the
+// fixtures' golden files.
+export const THEMES = { dark: theme("midnight"), light: theme("daylight") };

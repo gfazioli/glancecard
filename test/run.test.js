@@ -9,11 +9,13 @@ test("lists split on commas, spaces and newlines", () => {
   assert.deepEqual(parseList(undefined), []);
 });
 
-test("themes", () => {
+test("themes: both, dark, light and the looks, in any mix", () => {
   assert.deepEqual(parseThemes("both"), ["dark", "light"]);
   assert.deepEqual(parseThemes(""), ["dark", "light"]);
   assert.deepEqual(parseThemes("light"), ["light"]);
-  assert.throws(() => parseThemes("blue"), /dark, light or both/);
+  assert.deepEqual(parseThemes("both, Nebula\nhalloween"), ["dark", "light", "nebula", "halloween"]);
+  assert.deepEqual(parseThemes("dark, both"), ["dark", "light"]);
+  assert.throws(() => parseThemes("blue"), /unknown theme blue \(choose from both, dark, light, midnight/);
 });
 
 test("sections", () => {
