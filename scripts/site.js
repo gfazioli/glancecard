@@ -12,6 +12,7 @@
 // reserves the right room before the image arrives. `out` defaults to _site.
 
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import path from "node:path";
@@ -82,6 +83,20 @@ export function sizeImages(html, cards) {
   });
 }
 
+/**
+ * The page's own scripts, named with a hash of what they hold. Pages serves
+ * every file with max-age=600, and a reload fetches the page again but reuses
+ * a script still fresh in the cache: after a deploy that changes both, the
+ * new page ran with the old editor.js for up to ten minutes, and its new
+ * controls did nothing.
+ */
+export function versionScripts(html, dir) {
+  return html.replace(/(<script\b[^>]*\bsrc=")([\w-]+\.js)(")/g, (_, before, file, after) => {
+    const hash = createHash("sha256").update(readFileSync(path.join(dir, file))).digest("hex").slice(0, 10);
+    return `${before}${file}?v=${hash}${after}`;
+  });
+}
+
 export async function build(out, options = {}) {
   const target = path.resolve(out);
   if (target === ROOT || target === path.parse(target).root) throw new Error(`refusing to build into ${target}`);
@@ -91,7 +106,7 @@ export async function build(out, options = {}) {
   mkdirSync(path.join(target, "cards"), { recursive: true });
   for (const [name, svg] of Object.entries(cards)) writeFileSync(path.join(target, "cards", `${name}.svg`), svg);
   const index = path.join(target, "index.html");
-  writeFileSync(index, sizeImages(readFileSync(index, "utf8"), cards));
+  writeFileSync(index, versionScripts(sizeImages(readFileSync(index, "utf8"), cards), target));
   return { target, cards: Object.keys(cards) };
 }
 

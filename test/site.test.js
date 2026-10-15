@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -139,6 +140,20 @@ test("the build makes every card the page shows, at its real size", async () => 
   for (const file of ["og.png", "apple-touch-icon.png", "favicon.svg", "site.js", "editor.js", "legal.html", "privacy.html"]) {
     assert.ok(readFileSync(path.join(out, file)).length > 0, file);
   }
+});
+
+test("the built page names each script by its content, so a deploy never pairs a new page with an old script", () => {
+  const built = readFileSync(path.join(out, "index.html"), "utf8");
+  const srcs = [...built.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(
+    srcs.map((s) => s.replace(/\?v=[0-9a-f]{10}$/, "")),
+    ["editor.js", "site.js"],
+  );
+  for (const src of srcs) {
+    const [file, hash] = src.split("?v=");
+    assert.equal(hash, createHash("sha256").update(readFileSync(path.join(out, file))).digest("hex").slice(0, 10), file);
+  }
+  assert.match(built, /<script type="application\/ld\+json">/, "inline scripts keep no src");
 });
 
 test("the preview server serves nothing outside the build", () => {
