@@ -7,10 +7,10 @@ Daily SVG cards for your READMEs, rendered by GitHub Actions in your own reposit
 
 [![CI](https://github.com/gfazioli/glancecard/actions/workflows/ci.yml/badge.svg)](https://github.com/gfazioli/glancecard/actions/workflows/ci.yml)
 ![License](https://img.shields.io/badge/license-MIT-green)
-**[Website](https://gfazioli.github.io/glancecard/)** · [GitHub Marketplace](https://github.com/marketplace/actions/glancecard)
-
 [![GitHub Marketplace](https://img.shields.io/badge/marketplace-glancecard-2088FF?logo=github)](https://github.com/marketplace/actions/glancecard)
 ![Node](https://img.shields.io/badge/node-%E2%89%A520-339933)
+
+**[Website](https://gfazioli.github.io/glancecard/)** · [GitHub Marketplace](https://github.com/marketplace/actions/glancecard)
 
 <br/>
 
