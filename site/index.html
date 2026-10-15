@@ -845,10 +845,58 @@
         background: linear-gradient(180deg, #f9a8d4, #ec4899);
         color: #3b0920;
       }
+      /* The one-off coffee, in the warm gradient the sibling sites give it. */
+      .btn-coffee {
+        background: linear-gradient(45deg, #f08c00, #e8590c);
+        color: #fff;
+      }
+      /* Where releases are announced, under the buttons and set apart
+         from them: a line to read, not a fourth button. */
+      .support .community {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        max-width: none;
+        margin: 28px 0 0;
+        padding-top: 22px;
+        border-top: 1px solid var(--line);
+        font-size: 14px;
+      }
+      .community svg {
+        width: 20px;
+        height: 20px;
+        flex: none;
+        color: #8c94f7;
+      }
+      .community a {
+        color: var(--text);
+        font-weight: 600;
+        text-decoration: underline;
+        text-decoration-color: rgba(140, 148, 247, 0.6);
+        text-underline-offset: 3px;
+      }
+      /* Three buttons do not fit a phone's row: one each, the same width. */
+      @media (max-width: 560px) {
+        .support {
+          padding: 32px 20px;
+        }
+        .support .ctas {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .support .ctas .btn {
+          justify-content: center;
+        }
+        .support .community {
+          align-items: flex-start;
+          text-align: left;
+        }
+      }
       footer {
         padding: 56px 0 48px;
         border-top: 1px solid var(--line);
-        margin-top: 88px;
+        margin-top: 72px;
         font-size: 14px;
       }
       .footer-links {
@@ -858,8 +906,15 @@
         gap: 10px 26px;
       }
       .footer-links a {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
         color: var(--muted);
         text-decoration: none;
+      }
+      .footer-links svg {
+        width: 16px;
+        height: 16px;
       }
       .footer-links a:hover {
         color: var(--text);
@@ -1297,11 +1352,13 @@ Change nothing else, and add no tokens or secrets: the workflow uses the token G
       <div class="wrap">
         <div class="support" data-reveal="morph">
           <h2>Free, and MIT-licensed</h2>
-          <p>glancecard is made by one developer, in the open. If it has been useful to you or your team, please consider becoming a sponsor: it keeps the project maintained, and the looks coming.</p>
+          <p>glancecard is made by one developer, in the open. If it has been useful to you or your team, please consider becoming a sponsor, or buying me a coffee: it keeps the project maintained, and the looks coming.</p>
           <div class="ctas">
-            <a class="btn btn-sponsor" href="https://github.com/sponsors/gfazioli?o=esc">Become a sponsor</a>
-            <a class="btn btn-ghost" href="https://github.com/gfazioli/glancecard">Star on GitHub</a>
+            <a class="btn btn-sponsor" href="https://github.com/sponsors/gfazioli?o=esc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572" /></svg>Become a sponsor</a>
+            <a class="btn btn-coffee" href="https://donate.stripe.com/fZu4gy4Tn3b1dgudGx0co00"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 14c.83 .642 2.077 1.017 3.5 1c1.423 .017 2.67 -.358 3.5 -1c.83 -.642 2.077 -1.017 3.5 -1c1.423 -.017 2.67 .358 3.5 1" /><path d="M8 3a2.4 2.4 0 0 0 -1 2a2.4 2.4 0 0 0 1 2" /><path d="M12 3a2.4 2.4 0 0 0 -1 2a2.4 2.4 0 0 0 1 2" /><path d="M3 10h14v5a6 6 0 0 1 -6 6h-2a6 6 0 0 1 -6 -6v-5" /><path d="M16.746 16.726a3 3 0 1 0 .252 -5.555" /></svg>Buy me a coffee</a>
+            <a class="btn btn-ghost" href="https://github.com/gfazioli/glancecard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873l-6.158 -3.245" /></svg>Star on GitHub</a>
           </div>
+          <p class="community"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14.983 3l.123 .006c2.014 .214 3.527 .672 4.966 1.673a1 1 0 0 1 .371 .488c1.876 5.315 2.373 9.987 1.451 12.28c-1.003 2.005 -2.606 3.553 -4.394 3.553c-.732 0 -1.693 -.968 -2.328 -2.045a21.512 21.512 0 0 0 2.103 -.493a1 1 0 1 0 -.55 -1.924c-3.32 .95 -6.13 .95 -9.45 0a1 1 0 0 0 -.55 1.924c.717 .204 1.416 .37 2.103 .494c-.635 1.075 -1.596 2.044 -2.328 2.044c-1.788 0 -3.391 -1.548 -4.428 -3.629c-.888 -2.217 -.39 -6.89 1.485 -12.204a1 1 0 0 1 .371 -.488c1.439 -1.001 2.952 -1.459 4.966 -1.673a1 1 0 0 1 .935 .435l.063 .107l.651 1.285l.137 -.016a12.97 12.97 0 0 1 2.643 0l.134 .016l.65 -1.284a1 1 0 0 1 .754 -.54l.122 -.009zm-5.983 7a2 2 0 0 0 -1.977 1.697l-.018 .154l-.005 .149l.005 .15a2 2 0 1 0 1.995 -2.15zm6 0a2 2 0 0 0 -1.977 1.697l-.018 .154l-.005 .149l.005 .15a2 2 0 1 0 1.995 -2.15z" /></svg><span>New releases are announced on the <a href="https://discord.gg/rdWu5yFCR6">Undolog Discord</a>: come and ask, or suggest the next look.</span></p>
         </div>
       </div>
     </main>
@@ -1312,6 +1369,7 @@ Change nothing else, and add no tokens or secrets: the workflow uses the token G
           <a href="https://github.com/gfazioli/glancecard">GitHub</a>
           <a href="https://github.com/marketplace/actions/glancecard">Marketplace</a>
           <a href="https://github.com/gfazioli/glancecard/releases">Releases</a>
+          <a href="https://discord.gg/rdWu5yFCR6"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14.983 3l.123 .006c2.014 .214 3.527 .672 4.966 1.673a1 1 0 0 1 .371 .488c1.876 5.315 2.373 9.987 1.451 12.28c-1.003 2.005 -2.606 3.553 -4.394 3.553c-.732 0 -1.693 -.968 -2.328 -2.045a21.512 21.512 0 0 0 2.103 -.493a1 1 0 1 0 -.55 -1.924c-3.32 .95 -6.13 .95 -9.45 0a1 1 0 0 0 -.55 1.924c.717 .204 1.416 .37 2.103 .494c-.635 1.075 -1.596 2.044 -2.328 2.044c-1.788 0 -3.391 -1.548 -4.428 -3.629c-.888 -2.217 -.39 -6.89 1.485 -12.204a1 1 0 0 1 .371 -.488c1.439 -1.001 2.952 -1.459 4.966 -1.673a1 1 0 0 1 .935 .435l.063 .107l.651 1.285l.137 -.016a12.97 12.97 0 0 1 2.643 0l.134 .016l.65 -1.284a1 1 0 0 1 .754 -.54l.122 -.009zm-5.983 7a2 2 0 0 0 -1.977 1.697l-.018 .154l-.005 .149l.005 .15a2 2 0 1 0 1.995 -2.15zm6 0a2 2 0 0 0 -1.977 1.697l-.018 .154l-.005 .149l.005 .15a2 2 0 1 0 1.995 -2.15z" /></svg>Discord</a>
           <a href="https://github.com/gfazioli/glancecard/issues">Report an issue</a>
           <a href="https://findergit.app">FinderGit</a>
         </nav>
