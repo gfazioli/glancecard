@@ -878,6 +878,52 @@
       .editor fieldset[hidden] {
         display: none;
       }
+      /* The refresh's hour and zone: native selects, in the chips' ring. */
+      .editor-fields {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .editor-field {
+        display: grid;
+        gap: 6px;
+        min-width: 0;
+        font-size: 12px;
+        color: var(--faint);
+      }
+      .editor-field select,
+      .editor-field input {
+        width: 100%;
+        min-height: 36px;
+        padding: 0 30px 0 12px;
+        border: 0;
+        border-radius: 10px;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+        background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23e6edf3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6l6 -6'/%3E%3C/svg%3E") no-repeat right 10px center;
+        color: var(--text);
+        font: 600 13px/1.2 ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+        color-scheme: dark;
+        appearance: none;
+        cursor: pointer;
+      }
+      .editor-field input {
+        background-image: none;
+        padding-right: 12px;
+        cursor: text;
+      }
+      .editor-field select:hover,
+      .editor-field input:hover {
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+      }
+      .editor-field [aria-invalid="true"] {
+        box-shadow: inset 0 0 0 1px #f87171;
+      }
+      @media (max-width: 420px) {
+        .editor-fields {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
       /* The editor's chips: the buttons' pill and inset ring, smaller. */
       .chip {
         display: inline-flex;
@@ -1477,6 +1523,19 @@ glancecard/your-repo-light.svg</code></pre>
                   <label class="pick"><input type="radio" name="editor-calendar" value="chart" checked /><span class="chip">chart</span></label>
                   <label class="pick"><input type="radio" name="editor-calendar" value="grid" /><span class="chip">grid</span></label>
                 </div>
+              </fieldset>
+              <fieldset>
+                <legend>Refresh</legend>
+                <div class="segmented">
+                  <label><input type="radio" name="editor-often" value="day" checked /><span>Once a day</span></label>
+                  <label><input type="radio" name="editor-often" value="week" /><span>Once a week, on Mondays</span></label>
+                </div>
+                <div class="editor-fields">
+                  <label class="editor-field"><span>At, your time</span><select id="editor-hour"></select></label>
+                  <label class="editor-field"><span>Time zone</span><select id="editor-zone"></select></label>
+                </div>
+                <p class="editor-note" id="editor-zone-note"></p>
+                <p class="editor-note">The cards count days, so more runs would only add commits and API calls. The schedule runs in UTC: the local hour moves by one when daylight saving time changes, and GitHub often starts scheduled runs late. <code>time-zone</code> decides which day a commit counts on.</p>
               </fieldset>
               <p class="editor-hint" id="editor-hint" hidden></p>
               <p class="editor-note">Several looks in one run work too: list them in <code>theme:</code>, comma-separated, such as <code>theme: both, halloween</code>.</p>

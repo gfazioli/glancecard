@@ -53,7 +53,9 @@ by-hand workflow and the README embed (the README's), and the publisher line
 (octoscope's). A release bumps the version in all of them. The setup editor
 (`site/editor.js`) rewrites the prompt, the workflow and the embed at runtime
 from exclusive choices (a card that follows the reader's theme, one dark look
-beside Daylight, the only light one; or one look always) by exact-string swaps
+beside Daylight, the only light one; or one look always; and the refresh,
+whose hour is a UTC hour offered under its local time, so an untouched editor
+keeps the README's `30 5 * * *`) by exact-string swaps
 that must find their anchor once: change the README's wording there and
 `test/editor.test.js` says which anchor moved.
 Reveals move only `translate`, `scale` and `opacity`, every hiding rule

@@ -3,7 +3,24 @@ import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { fileNames as runFileNames, parseThemes as runParseThemes } from "../src/run.js";
 import { LOOK_NAMES, theme, THEME_NAMES } from "../src/theme.js";
-import { DARK_LOOKS, DEFAULT, embed, fileNames, LIGHT, LOOKS, parseThemes, plan, prompt, seasonHint, THEME_ORDER, workflow } from "../site/editor.js";
+import {
+  DARK_LOOKS,
+  DEFAULT,
+  DEFAULT_REFRESH,
+  embed,
+  fileNames,
+  hours,
+  LIGHT,
+  LOOKS,
+  parseThemes,
+  plan,
+  prompt,
+  refreshNote,
+  refreshPlan,
+  seasonHint,
+  THEME_ORDER,
+  workflow,
+} from "../site/editor.js";
 
 // The setup editor, on the README's own blocks: what the page starts from.
 const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8").replace(/\r\n/g, "\n");
@@ -117,4 +134,80 @@ test("a template that drifted fails loudly instead of passing through", () => {
   assert.throws(() => prompt(PROMPT.replace("time-zone: <zone>", "time-zone: UTC"), p), /expected exactly one/);
   assert.throws(() => workflow(YAML.replace("another-repo", "other"), p), /expected exactly one/);
   assert.throws(() => prompt(PROMPT.replace("profile-dark.svg is now", "profile.svg is now"), p), /expected exactly one/);
+});
+
+// ─── The refresh ───
+
+const OCT = new Date("2026-10-15T12:00:00Z");
+const JAN = new Date("2027-01-15T12:00:00Z");
+/** The UTC hour offered under a local time, and its day shift. */
+const at = (zone, label, date) => hours(zone, date).find((h) => h.label === label);
+const MONDAY = "Once a week";
+
+test("the refresh, untouched, is the README's schedule and writes no zone", () => {
+  assert.deepEqual(plan().refresh, refreshPlan(DEFAULT_REFRESH));
+  assert.deepEqual(plan().refresh, { cron: "30 5 * * *", comment: "every day", zone: null, promptZone: null });
+  assert.equal(workflow(YAML, plan()), YAML);
+  assert.equal(prompt(PROMPT, plan()), PROMPT);
+});
+
+test("hours: 24 starts at minute 30 UTC, offered under their local time, in order", () => {
+  for (const zone of ["UTC", "Europe/Rome", "Pacific/Auckland", "America/Los_Angeles", "Asia/Kolkata"]) {
+    const list = hours(zone, OCT);
+    assert.equal(list.length, 24, zone);
+    assert.deepEqual([...new Set(list.map((h) => h.utcHour))].sort((a, b) => a - b), [...Array(24).keys()], zone);
+    assert.ok(list.every((h, i) => i === 0 || h.minutes > list[i - 1].minutes), `${zone} in local order`);
+  }
+  assert.equal(at("UTC", "05:30", OCT).utcHour, 5);
+  assert.equal(hours("Asia/Kolkata", OCT).find((h) => h.utcHour === 5).label, "11:00", "a half-hour zone keeps the cron at minute 30");
+});
+
+test("Europe/Rome: 09:30 is 07:30 UTC in summer time, 08:30 UTC in winter", () => {
+  const oct = at("Europe/Rome", "09:30", OCT);
+  const jan = at("Europe/Rome", "09:30", JAN);
+  assert.deepEqual([oct.utcHour, oct.shift, jan.utcHour, jan.shift], [7, 0, 8, 0]);
+  assert.equal(at("Europe/Rome", "07:30", OCT).utcHour, 5, "the README's 05:30 UTC is 07:30 in Rome in October");
+  const p = plan({ refresh: { often: "day", utcHour: oct.utcHour, zone: "Europe/Rome", date: OCT } });
+  assert.equal(
+    workflow(YAML, p),
+    YAML.replace(`- cron: "30 5 * * *" # every day`, `- cron: "30 7 * * *" # every day`).replace("another-repo", "another-repo\n          time-zone: Europe/Rome"),
+  );
+  assert.equal(refreshNote({ often: "day", utcHour: 7, zone: "Europe/Rome", date: OCT }), "Every day at 09:30 in Europe/Rome, 07:30 UTC.");
+  const q = plan({ refresh: { often: "day", utcHour: jan.utcHour, zone: "Europe/Rome", date: JAN } });
+  assert.equal(q.refresh.cron, "30 8 * * *");
+});
+
+test("a Monday morning east of UTC is a Sunday in UTC: the weekday moves", () => {
+  const h = at("Pacific/Auckland", "08:30", OCT);
+  assert.deepEqual([h.utcHour, h.shift], [19, -1]);
+  const p = plan({ refresh: { often: "week", utcHour: h.utcHour, zone: "Pacific/Auckland", date: OCT } });
+  assert.deepEqual(p.refresh, { cron: "30 19 * * 0", comment: "every Monday", zone: "Pacific/Auckland", promptZone: null });
+  assert.ok(workflow(YAML, p).includes(`    - cron: "30 19 * * 0" # every Monday\n`));
+  assert.equal(refreshNote({ often: "week", utcHour: 19, zone: "Pacific/Auckland", date: OCT }), "Every Monday at 08:30 in Pacific/Auckland, Sunday 19:30 UTC.");
+});
+
+test("America/Los_Angeles: a morning, and a Monday night that is Tuesday in UTC", () => {
+  const morning = at("America/Los_Angeles", "06:30", OCT);
+  assert.equal(plan({ refresh: { often: "day", utcHour: morning.utcHour, zone: "America/Los_Angeles", date: OCT } }).refresh.cron, "30 13 * * *");
+  const night = at("America/Los_Angeles", "22:30", OCT);
+  assert.deepEqual([night.utcHour, night.shift], [5, 1]);
+  assert.equal(plan({ refresh: { often: "week", utcHour: night.utcHour, zone: "America/Los_Angeles", date: OCT } }).refresh.cron, "30 5 * * 2");
+});
+
+test("UTC: the hours are themselves, and Monday is Monday", () => {
+  const p = plan({ refresh: { often: "week", utcHour: 5, zone: "UTC", date: OCT } });
+  assert.equal(p.refresh.cron, "30 5 * * 1");
+  assert.ok(workflow(YAML, p).includes(`    - cron: "30 5 * * 1" # every Monday`) && workflow(YAML, p).includes("\n          time-zone: UTC"));
+});
+
+test("the prompt names a zone only when it was picked, and keeps the README's otherwise", () => {
+  const touched = plan({ refresh: { often: "day", utcHour: 7, zone: "Europe/Rome", date: OCT } });
+  const keep = prompt(PROMPT, touched);
+  assert.ok(keep.includes(`       - cron: "30 7 * * *"\n`));
+  assert.ok(keep.includes("             time-zone: <zone>\n"));
+  assert.ok(keep.includes("and this machine's IANA time zone:"));
+  const picked = prompt(PROMPT, plan({ mode: "one", look: "nebula", refresh: { often: "day", utcHour: 7, zone: "Europe/Rome", explicit: true, date: OCT } }));
+  assert.ok(picked.includes("             time-zone: Europe/Rome\n             theme: nebula\n"));
+  assert.ok(picked.includes("filling in my login and the repositories (one per line):"));
+  assert.doesNotMatch(picked, /<zone>|this machine's IANA time zone/);
 });

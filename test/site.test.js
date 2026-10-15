@@ -109,7 +109,8 @@ test("the editor's choices are radio groups, each with one choice made", async (
   assert.deepEqual(values("editor-dark"), LOOK_NAMES.filter((l) => theme(l).isDark));
   assert.deepEqual(values("editor-look"), LOOK_NAMES);
   assert.deepEqual(values("editor-calendar"), ["chart", "grid"]);
-  for (const [name, choice] of [["editor-mode", "follow"], ["editor-dark", "midnight"], ["editor-look", "midnight"], ["editor-calendar", "chart"]]) {
+  assert.deepEqual(values("editor-often"), ["day", "week"]);
+  for (const [name, choice] of [["editor-mode", "follow"], ["editor-dark", "midnight"], ["editor-look", "midnight"], ["editor-calendar", "chart"], ["editor-often", "day"]]) {
     assert.deepEqual(checked(name), [choice], `${name} starts on ${choice}`);
   }
   assert.match(index, /<fieldset data-editor-when="one" hidden>/, "the one-look group waits for its mode");
