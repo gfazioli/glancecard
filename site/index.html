@@ -585,6 +585,15 @@
         flex: none;
         box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
       }
+      .swatch svg {
+        width: 22px;
+        height: 22px;
+        flex: none;
+        color: var(--muted);
+      }
+      .swatch[aria-pressed="true"] svg {
+        color: var(--text);
+      }
       .swatch small {
         margin-left: auto;
         color: var(--faint);
@@ -1052,7 +1061,7 @@
           <div data-scope>
             <p class="kicker" data-reveal="rise">Looks</p>
             <h2 id="looks-title" data-reveal="rise">Nine looks, for both cards</h2>
-            <p class="section-lead" data-reveal="rise">The looks of FinderGit's Profile Card: three classics, four from out of this world, and two that come out only in their season. Pick one, or a few, with <code>theme</code>.</p>
+            <p class="section-lead" data-reveal="rise">The looks of FinderGit's Profile Card: three classics, four from out of this world, and two that come out only in their season. Pick one, or a few, with <code>theme</code>, and draw the year as a chart or as GitHub's grid with <code>calendar</code>.</p>
           </div>
           <div class="looks">
             <div class="families" data-scope>
@@ -1080,20 +1089,36 @@
                   <button class="swatch" type="button" data-look="christmas" aria-pressed="false"><i style="background: linear-gradient(135deg, #081c15, #1b4332 55%, #c1121f)"></i>Christmas<small>December</small></button>
                 </div>
               </div>
+              <div class="family" data-reveal="rise" style="--reveal-delay: 240ms">
+                <h3>The year</h3>
+                <div class="swatches">
+                  <button class="swatch" type="button" data-calendar="chart" aria-pressed="true"><svg viewBox="0 0 22 22" aria-hidden="true"><path d="M3 16.5l4.5-5 3.5 2.5 4.5-7.5 3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Chart</button>
+                  <button class="swatch" type="button" data-calendar="grid" aria-pressed="false"><svg viewBox="0 0 22 22" aria-hidden="true"><path d="M3 3h4v4H3zM9 3h4v4H9zM15 3h4v4h-4zM3 9h4v4H3zM9 9h4v4H9zM15 9h4v4h-4zM3 15h4v4H3zM9 15h4v4H9zM15 15h4v4h-4z" fill="currentColor"/></svg>Grid</button>
+                </div>
+              </div>
             </div>
             <div data-reveal="morph">
               <div class="look-stage" aria-live="polite">
-                <img class="on" data-card="profile-midnight" data-look="midnight" src="cards/profile-midnight.svg" width="880" height="824" alt="The profile card in the Midnight look" loading="lazy" decoding="async" />
-                <img data-card="profile-aurora" data-look="aurora" data-src="cards/profile-aurora.svg" width="880" height="824" alt="The profile card in the Aurora look" decoding="async" />
-                <img data-card="profile-daylight" data-look="daylight" data-src="cards/profile-daylight.svg" width="880" height="824" alt="The profile card in the Daylight look" decoding="async" />
-                <img data-card="profile-upside-down" data-look="upside-down" data-src="cards/profile-upside-down.svg" width="880" height="858" alt="The profile card in the Upside Down look, with fairy lights and spores" decoding="async" />
-                <img data-card="profile-hyperspace" data-look="hyperspace" data-src="cards/profile-hyperspace.svg" width="880" height="824" alt="The profile card in the Hyperspace look, with the streaks of a jump" decoding="async" />
-                <img data-card="profile-bridge" data-look="bridge" data-src="cards/profile-bridge.svg" width="880" height="824" alt="The profile card in the Bridge look, framed by console rails" decoding="async" />
-                <img data-card="profile-nebula" data-look="nebula" data-src="cards/profile-nebula.svg" width="880" height="824" alt="The profile card in the Nebula look, with gas and stars" decoding="async" />
-                <img data-card="profile-halloween" data-look="halloween" data-src="cards/profile-halloween.svg" width="880" height="898" alt="The profile card in the Halloween look, with a moon, bats and pumpkins" decoding="async" />
-                <img data-card="profile-christmas" data-look="christmas" data-src="cards/profile-christmas.svg" width="880" height="894" alt="The profile card in the Christmas look, with snow, baubles and a tree" decoding="async" />
+                <img class="on" data-card="profile-midnight" data-look="midnight" data-calendar="chart" src="cards/profile-midnight.svg" width="880" height="824" alt="The profile card in the Midnight look" loading="lazy" decoding="async" />
+                <img data-card="profile-aurora" data-look="aurora" data-calendar="chart" data-src="cards/profile-aurora.svg" width="880" height="824" alt="The profile card in the Aurora look" decoding="async" />
+                <img data-card="profile-daylight" data-look="daylight" data-calendar="chart" data-src="cards/profile-daylight.svg" width="880" height="824" alt="The profile card in the Daylight look" decoding="async" />
+                <img data-card="profile-upside-down" data-look="upside-down" data-calendar="chart" data-src="cards/profile-upside-down.svg" width="880" height="858" alt="The profile card in the Upside Down look, with fairy lights and spores" decoding="async" />
+                <img data-card="profile-hyperspace" data-look="hyperspace" data-calendar="chart" data-src="cards/profile-hyperspace.svg" width="880" height="824" alt="The profile card in the Hyperspace look, with the streaks of a jump" decoding="async" />
+                <img data-card="profile-bridge" data-look="bridge" data-calendar="chart" data-src="cards/profile-bridge.svg" width="880" height="824" alt="The profile card in the Bridge look, framed by console rails" decoding="async" />
+                <img data-card="profile-nebula" data-look="nebula" data-calendar="chart" data-src="cards/profile-nebula.svg" width="880" height="824" alt="The profile card in the Nebula look, with gas and stars" decoding="async" />
+                <img data-card="profile-halloween" data-look="halloween" data-calendar="chart" data-src="cards/profile-halloween.svg" width="880" height="898" alt="The profile card in the Halloween look, with a moon, bats and pumpkins" decoding="async" />
+                <img data-card="profile-christmas" data-look="christmas" data-calendar="chart" data-src="cards/profile-christmas.svg" width="880" height="894" alt="The profile card in the Christmas look, with snow, baubles and a tree" decoding="async" />
+                <img data-card="profile-midnight-grid" data-look="midnight" data-calendar="grid" data-src="cards/profile-midnight-grid.svg" width="880" height="824" alt="The profile card in the Midnight look, its year drawn as GitHub's calendar" decoding="async" />
+                <img data-card="profile-aurora-grid" data-look="aurora" data-calendar="grid" data-src="cards/profile-aurora-grid.svg" width="880" height="824" alt="The profile card in the Aurora look, its year drawn as GitHub's calendar" decoding="async" />
+                <img data-card="profile-daylight-grid" data-look="daylight" data-calendar="grid" data-src="cards/profile-daylight-grid.svg" width="880" height="824" alt="The profile card in the Daylight look, its year drawn as GitHub's calendar" decoding="async" />
+                <img data-card="profile-upside-down-grid" data-look="upside-down" data-calendar="grid" data-src="cards/profile-upside-down-grid.svg" width="880" height="858" alt="The profile card in the Upside Down look, with fairy lights and spores, its year drawn as GitHub's calendar" decoding="async" />
+                <img data-card="profile-hyperspace-grid" data-look="hyperspace" data-calendar="grid" data-src="cards/profile-hyperspace-grid.svg" width="880" height="824" alt="The profile card in the Hyperspace look, with the streaks of a jump, its year drawn as GitHub's calendar" decoding="async" />
+                <img data-card="profile-bridge-grid" data-look="bridge" data-calendar="grid" data-src="cards/profile-bridge-grid.svg" width="880" height="824" alt="The profile card in the Bridge look, framed by console rails, its year drawn as GitHub's calendar" decoding="async" />
+                <img data-card="profile-nebula-grid" data-look="nebula" data-calendar="grid" data-src="cards/profile-nebula-grid.svg" width="880" height="824" alt="The profile card in the Nebula look, with gas and stars, its year drawn as GitHub's calendar" decoding="async" />
+                <img data-card="profile-halloween-grid" data-look="halloween" data-calendar="grid" data-src="cards/profile-halloween-grid.svg" width="880" height="898" alt="The profile card in the Halloween look, with a moon, bats and pumpkins, its year drawn as GitHub's calendar" decoding="async" />
+                <img data-card="profile-christmas-grid" data-look="christmas" data-calendar="grid" data-src="cards/profile-christmas-grid.svg" width="880" height="894" alt="The profile card in the Christmas look, with snow, baubles and a tree, its year drawn as GitHub's calendar" decoding="async" />
               </div>
-              <p class="look-code">In your workflow: <code id="look-code">theme: midnight</code>. <code>dark</code> and <code>light</code> are Midnight and Daylight, and <code>both</code> gives you the pair that follows the reader's GitHub theme. The seasonal looks are worn in their season only, and are Midnight the rest of the year.</p>
+              <p class="look-code">In your workflow: <code id="look-code">theme: midnight</code> and <code id="calendar-code">calendar: chart</code>. <code>dark</code> and <code>light</code> are Midnight and Daylight, and <code>both</code> gives you the pair that follows the reader's GitHub theme. The seasonal looks are worn in their season only, and are Midnight the rest of the year. The year is a chart unless you ask for <code>grid</code>.</p>
             </div>
           </div>
         </div>

@@ -6,7 +6,8 @@
 //   node scripts/site.js serve [out] [--port 4173]
 //
 // The build copies site/ and renders the cards the page shows: the author's
-// profile card in every look, and glancecard's own repository card. Each
+// profile card in every look, its year as a chart and as a grid, and
+// glancecard's own repository card. Each
 // <img data-card="…"> then gets its card's real width and height, so the page
 // reserves the right room before the image arrives. `out` defaults to _site.
 
@@ -62,8 +63,11 @@ export async function renderSiteCards({ fixtures = false, now = new Date() } = {
   const repo = repoModel(repoData, { timeZone: TZ });
   const cards = {};
   // Every look, the seasonal ones included whatever the month: the page
-  // shows what each looks like.
-  for (const look of LOOK_NAMES) cards[`profile-${look}`] = renderProfile(profile, { theme: theme(look), images });
+  // shows what each looks like, its year as a chart and as a grid.
+  for (const look of LOOK_NAMES) {
+    cards[`profile-${look}`] = renderProfile(profile, { theme: theme(look), images });
+    cards[`profile-${look}-grid`] = renderProfile(profile, { theme: theme(look), images, calendar: "grid" });
+  }
   cards["repo-midnight"] = renderRepo(repo, { theme: theme("midnight"), images });
   return cards;
 }
