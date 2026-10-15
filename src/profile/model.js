@@ -29,6 +29,7 @@ export function profileModel(data, { now = new Date(data.fetchedAt), timeZone = 
     years: Math.floor((new Date(now) - joined) / (365.25 * 24 * 3600 * 1000)),
     joinedYear: joined.getUTCFullYear(),
     calendar: user.contributionsCollection.contributionCalendar,
+    days: user.contributionsCollection.contributionCalendar.weeks.flatMap((w) => w.contributionDays.map((d) => ({ day: d.date, count: d.contributionCount }))),
     commits: user.contributionsCollection.totalCommitContributions,
     contributedRepos: user.contributionsCollection.totalRepositoriesWithContributedCommits,
   };

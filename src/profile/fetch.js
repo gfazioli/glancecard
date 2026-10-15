@@ -18,7 +18,7 @@ query($login: String!, $prs: String!, $merged: String!, $issues: String!) {
       totalRepositoriesWithContributedCommits
       contributionCalendar {
         totalContributions
-        weeks { contributionDays { date weekday contributionLevel } }
+        weeks { contributionDays { date weekday contributionCount contributionLevel } }
       }
     }
   }

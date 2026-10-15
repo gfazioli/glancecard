@@ -1,11 +1,12 @@
 // Drawing primitives shared by both cards, bound to a look: the frame and
 // its decorations, panels and their titles, pills that flow and wrap, icons,
-// the sparkline.
+// the sparkline and the year chart.
 
 import { decorate } from "./decor.js";
 import { OCTICONS } from "./icons.js";
 import { alpha, display, styles } from "./theme.js";
-import { esc, fit, textWidth } from "./text.js";
+import { compact, esc, fit, textWidth } from "./text.js";
+import { MONTHS } from "./time.js";
 
 export const W = 880;
 export const PAD = 24;
@@ -13,6 +14,34 @@ export const IW = W - PAD * 2;
 export const GAP = 12;
 export const SECTION = 16;
 export const HALF = (IW - SECTION) / 2;
+
+/** How a year of days is drawn: a line of daily counts, or GitHub's calendar of squares. */
+export const CALENDARS = ["chart", "grid"];
+
+/**
+ * A value axis for counts up to `max`: a round step (1, 2 or 5 times a power
+ * of ten, never under 1) and the first multiple of it at or above `max`.
+ */
+export function ticks(max, count = 4) {
+  if (max <= 0) return { step: 1, top: 1 };
+  const raw = max / count;
+  const mag = 10 ** Math.floor(Math.log10(raw));
+  const step = Math.max(1, [1, 2, 5, 10].map((f) => f * mag).find((s) => s >= raw));
+  return { step, top: Math.ceil(max / step) * step };
+}
+
+/** A smooth path through `pts`, its control points held between `top` and `bottom`. */
+function smooth(pts, top, bottom) {
+  const clamp = (v) => Math.min(bottom, Math.max(top, v));
+  let d = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const [p0, p1, p2, p3] = [pts[i - 1] ?? pts[i], pts[i], pts[i + 1], pts[i + 2] ?? pts[i + 1]];
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, clamp(p1[1] + (p2[1] - p0[1]) / 6)];
+    const c2 = [p2[0] - (p3[0] - p1[0]) / 6, clamp(p2[1] - (p3[1] - p1[1]) / 6)];
+    d += ` C${c1[0].toFixed(1)} ${c1[1].toFixed(1)} ${c2[0].toFixed(1)} ${c2[1].toFixed(1)} ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
+  }
+  return d;
+}
 
 export function kit(t) {
   const icon = (name, x, y, fill, size = 16) => {
@@ -77,17 +106,57 @@ export function kit(t) {
   function sparkline(values, x, y, w, h, color) {
     const max = Math.max(1, ...values);
     const pts = values.map((v, i) => [x + (i * w) / (values.length - 1), y + h - (v / max) * (h - 4)]);
-    const clamp = (v) => Math.min(y + h, Math.max(y, v));
-    let d = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
-    for (let i = 0; i < pts.length - 1; i++) {
-      const [p0, p1, p2, p3] = [pts[i - 1] ?? pts[i], pts[i], pts[i + 1], pts[i + 2] ?? pts[i + 1]];
-      const c1 = [p1[0] + (p2[0] - p0[0]) / 6, clamp(p1[1] + (p2[1] - p0[1]) / 6)];
-      const c2 = [p2[0] - (p3[0] - p1[0]) / 6, clamp(p2[1] - (p3[1] - p1[1]) / 6)];
-      d += ` C${c1[0].toFixed(1)} ${c1[1].toFixed(1)} ${c2[0].toFixed(1)} ${c2[1].toFixed(1)} ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
-    }
+    const d = smooth(pts, y, y + h);
     return `
   <path d="${d} L${x + w} ${y + h} L${x} ${y + h} Z" fill="url(#spark)"/>
   <path d="${d}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  }
+
+  /**
+   * A year of `days` ({ day, count }, oldest first) as a smooth line over its
+   * area: the counts on a left axis with a rule at every step, and each month
+   * named over its days, from a dashed rule at its first. The plot fills
+   * x…x+w and y…y+h; the month names hang 18 px below it.
+   */
+  function yearChart(days, x, y, w, h, color) {
+    const { step, top } = ticks(Math.max(0, ...days.map((d) => d.count)));
+    const values = Array.from({ length: top / step + 1 }, (_, i) => i * step);
+    const labelW = Math.max(...values.map((v) => textWidth(compact(v), 10))) + 8;
+    const px = x + labelW;
+    const pw = w - labelW;
+    const at = (i) => px + (i * pw) / Math.max(1, days.length - 1);
+    const level = (v) => y + h - (v / top) * h;
+
+    const rules = values
+      .map((v) => {
+        const ry = level(v).toFixed(1);
+        return `<line x1="${px}" y1="${ry}" x2="${x + w}" y2="${ry}" stroke="${t.track}"/><text x="${px - 8}" y="${(level(v) + 3.5).toFixed(1)}" class="axis" text-anchor="end">${compact(v)}</text>`;
+      })
+      .join("");
+
+    // A month is named in the middle of its days, when they leave room for
+    // its name: the first, partial month of the year usually does not.
+    const firsts = days.flatMap((d, i) => (d.day.endsWith("-01") ? [i] : []));
+    const months = firsts
+      .map((i, n) => {
+        const from = at(i);
+        const to = at(firsts[n + 1] ?? days.length - 1);
+        const name = MONTHS[Number(days[i].day.slice(5, 7)) - 1];
+        const rule = i > 0 ? `<line x1="${from.toFixed(1)}" y1="${y}" x2="${from.toFixed(1)}" y2="${y + h}" stroke="${t.track}" stroke-dasharray="2 3"/>` : "";
+        const label = to - from >= textWidth(name, 10) + 4 ? `<text x="${((from + to) / 2).toFixed(1)}" y="${y + h + 18}" class="axis" text-anchor="middle">${name}</text>` : "";
+        return rule + label;
+      })
+      .join("");
+
+    const d = smooth(
+      days.map((day, i) => [at(i), level(day.count)]),
+      y,
+      y + h,
+    );
+    return `
+  ${rules}${months}
+  <path d="${d} L${at(days.length - 1).toFixed(1)} ${y + h} L${px} ${y + h} Z" fill="url(#spark)"/>
+  <path d="${d}" class="chart-line" fill="none" stroke="${color}" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>`;
   }
 
   /** A round avatar, or a disc when the image could not be fetched. */
@@ -182,5 +251,5 @@ ${body}${decor.front ? `\n<g clip-path="url(#card)" aria-hidden="true">${decor.f
     return { svg, h: Math.ceil(items.length / cols) * (h + GAP) - GAP };
   }
 
-  return { t, icon, panel, panelTitle, disp, pill, flow, sparkline, avatar, frame, tileGradients, tiles };
+  return { t, icon, panel, panelTitle, disp, pill, flow, sparkline, yearChart, avatar, frame, tileGradients, tiles };
 }

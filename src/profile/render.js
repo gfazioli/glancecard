@@ -1,5 +1,6 @@
-// The profile card: who, ten stat tiles, the contribution calendar, the most
-// starred repositories and their languages.
+// The profile card: who, ten stat tiles, a year of contributions (a chart of
+// daily counts, or GitHub's calendar), the most starred repositories and
+// their languages.
 
 import { HALF, IW, kit, PAD, SECTION } from "../svg.js";
 import { THEMES } from "../theme.js";
@@ -8,7 +9,7 @@ import { formatDay, MONTHS } from "../time.js";
 
 const LEVELS = ["NONE", "FIRST_QUARTILE", "SECOND_QUARTILE", "THIRD_QUARTILE", "FOURTH_QUARTILE"];
 
-export function renderProfile(m, { theme = THEMES.dark, images = {} } = {}) {
+export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = "chart" } = {}) {
   const k = kit(theme);
   const A = theme.accent;
   const u = m.user;
@@ -50,6 +51,12 @@ export function renderProfile(m, { theme = THEMES.dark, images = {} } = {}) {
 
   function contributions(y) {
     const h = 214;
+    const head = `
+  ${k.panel(PAD, y, IW, h)}
+  ${k.panelTitle(PAD, y, "flame", A.contributions, "Contributions")}
+  <text x="${PAD + 18}" y="${y + 52}" class="headline">${full(m.calendar.totalContributions)} contributions in the last year</text>`;
+    if (calendar === "chart") return { h, svg: `${head}${k.yearChart(m.days, PAD + 18, y + 76, IW - 36, h - 76 - 38, A.contributions)}` };
+
     const step = 14;
     const cell = 11;
     const weeks = m.calendar.weeks;
@@ -92,14 +99,8 @@ export function renderProfile(m, { theme = THEMES.dark, images = {} } = {}) {
   ${levels.map((f, i) => `<rect x="${lx + i * step}" y="${y + h - 27}" width="${cell}" height="${cell}" rx="2.5" fill="${f}"/>`).join("")}
   <text x="${lx + levels.length * step + 5}" y="${y + h - 18}" class="axis">More</text>`;
 
-    return {
-      h,
-      svg: `
-  ${k.panel(PAD, y, IW, h)}
-  ${k.panelTitle(PAD, y, "flame", A.contributions, "Contributions")}
-  <text x="${PAD + 18}" y="${y + 52}" class="headline">${full(m.calendar.totalContributions)} contributions in the last year</text>
-  ${months}${days}${cells}${legend}`,
-    };
+    return { h, svg: `${head}
+  ${months}${days}${cells}${legend}` };
   }
 
   function topRepos(x, y, w, h) {
@@ -182,6 +183,10 @@ export function renderProfile(m, { theme = THEMES.dark, images = {} } = {}) {
   <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
     <stop offset="0" stop-color="${theme.avatarRing[0]}"/>
     <stop offset="1" stop-color="${theme.avatarRing[1]}"/>
+  </linearGradient>
+  <linearGradient id="spark" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="${A.contributions}" stop-opacity="${theme.spark}"/>
+    <stop offset="1" stop-color="${A.contributions}" stop-opacity="0"/>
   </linearGradient>${k.tileGradients(tileItems.map((t) => t.color))}`;
 
   return k.frame({ height: y, title: `${name}'s GitHub activity`, desc, defs, body: parts.join("\n"), contentTop, ledge: contentTop });

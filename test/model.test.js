@@ -66,3 +66,12 @@ test("the profile model ranks repositories and languages", () => {
   assert.equal(m.languages.reduce((a, l) => a + l.count, 0), fixture("profile-gfazioli").repos.filter((r) => r.primaryLanguage).length);
   assert.ok(m.languages.length <= 6);
 });
+
+test("a year of days adds up to the number over it", () => {
+  const profile = profileModel(fixture("profile-gfazioli"), { timeZone: "Europe/Rome" });
+  assert.equal(profile.days.reduce((a, d) => a + d.count, 0), profile.calendar.totalContributions);
+  assert.ok(profile.days.every((d, i) => i === 0 || d.day > profile.days[i - 1].day), "oldest first");
+  const repo = repoModel(fixture("octoscope"), { timeZone: "Europe/Rome" });
+  assert.equal(repo.days.reduce((a, d) => a + d.count, 0), repo.yearCommits);
+  assert.equal(repo.days.at(-1).day, repo.today);
+});

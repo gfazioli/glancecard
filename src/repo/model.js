@@ -83,6 +83,7 @@ export function repoModel(data, { now = new Date(data.fetchedAt), timeZone = "UT
     idleDays: daysBetween(clk.day(repo.pushedAt), today),
     latestTag: repo.tags.nodes[0]?.name ?? null,
     grid,
+    days: grid.flat().filter(Boolean),
     quartiles: quartiles([...perDay.values()]),
     yearCommits,
     capped: history.capped,

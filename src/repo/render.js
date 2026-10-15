@@ -1,7 +1,8 @@
-// The repository card: header, hero, twelve stat tiles, a year of commits,
-// the weekly rhythm, languages and essentials, latest commits and releases,
-// contributors. Every section but the header can be left out; when one of a
-// side-by-side pair is, the other takes the full width.
+// The repository card: header, hero, twelve stat tiles, a year of commits (a
+// chart of daily counts, or GitHub's calendar), the weekly rhythm, languages
+// and essentials, latest commits and releases, contributors. Every section
+// but the header can be left out; when one of a side-by-side pair is, the
+// other takes the full width.
 
 import { HALF, IW, kit, PAD, SECTION, W } from "../svg.js";
 import { THEMES } from "../theme.js";
@@ -10,7 +11,7 @@ import { age, ago, formatDay, MONTHS } from "../time.js";
 
 export const REPO_SECTIONS = ["hero", "tiles", "activity", "rhythm", "code", "commits", "releases", "contributors"];
 
-export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, images = {} } = {}) {
+export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, images = {}, calendar = "chart" } = {}) {
   const k = kit(theme);
   const A = theme.accent;
   const r = m.repo;
@@ -113,6 +114,25 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
 
   function activity(y) {
     const x = PAD;
+    const chips = k.flow(x + 18, y + 44, IW - 36, [
+      { label: "Current streak", value: plural(m.streak, "day"), icon: "flame", color: A.orange },
+      { label: "Longest streak", value: plural(m.longest, "day"), icon: "trophy", color: A.yellow },
+      { label: "Active days", value: full(m.activeDays), icon: "calendar", color: A.contributions },
+    ]);
+    const count = m.capped ? `${full(m.yearCommits)}+ commits` : plural(m.yearCommits, "commit");
+    const head = (h) => `
+  ${k.panel(x, y, IW, h)}
+  ${k.panelTitle(x, y, "apps", A.contributions, "Activity", { x: x + IW - 18, text: `${count} in the last year` })}
+  ${chips.svg}`;
+    const capped = (cx, h) => (m.capped ? `<text x="${cx}" y="${y + h - 16}" class="foot">Only the latest ${full(m.yearCommits)} commits are drawn</text>` : "");
+
+    if (calendar === "chart") {
+      // The month names sit where the grid's legend does, so a capped
+      // history takes a line of its own below them.
+      const h = 232 + (m.capped ? 20 : 0);
+      return { h, svg: `${head(h)}${k.yearChart(m.days, x + 18, y + 92, IW - 36, 102, A.contributions)}${capped(x + 18, h)}` };
+    }
+
     const step = 14;
     const cell = 11;
     const weeks = m.grid;
@@ -160,23 +180,8 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
   <text x="${lx - 8}" y="${y + h - 16}" class="axis" text-anchor="end">Less</text>
   ${levels.map((f, i) => `<rect x="${lx + i * step}" y="${y + h - 25}" width="${cell}" height="${cell}" rx="2.5" fill="${f}"/>`).join("")}
   <text x="${lx + levels.length * step + 5}" y="${y + h - 16}" class="axis">More</text>`;
-    const capped = m.capped ? `<text x="${gx - labelW}" y="${y + h - 16}" class="foot">Only the latest ${full(m.yearCommits)} commits are drawn</text>` : "";
-
-    const chips = k.flow(x + 18, y + 44, IW - 36, [
-      { label: "Current streak", value: plural(m.streak, "day"), icon: "flame", color: A.orange },
-      { label: "Longest streak", value: plural(m.longest, "day"), icon: "trophy", color: A.yellow },
-      { label: "Active days", value: full(m.activeDays), icon: "calendar", color: A.contributions },
-    ]);
-    const count = m.capped ? `${full(m.yearCommits)}+ commits` : plural(m.yearCommits, "commit");
-
-    return {
-      h,
-      svg: `
-  ${k.panel(x, y, IW, h)}
-  ${k.panelTitle(x, y, "apps", A.contributions, "Activity", { x: x + IW - 18, text: `${count} in the last year` })}
-  ${chips.svg}
-  ${months}${days}${cells}${legend}${capped}`,
-    };
+    return { h, svg: `${head(h)}
+  ${months}${days}${cells}${legend}${capped(gx - labelW, h)}` };
   }
 
   // ─── Side-by-side panels: each returns the height it needs and a draw(h) ───

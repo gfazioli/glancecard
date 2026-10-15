@@ -5,7 +5,7 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { createClient } from "./github.js";
-import { parseCount, parseSections, parseThemes, renderCards } from "./run.js";
+import { parseCalendar, parseCount, parseSections, parseThemes, renderCards } from "./run.js";
 
 const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 
@@ -24,6 +24,8 @@ Options:
   --time-zone <zone>   IANA zone for commit days and hours (default: this machine's)
   --sections <list>    repository card sections, comma-separated (default: all):
                        hero, tiles, activity, rhythm, code, commits, releases, contributors
+  --calendar <style>   how a year of contributions or commits is drawn (default: chart):
+                       chart, a line of daily counts; grid, GitHub's calendar
   --max-commits <n>    commits read for the last year, at most (default: 5000)
   --allow-private      render private repositories too (the card publishes their data)
   -h, --help           this help
@@ -31,7 +33,7 @@ Options:
 
 The token is read from GITHUB_TOKEN, then GH_TOKEN, then \`gh auth token\`.`;
 
-const VALUED = new Set(["--out", "--theme", "--time-zone", "--sections", "--max-commits"]);
+const VALUED = new Set(["--out", "--theme", "--time-zone", "--sections", "--calendar", "--max-commits"]);
 
 function parseArgs(argv) {
   const options = {};
@@ -80,6 +82,7 @@ async function main() {
     themes: parseThemes(options.theme),
     timeZone: options["time-zone"] ?? (Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"),
     sections: parseSections(options.sections),
+    calendar: parseCalendar(options.calendar),
     maxCommits: parseCount(options["max-commits"], "--max-commits", 5000),
     allowPrivate: Boolean(options["allow-private"]),
     allSeasons: Boolean(options["all-seasons"]),

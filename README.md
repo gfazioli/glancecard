@@ -25,8 +25,8 @@ Daily SVG cards for your READMEs, rendered by GitHub Actions in your own reposit
 
 ## What you get
 
-- **A repository card** for any public repository: status, age and latest tag, description and topics, commits in the last 30 days with a 26-week sparkline, twelve stat tiles, a year of commits with streaks, the weekly rhythm (day × hour), languages and essentials (README, license, contributing guide, security policy, CI), the latest commits and releases with their cadence, contributors.
-- **A profile card** for any user: followers, stars, repositories, pull requests, issues, commits, the contribution calendar, the most starred repositories and their languages.
+- **A repository card** for any public repository: status, age and latest tag, description and topics, commits in the last 30 days with a 26-week sparkline, twelve stat tiles, a year of commits with streaks (a chart of daily counts, or GitHub's calendar), the weekly rhythm (day × hour), languages and essentials (README, license, contributing guide, security policy, CI), the latest commits and releases with their cadence, contributors.
+- **A profile card** for any user: followers, stars, repositories, pull requests, issues, commits, a year of contributions as a chart or as GitHub's calendar, the most starred repositories and their languages.
 - **Nine looks**, after the ones of [FinderGit](https://findergit.app)'s Profile Card, for both cards: Midnight, Aurora and Daylight; Upside Down, Hyperspace, Bridge and Nebula; Halloween and Christmas in their season. `dark` and `light` are Midnight and Daylight, a pair of files for a `<picture>` that shows the one matching the reader's GitHub theme.
 - **Refreshed by your own workflow**, on your schedule, with the token GitHub Actions already gives every run. The cards are plain files committed to your repository.
 
@@ -161,6 +161,7 @@ Dependabot also follows a line pinned to a commit SHA with the version as a comm
 | `theme` | `both` | `both` (`dark` and `light`), or looks, comma-separated: `dark`, `light`, `midnight`, `aurora`, `daylight`, `upside-down`, `hyperspace`, `bridge`, `nebula`, `halloween`, `christmas`. With one theme the file is `<name>.svg`, with several `<name>-<theme>.svg`. See [Looks](#looks). |
 | `time-zone` | `UTC` | IANA zone, such as `Europe/Rome`, for the commit calendar and rhythm. |
 | `sections` | `all` | Repository card sections to draw: `hero`, `tiles`, `activity`, `rhythm`, `code`, `commits`, `releases`, `contributors`. When one of a side-by-side pair is left out, the other takes the full width. |
+| `calendar` | `chart` | How a year is drawn, on both cards: `chart`, a line of daily contributions (profile) or commits (repository) over a value axis, or `grid`, GitHub's calendar of squares. |
 | `max-commits` | `5000` | Commits read for the last year, at most. A busier repository says so on its card. |
 | `allow-private` | `false` | Render private repositories too. Read the note on privacy first. |
 | `commit` | `true` | Commit and push the cards. On a pull request they are only rendered. |
@@ -198,7 +199,7 @@ The token is read from `GITHUB_TOKEN`, then `GH_TOKEN`, then `gh auth token`. `-
 
 **How fresh is a card?** As fresh as your schedule. GitHub caches a raw file for about five minutes, and scheduled runs often start late.
 
-**Privacy.** With the default token a card shows what anyone can see. A personal token can see private repositories, so glancecard refuses them unless you set `allow-private: true`: their card would publish their activity wherever it is committed. The profile card counts public repositories only; its contribution calendar is the one GitHub computes for the token's viewer.
+**Privacy.** With the default token a card shows what anyone can see. A personal token can see private repositories, so glancecard refuses them unless you set `allow-private: true`: their card would publish their activity wherever it is committed. The profile card counts public repositories only; its year of contributions is the one GitHub computes for the token's viewer.
 
 **Rate limits.** A repository card costs a handful of requests, plus one per hundred commits of the last year and one per hundred releases. The workflow token allows 1,000 REST requests and 1,000 GraphQL points an hour per repository: dozens of cards per run.
 

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { input, parseBool } from "../src/action.js";
-import { fileBases, fileNames, parseCount, parseList, parseSections, parseThemes } from "../src/run.js";
+import { fileBases, fileNames, parseCalendar, parseCount, parseList, parseSections, parseThemes } from "../src/run.js";
 
 test("lists split on commas, spaces and newlines", () => {
   assert.deepEqual(parseList("a/b, c/d\n  e/f\n"), ["a/b", "c/d", "e/f"]);
@@ -23,6 +23,14 @@ test("sections", () => {
   assert.equal(parseSections("").length, 8);
   assert.deepEqual(parseSections("hero, code"), ["hero", "code"]);
   assert.throws(() => parseSections("hero, stars"), /unknown section stars/);
+});
+
+test("calendar: a chart unless told grid", () => {
+  assert.equal(parseCalendar(""), "chart");
+  assert.equal(parseCalendar(undefined), "chart");
+  assert.equal(parseCalendar(" Grid "), "grid");
+  assert.equal(parseCalendar("chart"), "chart");
+  assert.throws(() => parseCalendar("bars"), /unknown calendar bars \(choose from chart, grid\)/);
 });
 
 test("counts", () => {

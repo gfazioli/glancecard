@@ -10,6 +10,7 @@ import { renderProfile } from "./profile/render.js";
 import { fetchRepo } from "./repo/fetch.js";
 import { repoModel } from "./repo/model.js";
 import { REPO_SECTIONS, renderRepo } from "./repo/render.js";
+import { CALENDARS } from "./svg.js";
 import { resolveLook, theme as lookTheme, THEME_NAMES } from "./theme.js";
 import { clock } from "./time.js";
 
@@ -33,6 +34,13 @@ export function parseSections(value) {
   const unknown = list.filter((s) => !REPO_SECTIONS.includes(s));
   if (unknown.length) throw new Error(`unknown section ${unknown.join(", ")} (choose from ${REPO_SECTIONS.join(", ")})`);
   return list;
+}
+
+/** How a year of days is drawn: `chart` unless told `grid`. */
+export function parseCalendar(value) {
+  const v = String(value || "chart").trim().toLowerCase();
+  if (!CALENDARS.includes(v)) throw new Error(`unknown calendar ${v} (choose from ${CALENDARS.join(", ")})`);
+  return v;
 }
 
 export function parseCount(value, name, fallback) {
@@ -66,6 +74,7 @@ export async function renderCards({
   themes = ["dark", "light"],
   timeZone = "UTC",
   sections = REPO_SECTIONS,
+  calendar = "chart",
   maxCommits = 5000,
   allowPrivate = false,
   allSeasons = false,
@@ -105,7 +114,7 @@ export async function renderCards({
       const model = repoModel(data, { now, timeZone });
       const images = await loadImages(client, model.contributors.map((c) => c.avatarUrl), 56);
       for (const [theme, name] of fileNames(bases.get(full), themes)) {
-        await write(name, renderRepo(model, { theme: looks.get(theme), sections, images }));
+        await write(name, renderRepo(model, { theme: looks.get(theme), sections, calendar, images }));
       }
       log(`${full}: ${model.totalCommits} commits, ${model.yearCommits} in the last year, ${model.repo.stargazerCount} stars`);
     } catch (error) {
@@ -119,7 +128,7 @@ export async function renderCards({
       const model = profileModel(data, { now, timeZone });
       const images = await loadImages(client, [model.user.avatarUrl], 160);
       for (const [theme, name] of fileNames("profile", themes)) {
-        await write(name, renderProfile(model, { theme: looks.get(theme), images }));
+        await write(name, renderProfile(model, { theme: looks.get(theme), calendar, images }));
       }
       log(`@${profile}: ${model.calendar.totalContributions} contributions in the last year, ${model.stars} stars`);
     } catch (error) {

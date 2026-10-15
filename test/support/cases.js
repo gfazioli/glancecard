@@ -27,13 +27,16 @@ export const CASES = [
   { name: "octoscope-upside-down", fixture: "octoscope", theme: "upside-down" },
   { name: "octoscope-nebula", fixture: "octoscope", theme: "nebula" },
   { name: "octoscope-christmas", fixture: "octoscope", theme: "christmas", allSeasons: true },
+  { name: "profile-gfazioli-grid-dark", fixture: "profile-gfazioli", theme: "dark", calendar: "grid" },
+  { name: "octoscope-grid-light", fixture: "octoscope", theme: "light", calendar: "grid" },
 ];
 
 export function renderCase(c) {
   const data = fixture(c.fixture);
   const theme = lookTheme(resolveLook(c.theme, { now: new Date(data.fetchedAt), timeZone: TZ, allSeasons: c.allSeasons }));
-  if (data.kind === "profile") return renderProfile(profileModel(data, { timeZone: TZ }), { theme });
-  return renderRepo(repoModel(data, { timeZone: TZ }), { theme, ...(c.sections && { sections: c.sections }) });
+  const calendar = c.calendar ?? "chart";
+  if (data.kind === "profile") return renderProfile(profileModel(data, { timeZone: TZ }), { theme, calendar });
+  return renderRepo(repoModel(data, { timeZone: TZ }), { theme, calendar, ...(c.sections && { sections: c.sections }) });
 }
 
 export const goldenPath = (c) => new URL(`../golden/${c.name}.svg`, import.meta.url);
