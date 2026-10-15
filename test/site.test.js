@@ -101,6 +101,20 @@ test("the editor is shown by its script, and only by it", () => {
   assert.match(index, /<script type="module" src="editor.js"><\/script>[\s\S]*<script src="site.js" defer>/, "editor.js runs before site.js arms the reveals");
 });
 
+test("the editor's choices are radio groups, each with one choice made", async () => {
+  const { LOOK_NAMES, theme } = await import("../src/theme.js");
+  const values = (name) => [...index.matchAll(new RegExp(`<input type="radio" name="${name}" value="([a-z-]+)"`, "g"))].map((m) => m[1]);
+  const checked = (name) => [...index.matchAll(new RegExp(`<input type="radio" name="${name}" value="([a-z-]+)" checked`, "g"))].map((m) => m[1]);
+  assert.deepEqual(values("editor-mode"), ["follow", "one"]);
+  assert.deepEqual(values("editor-dark"), LOOK_NAMES.filter((l) => theme(l).isDark));
+  assert.deepEqual(values("editor-look"), LOOK_NAMES);
+  assert.deepEqual(values("editor-calendar"), ["chart", "grid"]);
+  for (const [name, choice] of [["editor-mode", "follow"], ["editor-dark", "midnight"], ["editor-look", "midnight"], ["editor-calendar", "chart"]]) {
+    assert.deepEqual(checked(name), [choice], `${name} starts on ${choice}`);
+  }
+  assert.match(index, /<fieldset data-editor-when="one" hidden>/, "the one-look group waits for its mode");
+});
+
 test("the footer carries the publisher line and its two pages", () => {
   assert.match(index, /P\.IVA&nbsp;12343751009/);
   assert.match(index, /<a href="legal\.html">Legal<\/a>/);

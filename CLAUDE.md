@@ -52,9 +52,10 @@ module (`editor.js`), published by `.github/workflows/pages.yml` after
 by-hand workflow and the README embed (the README's), and the publisher line
 (octoscope's). A release bumps the version in all of them. The setup editor
 (`site/editor.js`) rewrites the prompt, the workflow and the embed at runtime
-from the looks picked,
-by exact-string swaps that must find their anchor once: change the README's
-wording there and `test/editor.test.js` says which anchor moved.
+from exclusive choices (a card that follows the reader's theme, one dark look
+beside Daylight, the only light one; or one look always) by exact-string swaps
+that must find their anchor once: change the README's wording there and
+`test/editor.test.js` says which anchor moved.
 Reveals move only `translate`, `scale` and `opacity`, every hiding rule
 requires `data-armed`, and the page loads nothing from another host. Buttons
 are flat pills with no border: a gradient under a transparent border repeats

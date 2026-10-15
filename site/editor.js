@@ -1,6 +1,9 @@
 /*
- * editor.js — the setup editor: the looks and the year a visitor picks,
- * turned into the workflow, the one-paste prompt and the README embed.
+ * editor.js — the setup editor: how the card wears its look and the year a
+ * visitor picks, turned into the workflow, the one-paste prompt and the
+ * README embed. The choices are exclusive: a card that follows the reader's
+ * theme has one dark look beside Daylight, the only light one; a card that
+ * doesn't wears one look.
  *
  * The page's own default text is the input (each block is held to the
  * README by test/site.test.js), and every change is an exact string put in
@@ -12,8 +15,13 @@
 
 /** The theme names, in the order the action lists them (src/theme.js THEME_NAMES). */
 export const THEME_ORDER = ["dark", "light", "midnight", "aurora", "daylight", "upside-down", "hyperspace", "bridge", "nebula", "halloween", "christmas"];
-export const SEASONAL = ["halloween", "christmas"];
-export const DEFAULT = { looks: ["dark", "light"], calendar: "chart" };
+/** The nine looks by name (src/theme.js LOOK_NAMES); Daylight is the only light one. */
+export const LOOKS = ["midnight", "aurora", "daylight", "upside-down", "hyperspace", "bridge", "nebula", "halloween", "christmas"];
+export const LIGHT = "daylight";
+export const DARK_LOOKS = LOOKS.filter((l) => l !== LIGHT);
+/** When a seasonal look is worn (src/theme.js inSeason); out of it, Midnight. */
+export const SEASONS = { halloween: "from 1 October to 2 November", christmas: "from 1 December to 6 January" };
+export const DEFAULT = { mode: "follow", dark: "midnight", look: "midnight", calendar: "chart" };
 
 /** The theme input as the action reads it (src/run.js parseThemes): `both` is dark and light, in order, once each. */
 export function parseThemes(value) {
@@ -32,24 +40,34 @@ export const fileNames = (base, themes) => (themes.length > 1 ? themes.map((t) =
 
 /**
  * What a choice writes: the `theme` and `calendar` lines (null where the
- * default needs none), the themes the action will render, and the embed: a
- * <picture> when a dark card (dark or midnight) and a light one (light or
- * daylight) are both rendered, else the first look picked.
+ * default needs none), the themes the action will render, and the embed.
+ *
+ * - `follow` with Midnight is the default, `both`: `dark` and `light`.
+ * - `follow` with another dark look is that look and `light`, a <picture>
+ *   of `-<look>.svg` and `-light.svg`.
+ * - `one` is one look and one file, `<name>.svg`, in a plain <img>.
  */
-export function plan({ looks = DEFAULT.looks, calendar = "chart" } = {}) {
-  let picked = THEME_ORDER.filter((n) => looks.includes(n));
-  if (!picked.length) picked = DEFAULT.looks;
-  const both = picked.includes("dark") && picked.includes("light");
-  const value = (both ? ["both", ...picked.filter((n) => n !== "dark" && n !== "light")] : picked).join(", ");
-  const themes = parseThemes(value);
-  const dark = ["dark", "midnight"].find((n) => picked.includes(n));
-  const light = ["light", "daylight"].find((n) => picked.includes(n));
+export function plan({ mode = DEFAULT.mode, dark = DEFAULT.dark, look = DEFAULT.look, calendar = DEFAULT.calendar } = {}) {
+  let value;
+  let embed;
+  let worn;
+  if (mode === "one") {
+    if (!LOOKS.includes(look)) throw new Error(`editor: no look "${look}"`);
+    value = look;
+    embed = { picture: false, look };
+    worn = look;
+  } else {
+    if (!DARK_LOOKS.includes(dark)) throw new Error(`editor: no dark look "${dark}"`);
+    value = dark === "midnight" ? "both" : `${dark}, light`;
+    embed = { picture: true, dark: dark === "midnight" ? "dark" : dark, light: "light" };
+    worn = dark;
+  }
   return {
     theme: value === "both" ? null : value,
     calendar: calendar === "grid" ? "grid" : null,
-    themes,
-    embed: dark && light ? { picture: true, dark, light } : { picture: false, look: picked[0] },
-    seasonal: SEASONAL.filter((n) => picked.includes(n)),
+    themes: parseThemes(value),
+    embed,
+    season: SEASONS[worn] ? worn : null,
   };
 }
 
@@ -120,47 +138,40 @@ export function prompt(text, p) {
 
 // ─── The page ───
 
+/** The line under the choices when a seasonal look is worn. */
+export function seasonHint(look) {
+  return SEASONS[look] ? `${look[0].toUpperCase()}${look.slice(1)} is worn ${SEASONS[look]} only; out of season the card wears Midnight.` : "";
+}
+
 function wire(doc) {
   const panel = doc.querySelector("[data-editor]");
   const promptEl = doc.getElementById("prompt-text");
   const yamlEl = doc.getElementById("editor-yaml");
   const embedEl = doc.getElementById("editor-embed");
   if (!panel || !promptEl || !yamlEl || !embedEl) return;
-  const looks = panel.querySelectorAll("[data-editor-look]");
-  const calendars = panel.querySelectorAll("[data-editor-calendar]");
   const hint = doc.getElementById("editor-hint");
   const base = { prompt: promptEl.textContent, yaml: yamlEl.textContent, embed: embedEl.textContent };
-  const pressed = (b) => b.getAttribute("aria-pressed") === "true";
+  // Native radios, one group per choice: one tab stop each, arrows move.
+  const value = (name) => panel.querySelector(`input[name="${name}"]:checked`)?.value;
 
   function render() {
-    const p = plan({
-      looks: [...looks].filter(pressed).map((b) => b.getAttribute("data-editor-look")),
-      calendar: [...calendars].find(pressed)?.getAttribute("data-editor-calendar"),
+    const mode = value("editor-mode") === "one" ? "one" : "follow";
+    panel.querySelectorAll("[data-editor-when]").forEach((group) => {
+      group.hidden = group.getAttribute("data-editor-when") !== mode;
     });
+    const p = plan({ mode, dark: value("editor-dark"), look: value("editor-look"), calendar: value("editor-calendar") });
     promptEl.textContent = prompt(base.prompt, p);
     yamlEl.textContent = workflow(base.yaml, p);
     embedEl.textContent = embed(base.embed, p);
     if (hint) {
-      hint.hidden = !p.seasonal.length;
-      const names = p.seasonal.map((n) => n[0].toUpperCase() + n.slice(1));
-      hint.textContent = `${names.join(" and ")} ${names.length > 1 ? "are" : "is"} worn in ${p.seasonal.length > 1 ? "their season" : "its season"} only, and ${names.length > 1 ? "are" : "is"} Midnight the rest of the year.`;
+      hint.hidden = !p.season;
+      hint.textContent = seasonHint(p.season);
     }
   }
 
-  looks.forEach((b) =>
-    b.addEventListener("click", () => {
-      // One look at least: the last one cannot be let go.
-      if (pressed(b) && [...looks].filter(pressed).length === 1) return;
-      b.setAttribute("aria-pressed", pressed(b) ? "false" : "true");
-      render();
-    }),
-  );
-  calendars.forEach((b) =>
-    b.addEventListener("click", () => {
-      calendars.forEach((c) => c.setAttribute("aria-pressed", c === b ? "true" : "false"));
-      render();
-    }),
-  );
+  panel.addEventListener("change", render);
+  // A browser may bring back the radios it had on a reload; draw what they say.
+  render();
   panel.hidden = false;
 }
 

@@ -820,6 +820,64 @@
         flex-wrap: wrap;
         gap: 8px;
       }
+      /* The editor's choices are native radios, one group each, so a group
+         is one tab stop and the arrows move within it. The input sits
+         invisible over what it draws: a chip, or a half of the segmented
+         control. */
+      .pick,
+      .segmented label {
+        position: relative;
+        display: inline-flex;
+        cursor: pointer;
+      }
+      .pick input,
+      .segmented input {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+      .pick input:focus-visible + .chip,
+      .segmented input:focus-visible + span {
+        outline: 2px solid var(--blue);
+        outline-offset: 3px;
+      }
+      .segmented {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+        padding: 4px;
+        border-radius: 22px;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+      }
+      .segmented span {
+        display: flex;
+        flex: 1;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 6px 14px;
+        border-radius: 18px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 650;
+        line-height: 1.25;
+        text-align: center;
+        transition: background-color 0.15s ease, color 0.15s ease;
+      }
+      .segmented label:hover span {
+        color: var(--text);
+      }
+      .segmented input:checked + span {
+        background: #4ade80;
+        color: #052e16;
+      }
+      .editor fieldset[hidden] {
+        display: none;
+      }
       /* The editor's chips: the buttons' pill and inset ring, smaller. */
       .chip {
         display: inline-flex;
@@ -836,19 +894,20 @@
         cursor: pointer;
         transition: box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease, translate 0.1s ease;
       }
-      .chip:hover {
+      .pick:hover .chip {
         box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
         color: var(--text);
       }
-      .chip:active {
+      .pick:active .chip {
         translate: 0 1px;
       }
-      .chip[aria-pressed="true"] {
+      .pick input:checked + .chip {
         box-shadow: inset 0 0 0 1px rgba(74, 222, 128, 0.6);
         background: rgba(74, 222, 128, 0.12);
         color: var(--text);
       }
-      .chip i {
+      .chip i,
+      .editor-fixed i {
         width: 14px;
         height: 14px;
         border-radius: 50%;
@@ -863,6 +922,11 @@
       }
       .editor-hint {
         color: #fbbf77;
+      }
+      .editor-fixed {
+        display: flex;
+        align-items: center;
+        gap: 8px;
       }
       /* One column the width of the panel: sized by its content, the
          longest line of a <pre> would push the card past the edge. */
@@ -1373,30 +1437,49 @@ glancecard/your-repo-light.svg</code></pre>
           <div class="editor" data-editor data-reveal="morph" hidden>
             <div class="editor-pick">
               <fieldset>
-                <legend>Your looks</legend>
-                <div class="chips">
-                  <button class="chip" type="button" data-editor-look="dark" aria-pressed="true"><i style="background: linear-gradient(135deg, #1a2140, #2e5199 55%, #a61e9c)"></i>dark</button>
-                  <button class="chip" type="button" data-editor-look="light" aria-pressed="true"><i style="background: linear-gradient(135deg, #f7f9fd, #dce8ff 55%, #fcc2d7)"></i>light</button>
-                  <button class="chip" type="button" data-editor-look="midnight" aria-pressed="false"><i style="background: linear-gradient(135deg, #1a2140, #2e5199 55%, #a61e9c)"></i>midnight</button>
-                  <button class="chip" type="button" data-editor-look="aurora" aria-pressed="false"><i style="background: linear-gradient(135deg, #0a2a30, #0f5f66 55%, #6741d9)"></i>aurora</button>
-                  <button class="chip" type="button" data-editor-look="daylight" aria-pressed="false"><i style="background: linear-gradient(135deg, #f7f9fd, #dce8ff 55%, #fcc2d7)"></i>daylight</button>
-                  <button class="chip" type="button" data-editor-look="upside-down" aria-pressed="false"><i style="background: linear-gradient(135deg, #07040a, #2a0a0e 55%, #b3001b)"></i>upside-down</button>
-                  <button class="chip" type="button" data-editor-look="hyperspace" aria-pressed="false"><i style="background: linear-gradient(135deg, #02030a, #0b1026 55%, #1c2e6e)"></i>hyperspace</button>
-                  <button class="chip" type="button" data-editor-look="bridge" aria-pressed="false"><i style="background: linear-gradient(135deg, #000, #16110c 55%, #3a2a55)"></i>bridge</button>
-                  <button class="chip" type="button" data-editor-look="nebula" aria-pressed="false"><i style="background: linear-gradient(135deg, #0b0620, #2a1650 55%, #c2255c)"></i>nebula</button>
-                  <button class="chip" type="button" data-editor-look="halloween" aria-pressed="false"><i style="background: linear-gradient(135deg, #0d0612, #3c096c 55%, #e85d04)"></i>halloween</button>
-                  <button class="chip" type="button" data-editor-look="christmas" aria-pressed="false"><i style="background: linear-gradient(135deg, #081c15, #1b4332 55%, #c1121f)"></i>christmas</button>
+                <legend>The card</legend>
+                <div class="segmented">
+                  <label><input type="radio" name="editor-mode" value="follow" checked /><span>Follows the reader's theme</span></label>
+                  <label><input type="radio" name="editor-mode" value="one" /><span>Always one look</span></label>
                 </div>
-                <p class="editor-note"><code>dark</code> and <code>light</code> are Midnight and Daylight under the names a <code>&lt;picture&gt;</code> pairs, so the card follows the reader's GitHub theme.</p>
+              </fieldset>
+              <fieldset data-editor-when="follow">
+                <legend>Dark look</legend>
+                <div class="chips">
+                  <label class="pick"><input type="radio" name="editor-dark" value="midnight" checked /><span class="chip"><i style="background: linear-gradient(135deg, #1a2140, #2e5199 55%, #a61e9c)"></i>midnight</span></label>
+                  <label class="pick"><input type="radio" name="editor-dark" value="aurora" /><span class="chip"><i style="background: linear-gradient(135deg, #0a2a30, #0f5f66 55%, #6741d9)"></i>aurora</span></label>
+                  <label class="pick"><input type="radio" name="editor-dark" value="upside-down" /><span class="chip"><i style="background: linear-gradient(135deg, #07040a, #2a0a0e 55%, #b3001b)"></i>upside-down</span></label>
+                  <label class="pick"><input type="radio" name="editor-dark" value="hyperspace" /><span class="chip"><i style="background: linear-gradient(135deg, #02030a, #0b1026 55%, #1c2e6e)"></i>hyperspace</span></label>
+                  <label class="pick"><input type="radio" name="editor-dark" value="bridge" /><span class="chip"><i style="background: linear-gradient(135deg, #000, #16110c 55%, #3a2a55)"></i>bridge</span></label>
+                  <label class="pick"><input type="radio" name="editor-dark" value="nebula" /><span class="chip"><i style="background: linear-gradient(135deg, #0b0620, #2a1650 55%, #c2255c)"></i>nebula</span></label>
+                  <label class="pick"><input type="radio" name="editor-dark" value="halloween" /><span class="chip"><i style="background: linear-gradient(135deg, #0d0612, #3c096c 55%, #e85d04)"></i>halloween</span></label>
+                  <label class="pick"><input type="radio" name="editor-dark" value="christmas" /><span class="chip"><i style="background: linear-gradient(135deg, #081c15, #1b4332 55%, #c1121f)"></i>christmas</span></label>
+                </div>
+                <p class="editor-note editor-fixed"><i style="background: linear-gradient(135deg, #f7f9fd, #dce8ff 55%, #fcc2d7)"></i><span>Light look: <code>daylight</code>, the only light one, for readers on GitHub's light theme.</span></p>
+              </fieldset>
+              <fieldset data-editor-when="one" hidden>
+                <legend>Look</legend>
+                <div class="chips">
+                  <label class="pick"><input type="radio" name="editor-look" value="midnight" checked /><span class="chip"><i style="background: linear-gradient(135deg, #1a2140, #2e5199 55%, #a61e9c)"></i>midnight</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="aurora" /><span class="chip"><i style="background: linear-gradient(135deg, #0a2a30, #0f5f66 55%, #6741d9)"></i>aurora</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="daylight" /><span class="chip"><i style="background: linear-gradient(135deg, #f7f9fd, #dce8ff 55%, #fcc2d7)"></i>daylight</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="upside-down" /><span class="chip"><i style="background: linear-gradient(135deg, #07040a, #2a0a0e 55%, #b3001b)"></i>upside-down</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="hyperspace" /><span class="chip"><i style="background: linear-gradient(135deg, #02030a, #0b1026 55%, #1c2e6e)"></i>hyperspace</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="bridge" /><span class="chip"><i style="background: linear-gradient(135deg, #000, #16110c 55%, #3a2a55)"></i>bridge</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="nebula" /><span class="chip"><i style="background: linear-gradient(135deg, #0b0620, #2a1650 55%, #c2255c)"></i>nebula</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="halloween" /><span class="chip"><i style="background: linear-gradient(135deg, #0d0612, #3c096c 55%, #e85d04)"></i>halloween</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="christmas" /><span class="chip"><i style="background: linear-gradient(135deg, #081c15, #1b4332 55%, #c1121f)"></i>christmas</span></label>
+                </div>
               </fieldset>
               <fieldset>
                 <legend>The year</legend>
                 <div class="chips">
-                  <button class="chip" type="button" data-editor-calendar="chart" aria-pressed="true">chart</button>
-                  <button class="chip" type="button" data-editor-calendar="grid" aria-pressed="false">grid</button>
+                  <label class="pick"><input type="radio" name="editor-calendar" value="chart" checked /><span class="chip">chart</span></label>
+                  <label class="pick"><input type="radio" name="editor-calendar" value="grid" /><span class="chip">grid</span></label>
                 </div>
               </fieldset>
               <p class="editor-hint" id="editor-hint" hidden></p>
+              <p class="editor-note">Several looks in one run work too: list them in <code>theme:</code>, comma-separated, such as <code>theme: both, halloween</code>.</p>
             </div>
             <div class="editor-out">
               <div class="out">
