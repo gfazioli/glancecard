@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0 — 2026-10-15
+
+**A year as a chart.**
+
+- The profile card's contributions and the repository card's year of commits are drawn as a line of daily counts, over a value axis with a rule at every step and each month named under its days. It is the new default on both cards.
+- `calendar: grid` (CLI: `--calendar grid`) brings back GitHub's calendar of squares, unchanged.
+- The profile card reads each day's contribution count from GitHub, not only its shade.
+
 ## 0.2.0 — 2026-10-14
 
 **Nine looks, and a website.**
