@@ -82,6 +82,7 @@ export async function renderCards({
   log = () => {},
 }) {
   clock(timeZone); // an unknown zone fails here, before any request
+  calendar = parseCalendar(calendar); // and so does an unknown calendar
 
   // The look each theme name wears today: a seasonal one out of its season
   // is Midnight, and the log says so.

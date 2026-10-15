@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { test } from "node:test";
 import { input, parseBool } from "../src/action.js";
-import { fileBases, fileNames, parseCalendar, parseCount, parseList, parseSections, parseThemes } from "../src/run.js";
+import { fileBases, fileNames, parseCalendar, parseCount, parseList, parseSections, parseThemes, renderCards } from "../src/run.js";
 
 test("lists split on commas, spaces and newlines", () => {
   assert.deepEqual(parseList("a/b, c/d\n  e/f\n"), ["a/b", "c/d", "e/f"]);
@@ -31,6 +34,12 @@ test("calendar: a chart unless told grid", () => {
   assert.equal(parseCalendar(" Grid "), "grid");
   assert.equal(parseCalendar("chart"), "chart");
   assert.throws(() => parseCalendar("bars"), /unknown calendar bars \(choose from chart, grid\)/);
+});
+
+test("renderCards refuses an unknown calendar before it asks or writes anything", async () => {
+  const outDir = path.join(tmpdir(), `glancecard-calendar-${process.pid}`);
+  await assert.rejects(renderCards({ client: null, profile: "gfazioli", outDir, calendar: "bars" }), /unknown calendar bars/);
+  assert.equal(existsSync(outDir), false);
 });
 
 test("counts", () => {
