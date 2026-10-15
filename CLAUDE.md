@@ -44,11 +44,17 @@ season (`resolveLook`), in the card's time zone.
 
 ## The website
 
-`site/` is hand-authored HTML, CSS and one deferred script, published by
-`.github/workflows/pages.yml` after `scripts/site.js build` renders the cards
-it shows. Three blocks in `site/index.html` are copies that a test holds to
-their source: the springs (`scripts/springs.js`, the sibling sites' sampler),
-the one-paste prompt (the README's) and the publisher line (octoscope's).
+`site/` is hand-authored HTML, CSS, one deferred script (`site.js`) and one
+module (`editor.js`), published by `.github/workflows/pages.yml` after
+`scripts/site.js build` renders the cards it shows. Five blocks in
+`site/index.html` are copies that a test holds to their source: the springs
+(`scripts/springs.js`, the sibling sites' sampler), the one-paste prompt, the
+by-hand workflow and the README embed (the README's), and the publisher line
+(octoscope's). A release bumps the version in all of them. The setup editor
+(`site/editor.js`) rewrites the prompt, the workflow and the embed at runtime
+from the looks picked,
+by exact-string swaps that must find their anchor once: change the README's
+wording there and `test/editor.test.js` says which anchor moved.
 Reveals move only `translate`, `scale` and `opacity`, every hiding rule
 requires `data-armed`, and the page loads nothing from another host. A
 significant change is measured before and after with the site-audit

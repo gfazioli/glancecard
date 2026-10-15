@@ -87,6 +87,20 @@ test("the one-paste prompt is the README's, word for word", () => {
   assert.equal(unescape(site), readme);
 });
 
+test("the editor's workflow and embed are the README's, word for word", () => {
+  const byHand = read("README.md").split("## Set it up by hand")[1].split("## Staying up to date")[0];
+  const workflow = index.match(/<!-- workflow:begin -->([\s\S]*?)<!-- workflow:end -->/)[1];
+  const embed = index.match(/<!-- embed:begin -->([\s\S]*?)<!-- embed:end -->/)[1];
+  assert.equal(unescape(workflow), byHand.match(/```yaml\n([\s\S]*?)\n```/)[1]);
+  assert.equal(unescape(embed), byHand.match(/```html\n([\s\S]*?)\n```/)[1]);
+});
+
+test("the editor is shown by its script, and only by it", () => {
+  const panel = index.match(/<div class="editor"[^>]*>/)[0];
+  assert.match(panel, /\bhidden\b/, "without JavaScript the page reads as before");
+  assert.match(index, /<script type="module" src="editor.js"><\/script>[\s\S]*<script src="site.js" defer>/, "editor.js runs before site.js arms the reveals");
+});
+
 test("the footer carries the publisher line and its two pages", () => {
   assert.match(index, /P\.IVA&nbsp;12343751009/);
   assert.match(index, /<a href="legal\.html">Legal<\/a>/);
@@ -107,7 +121,7 @@ test("the build makes every card the page shows, at its real size", async () => 
     const [, w, h] = svg.match(/<svg[^>]* width="(\d+)" height="(\d+)"/);
     assert.match(tag, new RegExp(`width="${w}" height="${h}"`), name);
   }
-  for (const file of ["og.png", "apple-touch-icon.png", "favicon.svg", "site.js", "legal.html", "privacy.html"]) {
+  for (const file of ["og.png", "apple-touch-icon.png", "favicon.svg", "site.js", "editor.js", "legal.html", "privacy.html"]) {
     assert.ok(readFileSync(path.join(out, file)).length > 0, file);
   }
 });

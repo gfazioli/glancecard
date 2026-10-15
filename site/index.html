@@ -19,6 +19,7 @@
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="A glancecard profile card: tiles, a contribution calendar, top repositories and languages" />
     <meta name="twitter:card" content="summary_large_image" />
+    <script type="module" src="editor.js"></script>
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -743,6 +744,109 @@
         background: linear-gradient(180deg, #9af0b8, #5ee08f);
       }
 
+      /* ---------- The setup editor ----------
+         Shown by editor.js, which rewrites the workflow, the embed and the
+         prompt below from the looks and the year picked here. */
+      .editor {
+        display: grid;
+        grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+        gap: 28px;
+        margin-bottom: 24px;
+        padding: 22px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+      }
+      .editor[hidden] {
+        display: none;
+      }
+      .editor fieldset {
+        margin: 0 0 20px;
+        padding: 0;
+        border: 0;
+        min-width: 0;
+      }
+      .editor legend {
+        padding: 0;
+        margin-bottom: 10px;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--faint);
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: transparent;
+        color: var(--muted);
+        font: 600 13px/1.2 ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+        cursor: pointer;
+        transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+      }
+      .chip:hover {
+        border-color: rgba(255, 255, 255, 0.22);
+      }
+      .chip[aria-pressed="true"] {
+        border-color: rgba(74, 222, 128, 0.55);
+        background: rgba(74, 222, 128, 0.1);
+        color: var(--text);
+      }
+      .chip i {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        flex: none;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+      }
+      .editor-note,
+      .editor-hint {
+        margin: 12px 0 0;
+        font-size: 13px;
+        color: var(--faint);
+      }
+      .editor-hint {
+        color: #fbbf77;
+      }
+      /* One column the width of the panel: sized by its content, the
+         longest line of a <pre> would push the card past the edge. */
+      .editor-out {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+        min-width: 0;
+      }
+      .out-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 8px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .copy-small {
+        padding: 6px 14px;
+        font-size: 13px;
+      }
+      .copy-small[data-copied] {
+        color: #062313;
+      }
+      @media (max-width: 900px) {
+        .editor {
+          grid-template-columns: minmax(0, 1fr);
+          padding: 18px;
+        }
+      }
+
       /* ---------- Why ---------- */
       .tiles {
         display: grid;
@@ -1228,6 +1332,71 @@ glancecard/your-repo-light.svg</code></pre>
             <p class="kicker" data-reveal="rise">The quickest way</p>
             <h2 id="setup-title" data-reveal="rise">Or set it up in one paste</h2>
             <p class="section-lead" data-reveal="rise">Paste this into Claude Code, Codex or any coding agent that can run a shell. With the GitHub CLI signed in, it does the three steps for you, adds Dependabot to keep the action current, and shows you every change before it pushes.</p>
+          </div>
+          <div class="editor" data-editor data-reveal="morph" hidden>
+            <div class="editor-pick">
+              <fieldset>
+                <legend>Your looks</legend>
+                <div class="chips">
+                  <button class="chip" type="button" data-editor-look="dark" aria-pressed="true"><i style="background: linear-gradient(135deg, #1a2140, #2e5199 55%, #a61e9c)"></i>dark</button>
+                  <button class="chip" type="button" data-editor-look="light" aria-pressed="true"><i style="background: linear-gradient(135deg, #f7f9fd, #dce8ff 55%, #fcc2d7)"></i>light</button>
+                  <button class="chip" type="button" data-editor-look="midnight" aria-pressed="false"><i style="background: linear-gradient(135deg, #1a2140, #2e5199 55%, #a61e9c)"></i>midnight</button>
+                  <button class="chip" type="button" data-editor-look="aurora" aria-pressed="false"><i style="background: linear-gradient(135deg, #0a2a30, #0f5f66 55%, #6741d9)"></i>aurora</button>
+                  <button class="chip" type="button" data-editor-look="daylight" aria-pressed="false"><i style="background: linear-gradient(135deg, #f7f9fd, #dce8ff 55%, #fcc2d7)"></i>daylight</button>
+                  <button class="chip" type="button" data-editor-look="upside-down" aria-pressed="false"><i style="background: linear-gradient(135deg, #07040a, #2a0a0e 55%, #b3001b)"></i>upside-down</button>
+                  <button class="chip" type="button" data-editor-look="hyperspace" aria-pressed="false"><i style="background: linear-gradient(135deg, #02030a, #0b1026 55%, #1c2e6e)"></i>hyperspace</button>
+                  <button class="chip" type="button" data-editor-look="bridge" aria-pressed="false"><i style="background: linear-gradient(135deg, #000, #16110c 55%, #3a2a55)"></i>bridge</button>
+                  <button class="chip" type="button" data-editor-look="nebula" aria-pressed="false"><i style="background: linear-gradient(135deg, #0b0620, #2a1650 55%, #c2255c)"></i>nebula</button>
+                  <button class="chip" type="button" data-editor-look="halloween" aria-pressed="false"><i style="background: linear-gradient(135deg, #0d0612, #3c096c 55%, #e85d04)"></i>halloween</button>
+                  <button class="chip" type="button" data-editor-look="christmas" aria-pressed="false"><i style="background: linear-gradient(135deg, #081c15, #1b4332 55%, #c1121f)"></i>christmas</button>
+                </div>
+                <p class="editor-note"><code>dark</code> and <code>light</code> are Midnight and Daylight under the names a <code>&lt;picture&gt;</code> pairs, so the card follows the reader's GitHub theme.</p>
+              </fieldset>
+              <fieldset>
+                <legend>The year</legend>
+                <div class="chips">
+                  <button class="chip" type="button" data-editor-calendar="chart" aria-pressed="true">chart</button>
+                  <button class="chip" type="button" data-editor-calendar="grid" aria-pressed="false">grid</button>
+                </div>
+              </fieldset>
+              <p class="editor-hint" id="editor-hint" hidden></p>
+            </div>
+            <div class="editor-out">
+              <div class="out">
+                <div class="out-bar"><span>The workflow, to set it up by hand</span><button class="btn btn-ghost copy copy-small" type="button" data-copy="editor-yaml">Copy</button></div>
+                <pre id="editor-yaml"><!-- workflow:begin --># .github/workflows/glancecard.yml
+name: glancecard
+
+on:
+  schedule:
+    - cron: "30 5 * * *" # every day
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  cards:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: gfazioli/glancecard@v0.3.0
+        with:
+          profile: your-login
+          repos: |
+            your-login/your-repo
+            your-login/another-repo<!-- workflow:end --></pre>
+              </div>
+              <div class="out">
+                <div class="out-bar"><span>A card in a README</span><button class="btn btn-ghost copy copy-small" type="button" data-copy="editor-embed">Copy</button></div>
+                <pre id="editor-embed"><!-- embed:begin -->&lt;picture&gt;
+  &lt;source media="(prefers-color-scheme: dark)" srcset="glancecard/your-repo-dark.svg"&gt;
+  &lt;img src="glancecard/your-repo-light.svg" width="880" alt="your-repo at a glance"&gt;
+&lt;/picture&gt;<!-- embed:end --></pre>
+              </div>
+              <p class="editor-note">The prompt below follows your choice too.</p>
+            </div>
           </div>
           <div class="prompt" data-reveal="morph">
             <div class="prompt-bar">
