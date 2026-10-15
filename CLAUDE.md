@@ -56,7 +56,11 @@ from the looks picked,
 by exact-string swaps that must find their anchor once: change the README's
 wording there and `test/editor.test.js` says which anchor moved.
 Reveals move only `translate`, `scale` and `opacity`, every hiding rule
-requires `data-armed`, and the page loads nothing from another host. A
+requires `data-armed`, and the page loads nothing from another host. Buttons
+are flat pills with no border: a gradient under a transparent border repeats
+beneath it and draws its far colour as a seam along the edges, and an outline
+is an inset ring. Each `.btn` variant sets `--btn-bg`, `--btn-hover`,
+`--btn-active` and `--btn-ink`, at 4.5:1 or more in every state. A
 significant change is measured before and after with the site-audit
 instrument (Lighthouse, the crawler check, the cost at rest and of a scroll).
 

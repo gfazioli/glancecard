@@ -262,16 +262,18 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 7px 14px;
-        border: 1px solid var(--line);
+        min-height: 36px;
+        padding: 0 14px;
         border-radius: 999px;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
         font-size: 14px;
         font-weight: 600;
         text-decoration: none;
-        background: var(--panel);
+        transition: box-shadow 0.15s ease, background-color 0.15s ease;
       }
       .nav-gh:hover {
-        border-color: rgba(255, 255, 255, 0.24);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.32);
+        background: rgba(255, 255, 255, 0.07);
       }
       .nav-gh svg {
         width: 16px;
@@ -354,35 +356,75 @@
         gap: 12px;
         align-items: center;
       }
+      /* ---------- Buttons ----------
+         Flat pills of one height, with no border. A gradient under a
+         transparent border repeats beneath it and paints its far colour as
+         a seam along the edges (seen at 3x on 2026-10-15), so a fill is one
+         colour and an outline is an inset ring. Each variant sets its fill
+         for rest, hover and active, and its ink: dark ink of the fill's own
+         hue on the coloured ones, 4.5:1 or more in every state. */
       .btn {
+        --btn-bg: transparent;
+        --btn-hover: rgba(255, 255, 255, 0.07);
+        --btn-active: rgba(255, 255, 255, 0.11);
+        --btn-ink: var(--text);
         display: inline-flex;
         align-items: center;
-        gap: 9px;
-        padding: 12px 20px;
-        border-radius: 12px;
-        font-weight: 650;
+        justify-content: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 0 22px;
+        border: 0;
+        border-radius: 999px;
+        background: var(--btn-bg);
+        color: var(--btn-ink);
+        font-family: inherit;
         font-size: 15px;
+        font-weight: 650;
+        line-height: 1.2;
         text-decoration: none;
-        border: 1px solid transparent;
-        transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+        cursor: pointer;
+        transition: background-color 0.15s ease, box-shadow 0.15s ease, translate 0.1s ease;
       }
       .btn:hover {
-        transform: translateY(-1px);
+        background: var(--btn-hover);
+        color: var(--btn-ink);
+      }
+      .btn:active {
+        background: var(--btn-active);
+        translate: 0 1px;
       }
       .btn svg {
         width: 18px;
         height: 18px;
+        flex: none;
       }
       .btn-primary {
-        background: linear-gradient(180deg, #5ee08f, #2fb866);
-        color: #062313;
+        --btn-bg: #4ade80;
+        --btn-hover: #86efac;
+        --btn-active: #22c55e;
+        --btn-ink: #052e16;
       }
       .btn-ghost {
-        border-color: var(--line);
-        background: var(--panel);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
       }
       .btn-ghost:hover {
-        border-color: rgba(255, 255, 255, 0.24);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.32);
+      }
+      .btn-sponsor {
+        --btn-bg: #f472b6;
+        --btn-hover: #f9a8d4;
+        --btn-active: #ec4899;
+        --btn-ink: #3b0920;
+      }
+      /* The coffee in the warm orange of the sibling sites: the two ends of
+         their gradient as hover and active, and dark ink, since white on
+         this orange is 2.5:1. */
+      .btn-coffee {
+        --btn-bg: #f08c00;
+        --btn-hover: #f59f00;
+        --btn-active: #e8590c;
+        --btn-ink: #2b1400;
       }
       .facts {
         display: flex;
@@ -685,8 +727,8 @@
         display: grid;
         place-items: center;
         font-weight: 700;
-        color: #062313;
-        background: linear-gradient(180deg, #5ee08f, #2fb866);
+        color: #052e16;
+        background: #4ade80;
         margin-bottom: 8px;
       }
       .step p {
@@ -736,12 +778,11 @@
         color: var(--muted);
         font-size: 14px;
       }
-      .copy {
-        font: inherit;
-        cursor: pointer;
-      }
       .copy[data-copied] {
-        background: linear-gradient(180deg, #9af0b8, #5ee08f);
+        --btn-bg: #86efac;
+        --btn-hover: #86efac;
+        --btn-ink: #052e16;
+        box-shadow: none;
       }
 
       /* ---------- The setup editor ----------
@@ -779,25 +820,32 @@
         flex-wrap: wrap;
         gap: 8px;
       }
+      /* The editor's chips: the buttons' pill and inset ring, smaller. */
       .chip {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 7px 12px;
+        min-height: 32px;
+        padding: 0 12px;
         border-radius: 999px;
-        border: 1px solid var(--line);
+        border: 0;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
         background: transparent;
         color: var(--muted);
         font: 600 13px/1.2 ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
         cursor: pointer;
-        transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+        transition: box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease, translate 0.1s ease;
       }
       .chip:hover {
-        border-color: rgba(255, 255, 255, 0.22);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+        color: var(--text);
+      }
+      .chip:active {
+        translate: 0 1px;
       }
       .chip[aria-pressed="true"] {
-        border-color: rgba(74, 222, 128, 0.55);
-        background: rgba(74, 222, 128, 0.1);
+        box-shadow: inset 0 0 0 1px rgba(74, 222, 128, 0.6);
+        background: rgba(74, 222, 128, 0.12);
         color: var(--text);
       }
       .chip i {
@@ -834,11 +882,9 @@
         color: var(--muted);
       }
       .copy-small {
-        padding: 6px 14px;
+        min-height: 32px;
+        padding: 0 14px;
         font-size: 13px;
-      }
-      .copy-small[data-copied] {
-        color: #062313;
       }
       @media (max-width: 900px) {
         .editor {
@@ -944,15 +990,6 @@
       }
       .support .ctas {
         justify-content: center;
-      }
-      .btn-sponsor {
-        background: linear-gradient(180deg, #f9a8d4, #ec4899);
-        color: #3b0920;
-      }
-      /* The one-off coffee, in the warm gradient the sibling sites give it. */
-      .btn-coffee {
-        background: linear-gradient(45deg, #f08c00, #e8590c);
-        color: #fff;
       }
       /* Where releases are announced, under the buttons and set apart
          from them: a line to read, not a fourth button. */
