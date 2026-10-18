@@ -162,6 +162,7 @@ Dependabot also follows a line pinned to a commit SHA with the version as a comm
 | `time-zone` | `UTC` | IANA zone, such as `Europe/Rome`, for the commit calendar and rhythm. |
 | `sections` | `all` | Repository card sections to draw: `hero`, `tiles`, `activity`, `stars`, `rhythm`, `code`, `commits`, `releases`, `contributors`. When one of a side-by-side pair is left out, the other takes the full width. `stars` also draws the profile card's Stars, and leaving it out leaves out both, and the star history they read. |
 | `calendar` | `chart` | How a year is drawn, on both cards: `chart`, a line of daily contributions (profile) or commits (repository) over a value axis, or `grid`, GitHub's calendar of squares. |
+| `stars-chart` | `steps` | How the stars are drawn, on both cards: `steps`, their running total exactly, flat between the days they came on; `smooth`, a soft line through it; or `bars`, the new stars of each month (each week, under half a year). |
 | `max-commits` | `5000` | Commits read for the last year, at most. A busier repository says so on its card. |
 | `allow-private` | `false` | Render private repositories too. Read the note on privacy first. |
 | `commit` | `true` | Commit and push the cards. On a pull request they are only rendered. |

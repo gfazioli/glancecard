@@ -8,7 +8,7 @@ import { appendFileSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createClient } from "./github.js";
-import { parseCalendar, parseCount, parseList, parseSections, parseThemes, renderCards } from "./run.js";
+import { parseCalendar, parseCount, parseList, parseSections, parseStarsChart, parseThemes, renderCards } from "./run.js";
 
 const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 const BOT = ["github-actions[bot]", "41898282+github-actions[bot]@users.noreply.github.com"];
@@ -84,6 +84,7 @@ async function main() {
     timeZone: input("time-zone") || "UTC",
     sections: parseSections(input("sections")),
     calendar: parseCalendar(input("calendar")),
+    starsChart: parseStarsChart(input("stars-chart")),
     maxCommits: parseCount(input("max-commits"), "max-commits", 5000),
     allowPrivate: parseBool(input("allow-private") || "false", "allow-private"),
     log: (line) => console.log(line),

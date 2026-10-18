@@ -155,3 +155,26 @@ test("the profile card draws the stars of every public repository, unless told n
   assert.doesNotMatch(without, /growth-line|stars-fill|class="title disp"[^>]*>Stars</);
   assert.ok(Number(without.match(/height="(\d+)"/)[1]) < Number(svg.match(/height="(\d+)"/)[1]));
 });
+
+test("the stars as bars: the new ones of each month, on their own axis, with no line", () => {
+  const m = repoModel(fixture("react-switch-button"), { timeZone: "Europe/Rome" });
+  const bars = renderRepo(m, { theme: THEMES.dark, sections: ["stars"], starsChart: "bars" });
+  const rects = [...bars.matchAll(/<rect x="[\d.]+" y="[\d.]+" width="[\d.]+" height="([\d.]+)" rx="[\d.]+" fill="#facc15"\/>/g)];
+  assert.ok(rects.length > 20, `${rects.length} bars`);
+  assert.match(bars, /class="axis">stars a month</);
+  assert.doesNotMatch(bars, /growth-line|stars-fill/);
+  // The chips count the same stars whatever the chart.
+  const steps = renderRepo(m, { theme: THEMES.dark, sections: ["stars"] });
+  const chips = (svg) => [...svg.matchAll(/class="pill-v">([^<]+)</g)].map((x) => x[1]);
+  assert.deepEqual(chips(bars), chips(steps));
+});
+
+test("the stars as a smooth line: fewer points than the steps, still only rising", () => {
+  const m = repoModel(fixture("octoscope"), { timeZone: "Europe/Rome" });
+  const curves = (svg) => svg.match(/<path d="([^"]+)" class="growth-line"/)[1].split(" C").length;
+  const smooth = renderRepo(m, { theme: THEMES.dark, sections: ["stars"], starsChart: "smooth" });
+  const steps = renderRepo(m, { theme: THEMES.dark, sections: ["stars"] });
+  assert.ok(curves(smooth) < curves(steps), `${curves(smooth)} curves against ${curves(steps)}`);
+  const ys = starLine(smooth);
+  assert.ok(ys.every((y, i) => i === 0 || y <= ys[i - 1] + 0.05), "the smooth line turns back down");
+});

@@ -6,7 +6,7 @@ import { decorate } from "./decor.js";
 import { OCTICONS } from "./icons.js";
 import { alpha, display, styles } from "./theme.js";
 import { compact, esc, fit, full, plural, textWidth } from "./text.js";
-import { daysBetween, MONTHS } from "./time.js";
+import { addDays, daysBetween, MONTHS } from "./time.js";
 
 export const W = 880;
 export const PAD = 24;
@@ -17,6 +17,13 @@ export const HALF = (IW - SECTION) / 2;
 
 /** How a year of days is drawn: a line of daily counts, or GitHub's calendar of squares. */
 export const CALENDARS = ["chart", "grid"];
+
+/**
+ * How the stars are drawn: their running total exactly, flat between the
+ * days they came on (steps), as a soft line through it (smooth), or the new
+ * ones of each month or week as bars.
+ */
+export const STARS_CHARTS = ["steps", "smooth", "bars"];
 
 /**
  * A value axis for counts up to `max`: a round step (1, 2 or 5 times a power
@@ -192,20 +199,46 @@ export function kit(t) {
   }
 
   /**
-   * A running total over time (`points` of { day, total }, oldest first) as a
-   * rising line over its area, filled with `fill`: the totals on a left axis,
-   * and the years named over their days (the months, under two years), from
-   * a dashed rule at their first day. At most one point per 4 px is drawn.
+   * A running total over time (`points` of { day, total }, oldest first),
+   * drawn as `chart` (STARS_CHARTS): a rising line over its area, filled
+   * with `fill`, or the new stars of each month (each week, under half a
+   * year) as bars on their own axis. The values sit on a left axis, and the
+   * years are named over their days (the months, under two years), from a
+   * dashed rule at their first day. At most one point per 4 px is drawn.
    * The plot fills x…x+w and y…y+h; the names hang 18 px below it.
    */
-  function growthChart(points, x, y, w, h, color, fill) {
-    const { step, top } = ticks(points.at(-1).total);
+  function growthChart(points, x, y, w, h, color, fill, chart = "steps") {
+    const start = points[0].day;
+    const last = points.at(-1).day;
+    const span = Math.max(1, daysBetween(start, last));
+    // The running total at the end of `day`: the points hold flat between them.
+    const totalAt = (day) => {
+      let v = 0;
+      for (const p of points) {
+        if (p.day > day) break;
+        v = p.total;
+      }
+      return v;
+    };
+    // Months over half a year, weeks under it: the bars' bins, and the smooth line's samples.
+    const bins = [];
+    if (span > 180) {
+      for (let d = `${start.slice(0, 7)}-01`; d <= last; ) {
+        const [yr, mo] = d.split("-").map(Number);
+        const next = `${mo === 12 ? yr + 1 : yr}-${String((mo % 12) + 1).padStart(2, "0")}-01`;
+        bins.push({ from: d < start ? start : d, to: next > last ? last : addDays(next, -1) });
+        d = next;
+      }
+    } else {
+      for (let d = start; d <= last; d = addDays(d, 7)) bins.push({ from: d, to: addDays(d, 6) > last ? last : addDays(d, 6) });
+    }
+    const counts = bins.map((b) => totalAt(b.to) - totalAt(addDays(b.from, -1)));
+
+    const { step, top } = ticks(chart === "bars" ? Math.max(0, ...counts) : points.at(-1).total);
     const values = Array.from({ length: top / step + 1 }, (_, i) => i * step);
     const labelW = Math.max(...values.map((v) => textWidth(compact(v), 10))) + 8;
     const px = x + labelW;
     const pw = w - labelW;
-    const start = points[0].day;
-    const span = Math.max(1, daysBetween(start, points.at(-1).day));
     const at = (day) => px + (daysBetween(start, day) / span) * pw;
     const level = (v) => y + h - (v / top) * h;
 
@@ -220,7 +253,7 @@ export function kit(t) {
     // for its name.
     const years = span >= 730;
     const firsts = [];
-    for (let d = start; d <= points.at(-1).day; ) {
+    for (let d = start; d <= last; ) {
       const [yr, mo] = d.split("-").map(Number);
       const next = years ? `${yr + 1}-01-01` : `${mo === 12 ? yr + 1 : yr}-${String((mo % 12) + 1).padStart(2, "0")}-01`;
       firsts.push({ day: d, name: years ? String(yr) : MONTHS[mo - 1] });
@@ -237,10 +270,35 @@ export function kit(t) {
       })
       .join("");
 
-    // Weeks beyond one per 4 px are folded into the last of their group,
-    // the running total at its end.
-    const group = Math.max(1, Math.ceil(points.length / Math.floor(pw / 4)));
-    const kept = points.filter((_, i) => i === 0 || i === points.length - 1 || i % group === 0);
+    if (chart === "bars") {
+      const bars = bins
+        .map((b, i) => {
+          if (!counts[i]) return "";
+          const bx = at(b.from);
+          const bw = Math.max(1.5, at(addDays(b.to, 1)) - bx - 1.5);
+          const bh = Math.max(1.5, (counts[i] / top) * h);
+          return `<rect x="${bx.toFixed(1)}" y="${(y + h - bh).toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="${Math.min(2, bw / 2).toFixed(1)}" fill="${color}"/>`;
+        })
+        .join("");
+      return `
+  ${rules}${periods}
+  <text x="${px}" y="${y - 10}" class="axis">stars a ${span > 180 ? "month" : "week"}</text>
+  <g class="growth-bars">${bars}</g>`;
+    }
+
+    // steps: every point, flat between starred days; smooth: the total at
+    // about 48 even steps across the history, so even a sparse one bends
+    // instead of stepping. Points beyond one per 4 px are folded into the
+    // last of their group, the running total at its end.
+    let source = points;
+    if (chart === "smooth") {
+      const every = Math.max(7, Math.ceil(span / 48));
+      source = [{ day: start, total: 0 }];
+      for (let d = addDays(start, every); d < last; d = addDays(d, every)) source.push({ day: d, total: totalAt(d) });
+      source.push({ day: last, total: totalAt(last) });
+    }
+    const group = Math.max(1, Math.ceil(source.length / Math.floor(pw / 4)));
+    const kept = source.filter((_, i) => i === 0 || i === source.length - 1 || i % group === 0);
     const d = monotone(kept.map((p) => [at(p.day), level(p.total)]));
     return `
   ${rules}${periods}
@@ -253,9 +311,10 @@ export function kit(t) {
    * history) under the `count` stars it ends at, with the stars of the last
    * 30 days, of the last year once the history is a year old (younger, it
    * would repeat the total), and of the best week; or a line saying why
-   * there is none. Its line is filled with `starsFill`.
+   * there is none, drawn as `chart` (STARS_CHARTS). Its line is filled with
+   * `starsFill`.
    */
-  function starsPanel(s, count, y, today) {
+  function starsPanel(s, count, y, today, chart = "steps") {
     const A = t.accent;
     const month = (day) => `${MONTHS[Number(day.slice(5, 7)) - 1]} ${day.slice(0, 4)}`;
     const head = (h) => `
@@ -273,12 +332,12 @@ export function kit(t) {
     ]);
     const h = 232;
     return { h, svg: `${head(h)}
-  ${chips.svg}${growthChart(s.points, PAD + 18, y + 92, IW - 36, 102, A.yellow, "stars-fill")}` };
+  ${chips.svg}${growthChart(s.points, PAD + 18, y + 92, IW - 36, 102, A.yellow, "stars-fill", chart)}` };
   }
 
   /** The gradient under the Stars panel's line, for a history that draws one. */
-  const starsFill = (s) =>
-    s?.total
+  const starsFill = (s, chart = "steps") =>
+    s?.total && chart !== "bars"
       ? `
   <linearGradient id="stars-fill" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0" stop-color="${t.accent.yellow}" stop-opacity="${t.spark}"/>

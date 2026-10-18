@@ -11,7 +11,7 @@ import { fetchRepo } from "./repo/fetch.js";
 import { repoModel } from "./repo/model.js";
 import { REPO_SECTIONS, renderRepo } from "./repo/render.js";
 import { starStore } from "./stars.js";
-import { CALENDARS } from "./svg.js";
+import { CALENDARS, STARS_CHARTS } from "./svg.js";
 import { resolveLook, theme as lookTheme, THEME_NAMES } from "./theme.js";
 import { clock } from "./time.js";
 
@@ -44,6 +44,13 @@ export function parseSections(value) {
 export function parseCalendar(value) {
   const v = String(value || "chart").trim().toLowerCase();
   if (!CALENDARS.includes(v)) throw new Error(`unknown calendar ${v} (choose from ${CALENDARS.join(", ")})`);
+  return v;
+}
+
+/** How the stars are drawn: `steps` unless told `smooth` or `bars`. */
+export function parseStarsChart(value) {
+  const v = String(value || "steps").trim().toLowerCase();
+  if (!STARS_CHARTS.includes(v)) throw new Error(`unknown stars-chart ${v} (choose from ${STARS_CHARTS.join(", ")})`);
   return v;
 }
 
@@ -81,6 +88,7 @@ export async function renderCards({
   timeZone = "UTC",
   sections = REPO_SECTIONS,
   calendar = "chart",
+  starsChart = "steps",
   maxCommits = 5000,
   allowPrivate = false,
   allSeasons = false,
@@ -89,6 +97,7 @@ export async function renderCards({
 }) {
   clock(timeZone); // an unknown zone fails here, before any request
   calendar = parseCalendar(calendar); // and so does an unknown calendar
+  starsChart = parseStarsChart(starsChart); // or way to draw the stars
 
   // The look each theme name wears today: a seasonal one out of its season
   // is Midnight, and the log says so.
@@ -126,7 +135,7 @@ export async function renderCards({
       const model = repoModel(data, { now, timeZone });
       const images = await loadImages(client, model.contributors.map((c) => c.avatarUrl), 56);
       for (const [theme, name] of fileNames(bases.get(full), themes)) {
-        await write(name, renderRepo(model, { theme: looks.get(theme), sections, calendar, images }));
+        await write(name, renderRepo(model, { theme: looks.get(theme), sections, calendar, starsChart, images }));
       }
       log(`${full}: ${model.totalCommits} commits, ${model.yearCommits} in the last year, ${model.repo.stargazerCount} stars`);
     } catch (error) {
@@ -140,7 +149,7 @@ export async function renderCards({
       const model = profileModel(data, { now, timeZone });
       const images = await loadImages(client, [model.user.avatarUrl], 160);
       for (const [theme, name] of fileNames("profile", themes)) {
-        await write(name, renderProfile(model, { theme: looks.get(theme), calendar, images, stars: Boolean(stars) }));
+        await write(name, renderProfile(model, { theme: looks.get(theme), calendar, starsChart, images, stars: Boolean(stars) }));
       }
       log(`@${profile}: ${model.calendar.totalContributions} contributions in the last year, ${model.stars} stars`);
     } catch (error) {

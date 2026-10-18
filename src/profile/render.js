@@ -10,7 +10,7 @@ import { formatDay, MONTHS } from "../time.js";
 
 const LEVELS = ["NONE", "FIRST_QUARTILE", "SECOND_QUARTILE", "THIRD_QUARTILE", "FOURTH_QUARTILE"];
 
-export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = "chart", stars = true } = {}) {
+export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = "chart", stars = true, starsChart = "steps" } = {}) {
   const k = kit(theme);
   const A = theme.accent;
   const u = m.user;
@@ -167,7 +167,7 @@ export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = 
   parts.push(cal.svg);
   y += cal.h + SECTION;
   if (stars) {
-    const panel = k.starsPanel(m.starHistory, m.stars, y, m.today);
+    const panel = k.starsPanel(m.starHistory, m.stars, y, m.today, starsChart);
     parts.push(panel.svg);
     y += panel.h + SECTION;
   }
@@ -193,7 +193,7 @@ export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = 
   <linearGradient id="spark" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0" stop-color="${A.contributions}" stop-opacity="${theme.spark}"/>
     <stop offset="1" stop-color="${A.contributions}" stop-opacity="0"/>
-  </linearGradient>${stars ? k.starsFill(m.starHistory) : ""}${k.tileGradients(tileItems.map((t) => t.color))}`;
+  </linearGradient>${stars ? k.starsFill(m.starHistory, starsChart) : ""}${k.tileGradients(tileItems.map((t) => t.color))}`;
 
   return k.frame({ height: y, title: `${name}'s GitHub activity`, desc, defs, body: parts.join("\n"), contentTop, ledge: contentTop });
 }

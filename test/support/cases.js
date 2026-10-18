@@ -29,14 +29,17 @@ export const CASES = [
   { name: "octoscope-christmas", fixture: "octoscope", theme: "christmas", allSeasons: true },
   { name: "profile-gfazioli-grid-dark", fixture: "profile-gfazioli", theme: "dark", calendar: "grid" },
   { name: "octoscope-grid-light", fixture: "octoscope", theme: "light", calendar: "grid" },
+  { name: "react-switch-button-bars-dark", fixture: "react-switch-button", theme: "dark", sections: ["hero", "stars"], starsChart: "bars" },
+  { name: "profile-gfazioli-smooth-light", fixture: "profile-gfazioli", theme: "light", starsChart: "smooth" },
 ];
 
 export function renderCase(c) {
   const data = fixture(c.fixture);
   const theme = lookTheme(resolveLook(c.theme, { now: new Date(data.fetchedAt), timeZone: TZ, allSeasons: c.allSeasons }));
   const calendar = c.calendar ?? "chart";
-  if (data.kind === "profile") return renderProfile(profileModel(data, { timeZone: TZ }), { theme, calendar });
-  return renderRepo(repoModel(data, { timeZone: TZ }), { theme, calendar, ...(c.sections && { sections: c.sections }) });
+  const starsChart = c.starsChart ?? "steps";
+  if (data.kind === "profile") return renderProfile(profileModel(data, { timeZone: TZ }), { theme, calendar, starsChart });
+  return renderRepo(repoModel(data, { timeZone: TZ }), { theme, calendar, starsChart, ...(c.sections && { sections: c.sections }) });
 }
 
 export const goldenPath = (c) => new URL(`../golden/${c.name}.svg`, import.meta.url);

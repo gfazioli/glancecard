@@ -32,6 +32,10 @@ inputs:
     description: How a year of contributions (profile) or commits (repository) is drawn — chart, a line of daily counts, or grid, GitHub's calendar of squares.
     required: false
     default: chart
+  stars-chart:
+    description: How the stars are drawn, on both cards — steps, their running total exactly; smooth, a soft line through it; or bars, the new stars of each month.
+    required: false
+    default: steps
   max-commits:
     description: Commits read for the last year, at most; a busier repository says so on its card.
     required: false

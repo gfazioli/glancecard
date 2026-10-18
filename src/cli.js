@@ -5,7 +5,7 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { createClient } from "./github.js";
-import { parseCalendar, parseCount, parseSections, parseThemes, renderCards } from "./run.js";
+import { parseCalendar, parseCount, parseSections, parseStarsChart, parseThemes, renderCards } from "./run.js";
 
 const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 
@@ -26,6 +26,10 @@ Options:
                        hero, tiles, activity, stars, rhythm, code, commits, releases, contributors
   --calendar <style>   how a year of contributions or commits is drawn (default: chart):
                        chart, a line of daily counts; grid, GitHub's calendar
+  --stars-chart <style>
+                       how the stars are drawn (default: steps): steps, their
+                       running total exactly; smooth, a soft line; bars, the
+                       new ones of each month
   --max-commits <n>    commits read for the last year, at most (default: 5000)
   --allow-private      render private repositories too (the card publishes their data)
   -h, --help           this help
@@ -33,7 +37,7 @@ Options:
 
 The token is read from GITHUB_TOKEN, then GH_TOKEN, then \`gh auth token\`.`;
 
-const VALUED = new Set(["--out", "--theme", "--time-zone", "--sections", "--calendar", "--max-commits"]);
+const VALUED = new Set(["--out", "--theme", "--time-zone", "--sections", "--calendar", "--stars-chart", "--max-commits"]);
 
 function parseArgs(argv) {
   const options = {};
@@ -83,6 +87,7 @@ async function main() {
     timeZone: options["time-zone"] ?? (Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"),
     sections: parseSections(options.sections),
     calendar: parseCalendar(options.calendar),
+    starsChart: parseStarsChart(options["stars-chart"]),
     maxCommits: parseCount(options["max-commits"], "--max-commits", 5000),
     allowPrivate: Boolean(options["allow-private"]),
     allSeasons: Boolean(options["all-seasons"]),
