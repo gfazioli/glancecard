@@ -1,9 +1,10 @@
 /*
- * editor.js — the setup editor: how the card wears its look and the year a
- * visitor picks, turned into the workflow, the one-paste prompt and the
- * README embed. The choices are exclusive: a card that follows the reader's
- * theme has one dark look beside Daylight, the only light one; a card that
- * doesn't wears one look.
+ * editor.js — the setup editor: how the card wears its look, and how the
+ * year and the stars a visitor picks are drawn, turned into the workflow,
+ * the one-paste prompt and the README embed, and into the card itself,
+ * drawn beside them by glancecard's own renderer. The choices are
+ * exclusive: a card that follows the reader's theme has one dark look
+ * beside Daylight, the only light one; a card that doesn't wears one look.
  *
  * The page's own default text is the input (each block is held to the
  * README by test/site.test.js), and every change is an exact string put in
@@ -21,7 +22,9 @@ export const LIGHT = "daylight";
 export const DARK_LOOKS = LOOKS.filter((l) => l !== LIGHT);
 /** When a seasonal look is worn (src/theme.js inSeason); out of it, Midnight. */
 export const SEASONS = { halloween: "from 1 October to 2 November", christmas: "from 1 December to 6 January" };
-export const DEFAULT = { mode: "follow", dark: "midnight", look: "midnight", calendar: "chart" };
+/** How the stars are drawn (src/svg.js STARS_CHARTS); steps is the action's default. */
+export const STARS = ["steps", "smooth", "bars"];
+export const DEFAULT = { mode: "follow", dark: "midnight", look: "midnight", calendar: "chart", stars: "steps" };
 
 // ─── The refresh: how often, at what hour, in which zone ───
 //
@@ -99,15 +102,17 @@ export function parseThemes(value) {
 export const fileNames = (base, themes) => (themes.length > 1 ? themes.map((t) => [t, `${base}-${t}.svg`]) : [[themes[0], `${base}.svg`]]);
 
 /**
- * What a choice writes: the `theme` and `calendar` lines (null where the
- * default needs none), the themes the action will render, and the embed.
+ * What a choice writes: the `theme`, `calendar` and `stars-chart` lines
+ * (null where the default needs none), the themes the action will render,
+ * and the embed.
  *
  * - `follow` with Midnight is the default, `both`: `dark` and `light`.
  * - `follow` with another dark look is that look and `light`, a <picture>
  *   of `-<look>.svg` and `-light.svg`.
  * - `one` is one look and one file, `<name>.svg`, in a plain <img>.
  */
-export function plan({ mode = DEFAULT.mode, dark = DEFAULT.dark, look = DEFAULT.look, calendar = DEFAULT.calendar, refresh = DEFAULT_REFRESH } = {}) {
+export function plan({ mode = DEFAULT.mode, dark = DEFAULT.dark, look = DEFAULT.look, calendar = DEFAULT.calendar, stars = DEFAULT.stars, refresh = DEFAULT_REFRESH } = {}) {
+  if (!STARS.includes(stars)) throw new Error(`editor: no stars chart "${stars}"`);
   let value;
   let embed;
   let worn;
@@ -125,6 +130,7 @@ export function plan({ mode = DEFAULT.mode, dark = DEFAULT.dark, look = DEFAULT.
   return {
     theme: value === "both" ? null : value,
     calendar: calendar === "grid" ? "grid" : null,
+    stars: stars === "steps" ? null : stars,
     themes: parseThemes(value),
     embed,
     season: SEASONS[worn] ? worn : null,
@@ -143,7 +149,11 @@ function swap(text, from, to) {
 const fileOf = (p, base, look) => fileNames(base, p.themes).find(([t]) => t === look)[1];
 
 /** The workflow's extra inputs, each on its own line at `indent`. */
-const inputs = (p, indent) => [p.theme && `theme: ${p.theme}`, p.calendar && `calendar: ${p.calendar}`].filter(Boolean).map((l) => `\n${indent}${l}`).join("");
+const inputs = (p, indent) =>
+  [p.theme && `theme: ${p.theme}`, p.calendar && `calendar: ${p.calendar}`, p.stars && `stars-chart: ${p.stars}`]
+    .filter(Boolean)
+    .map((l) => `\n${indent}${l}`)
+    .join("");
 
 /**
  * A <picture> embed of `base`'s card, as the README writes it, for the
@@ -203,6 +213,36 @@ export function prompt(text, p) {
   );
 }
 
+// ─── The card beside the choices ───
+//
+// Drawn in the page by glancecard's renderer, from the author's data, both
+// in preview.js, which the build writes (scripts/site.js) and names by its
+// content: the first draw waits for it, and the card until then is
+// Midnight's, drawn at build time from the same data.
+
+/** The module that draws the card; the build appends its content's hash. */
+const PREVIEW = "./preview.js";
+
+/** The look the card wears for a choice: its one look, or the dark one, or Daylight on the light side. */
+export function previewLook({ mode, dark, look }, side) {
+  if (mode === "one") return look;
+  return side === "light" ? LIGHT : dark;
+}
+
+/** The file the shown card is written to: the profile's, or `your-repo`'s, for the reader's side or the one look. */
+export function previewFile(p, card, side) {
+  const theme = p.embed.picture ? (side === "light" ? p.embed.light : p.embed.dark) : p.embed.look;
+  return fileOf(p, card === "repo" ? "your-repo" : "profile", theme);
+}
+
+const named = (look) => look.split("-").map((w) => w[0].toUpperCase() + w.slice(1)).join(" ");
+
+/** What the card's alt says. */
+export function previewAlt({ card, look, calendar, stars }) {
+  const what = card === "repo" ? "octoscope's repository card" : "The profile card";
+  return `${what} in the ${named(look)} look, its year as a ${calendar} and its stars as ${stars}`;
+}
+
 // ─── The page ───
 
 /** The line under the choices when a seasonal look is worn. */
@@ -219,6 +259,95 @@ export function refreshNote({ often, utcHour, zone, date = new Date() }) {
   const utc = `${String(utcHour).padStart(2, "0")}:${MINUTE}`;
   if (often !== "week") return `Every day at ${h.label} in ${zone}, ${utc} UTC.`;
   return `Every Monday at ${h.label} in ${zone}, ${WEEKDAYS[(1 + h.shift + 7) % 7]} ${utc} UTC.`;
+}
+
+/**
+ * The card beside the choices: drawn once preview.js is in, which it starts
+ * fetching when the card comes near the screen or a choice changes. Each
+ * draw is decoded before it is shown, so a switch never flashes empty.
+ */
+function wirePreview(doc) {
+  const stage = doc.querySelector("[data-preview]");
+  const img = stage?.querySelector("img");
+  if (!img) return () => {};
+  const bar = doc.querySelector("[data-preview-bar]");
+  const side = doc.querySelector("[data-preview-side]");
+  const note = doc.querySelector("[data-preview-note]");
+  const initial = { mode: "follow", dark: "midnight", side: "dark", card: "profile", calendar: "chart", stars: "steps" };
+  let draw = null;
+  let wanted = null;
+  let drawn = false;
+  let shown = null;
+  let started = false;
+
+  function load() {
+    if (started) return;
+    started = true;
+    import(PREVIEW).then(
+      (m) => {
+        const tz = m.DATA.timeZone;
+        const models = { profile: m.profileModel(m.DATA.profile, { timeZone: tz }), repo: m.repoModel(m.DATA.repo, { timeZone: tz }) };
+        draw = (c) => {
+          const options = { theme: m.theme(c.look), calendar: c.calendar, starsChart: c.stars, images: m.DATA.images };
+          const svg = c.card === "repo" ? m.renderRepo(models.repo, options) : m.renderProfile(models.profile, options);
+          const [, w, h] = svg.match(/<svg[^>]* width="(\d+)" height="(\d+)"/);
+          const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+          const next = new Image();
+          next.src = url;
+          const swap = () => {
+            if (wanted !== c) return URL.revokeObjectURL(url);
+            img.width = Number(w);
+            img.height = Number(h);
+            img.src = url;
+            img.alt = previewAlt(c);
+            if (shown) URL.revokeObjectURL(shown);
+            shown = url;
+          };
+          (next.decode ? next.decode() : Promise.resolve()).then(swap, swap);
+          drawn = true;
+        };
+        if (bar) bar.hidden = false;
+        if (wanted) show(wanted);
+      },
+      () => {
+        // Without the module the card stays Midnight's, and the choices still write the code.
+      },
+    );
+  }
+
+  function show(c) {
+    wanted = c;
+    if (side) side.hidden = c.mode === "one";
+    if (note) {
+      note.hidden = false;
+      const who = c.card === "repo" ? "octoscope's card, as an example" : "the author's card";
+      const reader = c.mode === "one" ? "every reader sees" : `readers on GitHub's ${c.side} theme see`;
+      note.textContent = `${c.file}: what ${reader}, drawn here from ${who}.`;
+    }
+    if (!draw) return;
+    const same = Object.keys(initial).every((k) => c[k] === initial[k]);
+    if (!drawn && same) return;
+    draw(c);
+  }
+
+  if (typeof IntersectionObserver === "function") {
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          io.disconnect();
+          load();
+        }
+      },
+      { rootMargin: "800px 0px" },
+    );
+    io.observe(stage);
+  } else {
+    load();
+  }
+  return (c, changed) => {
+    if (changed) load();
+    show(c);
+  };
 }
 
 function wire(doc) {
@@ -262,7 +391,10 @@ function wire(doc) {
     for (const h of list) hourEl.add(new Option(h.label, String(h.utcHour), false, h.utcHour === refresh.utcHour));
   }
 
-  function render() {
+  const preview = wirePreview(doc);
+  const pickedIn = (name) => doc.querySelector(`input[name="${name}"]:checked`)?.value;
+
+  function render(changed = false) {
     const mode = value("editor-mode") === "one" ? "one" : "follow";
     panel.querySelectorAll("[data-editor-when]").forEach((group) => {
       group.hidden = group.getAttribute("data-editor-when") !== mode;
@@ -274,6 +406,7 @@ function wire(doc) {
       dark: value("editor-dark"),
       look: value("editor-look"),
       calendar: value("editor-calendar"),
+      stars: value("editor-stars") ?? DEFAULT.stars,
       refresh: refresh.touched ? { often, utcHour: refresh.utcHour, zone: refresh.zone, explicit: refresh.explicit } : DEFAULT_REFRESH,
     });
     promptEl.textContent = prompt(base.prompt, p);
@@ -288,6 +421,23 @@ function wire(doc) {
         ? refreshNote({ often, utcHour: refresh.utcHour, zone: refresh.zone })
         : `Detected ${detected}. Change any of these and the workflow also says time-zone: ${detected}.`;
     }
+    const card = pickedIn("preview-card") === "repo" ? "repo" : "profile";
+    const sideOf = pickedIn("preview-side") === "light" ? "light" : "dark";
+    const choice = { mode, dark: value("editor-dark"), look: value("editor-look") };
+    const look = previewLook(choice, sideOf);
+    preview(
+      {
+        mode,
+        dark: choice.dark,
+        side: sideOf,
+        card,
+        look,
+        calendar: value("editor-calendar") === "grid" ? "grid" : "chart",
+        stars: value("editor-stars") ?? DEFAULT.stars,
+        file: previewFile(p, card, sideOf),
+      },
+      changed,
+    );
   }
 
   panel.addEventListener("change", (event) => {
@@ -317,8 +467,9 @@ function wire(doc) {
     } else if (t.name === "editor-often") {
       refresh.touched = true;
     }
-    render();
+    render(true);
   });
+  doc.querySelector("[data-preview-bar]")?.addEventListener("change", () => render(true));
   if (hourEl) fillHours();
   // A browser may bring back the radios it had on a reload; draw what they say.
   render();

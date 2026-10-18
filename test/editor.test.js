@@ -14,10 +14,14 @@ import {
   LOOKS,
   parseThemes,
   plan,
+  previewAlt,
+  previewFile,
+  previewLook,
   prompt,
   refreshNote,
   refreshPlan,
   seasonHint,
+  STARS,
   THEME_ORDER,
   workflow,
 } from "../site/editor.js";
@@ -211,3 +215,26 @@ test("the prompt names a zone only when it was picked, and keeps the README's ot
   assert.ok(picked.includes("filling in my login and the repositories (one per line):"));
   assert.doesNotMatch(picked, /<zone>|this machine's IANA time zone/);
 });
+
+test("the stars, drawn as the action draws them: steps writes nothing, the others their line", async () => {
+  const { STARS_CHARTS } = await import("../src/svg.js");
+  assert.deepEqual(STARS, STARS_CHARTS);
+  assert.equal(plan({ stars: "steps" }).stars, null);
+  const p = plan({ stars: "bars", calendar: "grid" });
+  assert.equal(p.stars, "bars");
+  assert.match(workflow(YAML, p), /\n          calendar: grid\n          stars-chart: bars$/);
+  assert.match(prompt(PROMPT, p), /\n             time-zone: <zone>\n             calendar: grid\n             stars-chart: bars\n/);
+  assert.throws(() => plan({ stars: "pie" }), /no stars chart "pie"/);
+});
+
+test("the card beside the choices wears the look the reader would see, and names its file", () => {
+  assert.equal(previewLook({ mode: "follow", dark: "nebula", look: "midnight" }, "dark"), "nebula");
+  assert.equal(previewLook({ mode: "follow", dark: "nebula", look: "midnight" }, "light"), "daylight");
+  assert.equal(previewLook({ mode: "one", dark: "nebula", look: "bridge" }, "light"), "bridge");
+  assert.equal(previewFile(plan(), "profile", "dark"), "profile-dark.svg");
+  assert.equal(previewFile(plan(), "repo", "light"), "your-repo-light.svg");
+  assert.equal(previewFile(plan({ dark: "nebula" }), "profile", "dark"), "profile-nebula.svg");
+  assert.equal(previewFile(plan({ mode: "one", look: "upside-down" }), "repo", "dark"), "your-repo.svg");
+  assert.equal(previewAlt({ card: "profile", look: "upside-down", calendar: "grid", stars: "bars" }), "The profile card in the Upside Down look, its year as a grid and its stars as bars");
+});
+

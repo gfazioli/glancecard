@@ -63,7 +63,15 @@ season (`resolveLook`), in the card's time zone.
 
 `site/` is hand-authored HTML, CSS, one deferred script (`site.js`) and one
 module (`editor.js`), published by `.github/workflows/pages.yml` after
-`scripts/site.js build` renders the cards it shows. Five blocks in
+`scripts/site.js build` renders the cards it shows. The editor's card is
+drawn in the page by `preview.js`, which the build writes: the renderer's
+modules from `src/`, each in its own scope, in `PREVIEW_MODULES` order, and
+the author's data, loaded when the editor comes near the screen. A test
+holds it to `src/` byte for byte. It can bundle only what the modules do
+today, `import { … } from "./x.js";` on one line and `export function` or
+`export const`: anything else stops the build. The page keeps no other card
+of its own, but the build still writes every look's, because the README's
+Looks table and old release notes show them from there. Five blocks in
 `site/index.html` are copies that a test holds to their source: the springs
 (`scripts/springs.js`, the sibling sites' sampler), the one-paste prompt, the
 by-hand workflow and the README embed (the README's), and the publisher line

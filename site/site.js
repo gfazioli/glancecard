@@ -1,12 +1,13 @@
 /*
- * site.js — the page's motion and its controls: the scroll reveals, the
- * look switcher with its chart or grid, and the prompt's copy button.
+ * site.js — the page's motion and its copy buttons: the scroll reveals,
+ * and the prompt's, the workflow's and the embed's Copy.
  *
  * Deferred, and nothing here is needed to read the page: without it every
- * section is where the layout put it, the looks show Midnight's chart, and the prompt
- * can be selected by hand. The reveals are octoscope's landing engine, the
- * one findergit.app and lancetta.app run, without the light a card catches,
- * which animates a property the compositor cannot run.
+ * section is where the layout put it, and the prompt can be selected by
+ * hand. The editor and its card are editor.js's. The reveals are
+ * octoscope's landing engine, the one findergit.app and lancetta.app run,
+ * without the light a card catches, which animates a property the
+ * compositor cannot run.
  */
 (function () {
     'use strict';
@@ -70,82 +71,6 @@
                 el.setAttribute('data-armed', '');
                 observer.observe(el);
             }
-        });
-    })();
-
-    // ------------------------------------------------------------------
-    // The looks, each with its year as a chart or as a grid. Only
-    // Midnight's chart loads with the page; another card is fetched the
-    // first time it is asked for, and shown once decoded, so a switch
-    // never flashes an empty stage.
-    // ------------------------------------------------------------------
-    (function looks() {
-        var buttons = document.querySelectorAll('.swatch[data-look]');
-        var calendars = document.querySelectorAll('.swatch[data-calendar]');
-        var stage = document.querySelector('.look-stage');
-        var code = document.getElementById('look-code');
-        var calendarCode = document.getElementById('calendar-code');
-        if (!buttons.length || !stage) return;
-        var current = 'midnight';
-        var calendar = 'chart';
-
-        function card(look, cal) {
-            return stage.querySelector('img[data-look="' + look + '"][data-calendar="' + cal + '"]');
-        }
-
-        function load(img) {
-            if (img && img.getAttribute('data-src')) {
-                img.src = img.getAttribute('data-src');
-                img.removeAttribute('data-src');
-            }
-        }
-
-        function ready(img, fn) {
-            load(img);
-            if (img.decode) img.decode().then(fn, fn);
-            else if (img.complete) fn();
-            else img.addEventListener('load', fn, { once: true });
-        }
-
-        function show(look, cal) {
-            if (look === current && cal === calendar) return;
-            var next = card(look, cal);
-            if (!next) return;
-            current = look;
-            calendar = cal;
-            each(buttons, function (b) {
-                b.setAttribute('aria-pressed', b.getAttribute('data-look') === look ? 'true' : 'false');
-            });
-            each(calendars, function (b) {
-                b.setAttribute('aria-pressed', b.getAttribute('data-calendar') === cal ? 'true' : 'false');
-            });
-            if (code) code.textContent = 'theme: ' + look;
-            if (calendarCode) calendarCode.textContent = 'calendar: ' + cal;
-            ready(next, function () {
-                if (current !== look || calendar !== cal) return;
-                each(stage.querySelectorAll('img.on'), function (img) {
-                    img.classList.remove('on');
-                });
-                next.classList.add('on');
-            });
-        }
-
-        each(buttons, function (b) {
-            b.addEventListener('click', function () {
-                show(b.getAttribute('data-look'), calendar);
-            });
-            // A look the pointer rests on starts loading before the click.
-            b.addEventListener('pointerenter', function () {
-                load(card(b.getAttribute('data-look'), calendar));
-            });
-        });
-        each(calendars, function (b) {
-            b.addEventListener('click', function () {
-                show(current, b.getAttribute('data-calendar'));
-            });
-            b.addEventListener('pointerenter', function () {
-                load(card(current, b.getAttribute('data-calendar')));
-            });
         });
     })();
 

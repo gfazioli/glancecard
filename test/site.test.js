@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { after, test } from "node:test";
 import { build, resolveRequest } from "../scripts/site.js";
 import { springsCSS } from "../scripts/springs.js";
@@ -110,8 +111,11 @@ test("the editor's choices are radio groups, each with one choice made", async (
   assert.deepEqual(values("editor-dark"), LOOK_NAMES.filter((l) => theme(l).isDark));
   assert.deepEqual(values("editor-look"), LOOK_NAMES);
   assert.deepEqual(values("editor-calendar"), ["chart", "grid"]);
+  assert.deepEqual(values("editor-stars"), ["steps", "smooth", "bars"]);
   assert.deepEqual(values("editor-often"), ["day", "week"]);
-  for (const [name, choice] of [["editor-mode", "follow"], ["editor-dark", "midnight"], ["editor-look", "midnight"], ["editor-calendar", "chart"], ["editor-often", "day"]]) {
+  assert.deepEqual(values("preview-card"), ["profile", "repo"]);
+  assert.deepEqual(values("preview-side"), ["dark", "light"]);
+  for (const [name, choice] of [["editor-mode", "follow"], ["editor-dark", "midnight"], ["editor-look", "midnight"], ["editor-calendar", "chart"], ["editor-stars", "steps"], ["editor-often", "day"], ["preview-card", "profile"], ["preview-side", "dark"]]) {
     assert.deepEqual(checked(name), [choice], `${name} starts on ${choice}`);
   }
   assert.match(index, /<fieldset data-editor-when="one" hidden>/, "the one-look group waits for its mode");
@@ -154,6 +158,31 @@ test("the built page names each script by its content, so a deploy never pairs a
     assert.equal(hash, createHash("sha256").update(readFileSync(path.join(out, file))).digest("hex").slice(0, 10), file);
   }
   assert.match(built, /<script type="application\/ld\+json">/, "inline scripts keep no src");
+});
+
+test("the editor's card is glancecard's own renderer: the same data draws the same card, byte for byte", async () => {
+  const { profileModel } = await import("../src/profile/model.js");
+  const { renderProfile } = await import("../src/profile/render.js");
+  const { repoModel } = await import("../src/repo/model.js");
+  const { renderRepo } = await import("../src/repo/render.js");
+  const { theme } = await import("../src/theme.js");
+  const { fixture } = await import("./support/cases.js");
+  const preview = readFileSync(path.join(out, "preview.js"), "utf8");
+  assert.doesNotMatch(preview, /^import\b/m, "one module, importing nothing");
+  const m = await import(pathToFileURL(path.join(out, "preview.js")).href);
+  const tz = m.DATA.timeZone;
+  const profile = [m.profileModel(m.DATA.profile, { timeZone: tz }), profileModel(fixture("profile-gfazioli"), { timeZone: tz })];
+  const repo = [m.repoModel(m.DATA.repo, { timeZone: tz }), repoModel(fixture("octoscope"), { timeZone: tz })];
+  for (const [look, calendar, starsChart] of [["midnight", "chart", "steps"], ["nebula", "grid", "bars"], ["daylight", "chart", "smooth"]]) {
+    const o = (t) => ({ theme: t(look), calendar, starsChart, images: {} });
+    assert.equal(m.renderProfile(profile[0], o(m.theme)), renderProfile(profile[1], o(theme)), `profile ${look} ${calendar} ${starsChart}`);
+    assert.equal(m.renderRepo(repo[0], o(m.theme)), renderRepo(repo[1], o(theme)), `repository ${look} ${calendar} ${starsChart}`);
+  }
+  // The card the page starts on is the default choice, drawn from the same data.
+  assert.equal(readFileSync(path.join(out, "cards", "profile-midnight.svg"), "utf8"), m.renderProfile(profile[0], { theme: m.theme("midnight"), images: m.DATA.images }));
+  const editor = readFileSync(path.join(out, "editor.js"), "utf8");
+  const [, hash] = editor.match(/const PREVIEW = "\.\/preview\.js\?v=([0-9a-f]{10})";/);
+  assert.equal(hash, createHash("sha256").update(preview).digest("hex").slice(0, 10), "editor.js names preview.js by its content");
 });
 
 test("the preview server serves nothing outside the build", () => {
