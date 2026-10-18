@@ -1,5 +1,6 @@
 // From fetched data to what the profile card draws. Pure.
 
+import { starHistory } from "../repo/model.js";
 import { clock } from "../time.js";
 
 export function profileModel(data, { now = new Date(data.fetchedAt), timeZone = "UTC" } = {}) {
@@ -17,10 +18,11 @@ export function profileModel(data, { now = new Date(data.fetchedAt), timeZone = 
   if (rest > 0) languages.push({ name: "Other", color: "#6e7681", count: rest });
 
   const joined = new Date(user.createdAt);
+  const today = clock(timeZone).day(now);
   return {
     user,
     counts,
-    today: clock(timeZone).day(now),
+    today,
     repoCount: repos.length,
     stars: repos.reduce((s, r) => s + r.stargazerCount, 0),
     forks: repos.reduce((s, r) => s + r.forkCount, 0),
@@ -32,5 +34,6 @@ export function profileModel(data, { now = new Date(data.fetchedAt), timeZone = 
     days: user.contributionsCollection.contributionCalendar.weeks.flatMap((w) => w.contributionDays.map((d) => ({ day: d.date, count: d.contributionCount }))),
     commits: user.contributionsCollection.totalCommitContributions,
     contributedRepos: user.contributionsCollection.totalRepositoriesWithContributedCommits,
+    starHistory: starHistory(data.stars, null, today),
   };
 }

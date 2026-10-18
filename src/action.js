@@ -47,6 +47,11 @@ function mustGit(workspace, args) {
   return res.stdout;
 }
 
+/** The `state` files (absolute) to commit, relative to `workspace`: those git does not ignore. */
+export function kept(workspace, state) {
+  return state.map((f) => path.relative(workspace, f)).filter((f) => git(workspace, ["check-ignore", "-q", "--", f]).status !== 0);
+}
+
 /** Commits `files` (paths relative to `workspace`) and pushes; false when nothing changed. */
 export function commit(workspace, files, message) {
   if (git(workspace, ["rev-parse", "--is-inside-work-tree"]).status !== 0) {
@@ -70,7 +75,7 @@ async function main() {
   const profile = input("profile") || null;
   if (!repos.length && !profile) throw new Error("set repos, profile, or both");
 
-  const { files, failures } = await renderCards({
+  const { files, failures, state } = await renderCards({
     client: createClient({ token: input("token"), userAgent: `glancecard/${version}` }),
     repos,
     profile,
@@ -92,7 +97,7 @@ async function main() {
   const event = process.env.GITHUB_EVENT_NAME ?? "";
   if (parseBool(input("commit") || "true", "commit") && relative.length) {
     if (event.startsWith("pull_request")) console.log("::notice title=glancecard::Not committing on a pull request; the cards are only rendered.");
-    else committed = commit(workspace, relative, input("commit-message") || "chore: refresh glancecard");
+    else committed = commit(workspace, [...relative, ...kept(workspace, state)], input("commit-message") || "chore: refresh glancecard");
   }
   setOutput("committed", String(committed));
   console.log(committed ? "Committed the cards." : "No commit.");

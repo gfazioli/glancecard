@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
-import { commit } from "../src/action.js";
+import { commit, kept } from "../src/action.js";
 
 // The action's commit path against a real bare remote, with no git identity
 // configured anywhere, as on a fresh runner.
@@ -69,4 +69,12 @@ test("a push that lands first is rebased onto, not lost", () => {
   writeFileSync(path.join(work, "glancecard", "a-dark.svg"), "<svg>new</svg>");
   assert.equal(commit(work, ["glancecard/a-dark.svg"], "chore: refresh glancecard"), true);
   assert.deepEqual(git(remote, "log", "-2", "--format=%s").split("\n"), ["chore: refresh glancecard", "meanwhile"]);
+});
+
+test("the star histories are committed with the cards, unless git ignores them", () => {
+  const stars = path.join(work, "glancecard", ".stars.json");
+  writeFileSync(stars, "{}\n");
+  assert.deepEqual(kept(work, [stars]), ["glancecard/.stars.json"]);
+  writeFileSync(path.join(work, ".gitignore"), "glancecard/.stars.json\n");
+  assert.deepEqual(kept(work, [stars]), []);
 });

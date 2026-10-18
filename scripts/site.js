@@ -10,6 +10,8 @@
 // glancecard's own repository card. Each
 // <img data-card="…"> then gets its card's real width and height, so the page
 // reserves the right room before the image arrives. `out` defaults to _site.
+// A live build keeps the star histories it read in .stars.json (the Pages
+// workflow caches it between builds), so a rebuild reads the newest weeks only.
 
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -25,6 +27,7 @@ import { renderProfile } from "../src/profile/render.js";
 import { fetchRepo } from "../src/repo/fetch.js";
 import { repoModel } from "../src/repo/model.js";
 import { renderRepo } from "../src/repo/render.js";
+import { starStore } from "../src/stars.js";
 import { LOOK_NAMES, theme } from "../src/theme.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -54,7 +57,10 @@ export async function renderSiteCards({ fixtures = false, now = new Date() } = {
     repoData = fixture("glancecard");
   } else {
     const client = createClient({ token: token(), userAgent: "glancecard-site" });
-    [profileData, repoData] = await Promise.all([fetchProfile(client, LOGIN, { now }), fetchRepo(client, REPO, { now, timeZone: TZ })]);
+    const stars = starStore({ file: path.join(ROOT, ".stars.json"), now });
+    await stars.load();
+    [profileData, repoData] = await Promise.all([fetchProfile(client, LOGIN, { now, stars }), fetchRepo(client, REPO, { now, timeZone: TZ, stars })]);
+    await stars.save();
     images = {
       ...(await loadImages(client, [profileData.user.avatarUrl], 160)),
       ...(await loadImages(client, repoData.contributors.list.map((c) => c.avatarUrl), 56)),

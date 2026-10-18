@@ -1,11 +1,11 @@
 // Drawing primitives shared by both cards, bound to a look: the frame and
 // its decorations, panels and their titles, pills that flow and wrap, icons,
-// the sparkline and the year chart.
+// the sparkline, the year chart, and the Stars panel.
 
 import { decorate } from "./decor.js";
 import { OCTICONS } from "./icons.js";
 import { alpha, display, styles } from "./theme.js";
-import { compact, esc, fit, textWidth } from "./text.js";
+import { compact, esc, fit, full, plural, textWidth } from "./text.js";
 import { daysBetween, MONTHS } from "./time.js";
 
 export const W = 880;
@@ -248,6 +248,44 @@ export function kit(t) {
   <path d="${d}" class="growth-line" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
   }
 
+  /**
+   * The Stars panel at `y`, across the card: the running total of `s` (a star
+   * history) under the `count` stars it ends at, with the stars of the last
+   * 30 days, of the last year once the history is a year old (younger, it
+   * would repeat the total), and of the best week; or a line saying why
+   * there is none. Its line is filled with `starsFill`.
+   */
+  function starsPanel(s, count, y, today) {
+    const A = t.accent;
+    const month = (day) => `${MONTHS[Number(day.slice(5, 7)) - 1]} ${day.slice(0, 4)}`;
+    const head = (h) => `
+  ${panel(PAD, y, IW, h)}
+  ${panelTitle(PAD, y, "star", A.yellow, "Stars", { x: PAD + IW - 18, text: `${plural(count, "star")}${s?.first ? ` since ${month(s.first)}` : ""}` })}`;
+    if (!s?.total) {
+      const h = 96;
+      return { h, svg: `${head(h)}
+  <text x="${PAD + 18}" y="${y + 70}" class="excerpt">${s ? "No stars yet." : "GitHub returned no star history."}</text>` };
+    }
+    const chips = flow(PAD + 18, y + 44, IW - 36, [
+      { label: "Last 30 days", value: `+${full(s.last30)}`, icon: "star", color: A.yellow },
+      ...(daysBetween(s.points[0].day, today) >= 365 ? [{ label: "Last year", value: `+${full(s.lastYear)}`, icon: "calendar", color: A.blue }] : []),
+      { label: "Best week", value: `+${full(s.best.count)} · ${month(s.best.day)}`, icon: "trophy", color: A.orange },
+    ]);
+    const h = 232;
+    return { h, svg: `${head(h)}
+  ${chips.svg}${growthChart(s.points, PAD + 18, y + 92, IW - 36, 102, A.yellow, "stars-fill")}` };
+  }
+
+  /** The gradient under the Stars panel's line, for a history that draws one. */
+  const starsFill = (s) =>
+    s?.total
+      ? `
+  <linearGradient id="stars-fill" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="${t.accent.yellow}" stop-opacity="${t.spark}"/>
+    <stop offset="1" stop-color="${t.accent.yellow}" stop-opacity="0"/>
+  </linearGradient>`
+      : "";
+
   /** A round avatar, or a disc when the image could not be fetched. */
   function avatar(id, data, cx, cy, r, ring, ringWidth = 1) {
     const face = data
@@ -340,5 +378,5 @@ ${body}${decor.front ? `\n<g clip-path="url(#card)" aria-hidden="true">${decor.f
     return { svg, h: Math.ceil(items.length / cols) * (h + GAP) - GAP };
   }
 
-  return { t, icon, panel, panelTitle, disp, pill, flow, sparkline, yearChart, growthChart, avatar, frame, tileGradients, tiles };
+  return { t, icon, panel, panelTitle, disp, pill, flow, sparkline, yearChart, growthChart, starsPanel, starsFill, avatar, frame, tileGradients, tiles };
 }

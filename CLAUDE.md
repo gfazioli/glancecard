@@ -13,6 +13,9 @@ even `@actions/core`: the runner protocol is `INPUT_*` variables,
 - `src/svg.js` — drawing primitives bound to a palette; `src/theme.js` — the
   dark and light palettes and the shared stylesheet; `src/text.js` — glyph
   widths, `fit`, `wrap`; `src/time.js` — days and hours in a time zone.
+- `src/stars.js` — GitHub's star history for both cards, and the store that
+  keeps it in `<out-dir>/.stars.json` between runs, so a daily run reads the
+  newest page of each repository only.
 - `src/run.js` — what the CLI (`src/cli.js`) and the Action share.
 - `test/fixtures/` — recorded API data; `test/golden/` — the cards they must
   render to, byte for byte.
@@ -38,7 +41,11 @@ even `@actions/core`: the runner protocol is `INPUT_*` variables,
   against the exact timestamps, 0 of 35 days differ in Pacific time and 23 in
   UTC. It cannot be moved to the card's zone, so a star may sit a day off.
   It answers 30 weeks a page whatever `per_page` asks, empty weeks included,
-  and counts only the stars still given. The stargazer list behind the old
+  and counts only the stars still given, and not always all of them:
+  next-app-nextra-template's history adds up to 36 of its 37, for good. The
+  store (`src/stars.js`) trusts a kept history while it misses by what it
+  missed by before; held to the exact count, it would read that repository
+  in full every day. The stargazer list behind the old
   star-history charts is for admins and collaborators only since July 2026,
   so it is no substitute: the workflow token cannot read it for another
   repository.

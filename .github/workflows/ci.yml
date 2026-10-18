@@ -70,6 +70,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # The star histories the last run read: without them the profile
+      # card's stars take hundreds of requests on every run.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: action-out/.stars.json
+          key: stars-ci-${{ github.run_id }}
+          restore-keys: stars-ci-
       - id: cards
         uses: ./
         with:
@@ -87,6 +94,7 @@ jobs:
           test "$(printf '%s\n' "$FILES" | grep -c '\.svg$')" -eq 4
           test "$COMMITTED" = false
           for f in $FILES; do test -s "$f" && head -c 200 "$f" | grep -q '<svg'; done
+          grep -q '"gfazioli/octoscope"' action-out/.stars.json
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: action-cards

@@ -83,7 +83,8 @@ test("a year is a chart by default, and GitHub's calendar when asked", () => {
     assert.doesNotMatch(grid, /class="chart-line"/);
     assert.equal(squares(grid), days + 5, "a square per day, and five in the legend");
   }
-  const axis = [...renderProfile(profile, { theme: THEMES.dark }).matchAll(/class="axis" text-anchor="end">(\d+)</g)].map((m) => m[1]);
+  // The contributions axis alone: the Stars panel has one of its own.
+  const axis = [...renderProfile(profile, { theme: THEMES.dark, stars: false }).matchAll(/class="axis" text-anchor="end">(\d+)</g)].map((m) => m[1]);
   assert.deepEqual(axis, ["0", "100", "200", "300", "400"]);
 });
 
@@ -141,4 +142,16 @@ test("a repository without stars, or without a history, says so in place of the 
   assert.match(missing, /class="excerpt">GitHub returned no star history\.</);
   const off = renderRepo(repoModel(data, { timeZone: "Europe/Rome" }), { theme: THEMES.dark, sections: ["hero"] });
   assert.doesNotMatch(off, />Stars<|stars-fill/);
+});
+
+test("the profile card draws the stars of every public repository, unless told not to", () => {
+  const m = profileModel(fixture("profile-gfazioli"), { timeZone: "Europe/Rome" });
+  const svg = renderProfile(m, { theme: THEMES.dark });
+  assert.match(svg, new RegExp(`class="caption" text-anchor="end">${m.stars} stars since Mar 2011<`));
+  assert.match(svg, /class="pill-k">Best week<tspan dx="5" class="pill-v">\+45 · Nov 2025</);
+  assert.ok(starLine(svg).length > 1);
+  const without = renderProfile(m, { theme: THEMES.dark, stars: false });
+  // The panel's title, not the tile that counts the stars too.
+  assert.doesNotMatch(without, /growth-line|stars-fill|class="title disp"[^>]*>Stars</);
+  assert.ok(Number(without.match(/height="(\d+)"/)[1]) < Number(svg.match(/height="(\d+)"/)[1]));
 });

@@ -1,6 +1,7 @@
 // Everything a repository card needs from GitHub, as plain JSON: what the
 // model reads, and what a test fixture records.
 
+import { starStore } from "../stars.js";
 import { addDays, clock } from "../time.js";
 import { calendarStart } from "./model.js";
 
@@ -130,35 +131,10 @@ async function fetchTree(client, full, branch) {
 }
 
 /**
- * The weeks the repository was starred in, oldest first: `week` is its
- * Sunday, and `days` the stars of each day from it, counted in Pacific time.
- * GitHub answers 30 weeks a page whatever `per_page` asks, empty ones
- * included, back to the repository's creation, and only for stars still
- * given: an unstar leaves no trace. Null where the endpoint does not exist
- * (an older GitHub Enterprise Server).
- */
-export async function fetchStars(client, full) {
-  const path = `/repos/${full}/stargazers/history`;
-  let first;
-  try {
-    first = await client.rest(path);
-  } catch (error) {
-    if (/: HTTP 404$/.test(error.message)) return null;
-    throw error;
-  }
-  const last = Number(first.link.match(/[?&]page=(\d+)>; rel="last"/)?.[1] ?? 1);
-  const rest = await Promise.all(Array.from({ length: last - 1 }, (_, i) => client.rest(`${path}?page=${i + 2}`)));
-  return [first, ...rest]
-    .flatMap((page) => page.data)
-    .filter((w) => w.total > 0)
-    .map((w) => ({ week: new Date(w.week * 1000).toISOString().slice(0, 10), days: w.days }))
-    .sort((a, b) => (a.week < b.week ? -1 : 1));
-}
-
-/**
  * Fetches a repository's card data. `now` and `timeZone` set how far back the
- * commit history goes: to the first day the calendar draws. `stars` asks for
- * the star history, a request for every 30 weeks of the repository's life.
+ * commit history goes: to the first day the calendar draws. `stars` is the
+ * store the star history is read through (`src/stars.js`), true for one of
+ * its own, or false to leave it out.
  */
 export async function fetchRepo(client, full, { now = new Date(), timeZone = "UTC", maxCommits = 5000, allowPrivate = false, stars = true } = {}) {
   const [owner, name, extra] = String(full).split("/");
@@ -176,7 +152,7 @@ export async function fetchRepo(client, full, { now = new Date(), timeZone = "UT
     fetchReleases(client, owner, name),
     fetchContributors(client, `${owner}/${name}`),
     fetchTree(client, `${owner}/${name}`, repo.defaultBranchRef.name),
-    stars ? fetchStars(client, `${owner}/${name}`) : null,
+    stars ? (stars === true ? starStore() : stars).history(client, `${owner}/${name}`, repo.stargazerCount) : null,
   ]);
   return { kind: "repo", fetchedAt: new Date(now).toISOString(), repo, history, releases, contributors, tree, stars: starHistory };
 }

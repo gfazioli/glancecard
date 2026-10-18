@@ -10,9 +10,13 @@ import { renderProfile } from "./profile/render.js";
 import { fetchRepo } from "./repo/fetch.js";
 import { repoModel } from "./repo/model.js";
 import { REPO_SECTIONS, renderRepo } from "./repo/render.js";
+import { starStore } from "./stars.js";
 import { CALENDARS } from "./svg.js";
 import { resolveLook, theme as lookTheme, THEME_NAMES } from "./theme.js";
 import { clock } from "./time.js";
+
+/** The file in the cards' folder the star histories are kept in. */
+export const STARS_FILE = ".stars.json";
 
 /** Items separated by commas, spaces or newlines. */
 export const parseList = (value) =>
@@ -65,6 +69,8 @@ export const fileNames = (base, themes) => (themes.length > 1 ? themes.map((t) =
 /**
  * Renders a card per repository, plus the profile card when `profile` is set.
  * A target that fails is reported in `failures` and the others still render.
+ * `state` lists the files kept for the next run (the star histories), to be
+ * committed with the cards.
  */
 export async function renderCards({
   client,
@@ -108,10 +114,15 @@ export async function renderCards({
     files.push(file);
   };
 
+  // The star histories, kept beside the cards between runs: a daily run asks
+  // for the newest page of each repository only.
+  const stars = sections.includes("stars") && starStore({ file: path.join(outDir, STARS_FILE), now });
+  if (stars) await stars.load();
+
   const bases = fileBases(repos);
   for (const full of repos) {
     try {
-      const data = await fetchRepo(client, full, { now, timeZone, maxCommits, allowPrivate, stars: sections.includes("stars") });
+      const data = await fetchRepo(client, full, { now, timeZone, maxCommits, allowPrivate, stars });
       const model = repoModel(data, { now, timeZone });
       const images = await loadImages(client, model.contributors.map((c) => c.avatarUrl), 56);
       for (const [theme, name] of fileNames(bases.get(full), themes)) {
@@ -125,16 +136,17 @@ export async function renderCards({
 
   if (profile) {
     try {
-      const data = await fetchProfile(client, profile, { now });
+      const data = await fetchProfile(client, profile, { now, stars });
       const model = profileModel(data, { now, timeZone });
       const images = await loadImages(client, [model.user.avatarUrl], 160);
       for (const [theme, name] of fileNames("profile", themes)) {
-        await write(name, renderProfile(model, { theme: looks.get(theme), calendar, images }));
+        await write(name, renderProfile(model, { theme: looks.get(theme), calendar, images, stars: Boolean(stars) }));
       }
       log(`@${profile}: ${model.calendar.totalContributions} contributions in the last year, ${model.stars} stars`);
     } catch (error) {
       failures.push({ target: `@${profile}`, error });
     }
   }
-  return { files, failures };
+  const state = stars ? [await stars.save()] : [];
+  return { files, failures, state };
 }

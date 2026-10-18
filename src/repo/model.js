@@ -40,7 +40,8 @@ export function quartiles(counts) {
 }
 
 /**
- * The star history from `start` to `today`: the running total before and
+ * The star history from `start` (or, without one, from its first star) to
+ * `today`: the running total before and
  * after each day with stars, so the line holds flat between them and climbs
  * on the day; the stars of the last 30 and 365 days; and the best week, named
  * by its first starred day. GitHub counts its days in Pacific time, so a star
@@ -58,7 +59,7 @@ export function starHistory(weeks, start, today) {
     }),
   );
   const first = starred[0]?.day ?? null;
-  const points = [{ day: first && first <= start ? addDays(first, -1) : start, total: 0 }];
+  const points = [{ day: first && (!start || first <= start) ? addDays(first, -1) : (start ?? today), total: 0 }];
   const perWeek = new Map();
   let total = 0;
   let last30 = 0;

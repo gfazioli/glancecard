@@ -1,6 +1,7 @@
 // The profile card: who, ten stat tiles, a year of contributions (a chart of
-// daily counts, or GitHub's calendar), the most starred repositories and
-// their languages.
+// daily counts, or GitHub's calendar), the stars of every public repository
+// since the first, the most starred repositories and their languages. The
+// stars can be left out.
 
 import { HALF, IW, kit, PAD, SECTION } from "../svg.js";
 import { THEMES } from "../theme.js";
@@ -9,7 +10,7 @@ import { formatDay, MONTHS } from "../time.js";
 
 const LEVELS = ["NONE", "FIRST_QUARTILE", "SECOND_QUARTILE", "THIRD_QUARTILE", "FOURTH_QUARTILE"];
 
-export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = "chart" } = {}) {
+export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = "chart", stars = true } = {}) {
   const k = kit(theme);
   const A = theme.accent;
   const u = m.user;
@@ -165,6 +166,11 @@ export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = 
   const cal = contributions(y);
   parts.push(cal.svg);
   y += cal.h + SECTION;
+  if (stars) {
+    const panel = k.starsPanel(m.starHistory, m.stars, y, m.today);
+    parts.push(panel.svg);
+    y += panel.h + SECTION;
+  }
   const bottomH = 80 + (Math.max(m.topRepos.length, m.languages.length, 1) - 1) * 21 + 17;
   parts.push(topRepos(PAD, y, HALF, bottomH));
   parts.push(languages(PAD + HALF + SECTION, y, HALF, bottomH));
@@ -187,7 +193,7 @@ export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = 
   <linearGradient id="spark" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0" stop-color="${A.contributions}" stop-opacity="${theme.spark}"/>
     <stop offset="1" stop-color="${A.contributions}" stop-opacity="0"/>
-  </linearGradient>${k.tileGradients(tileItems.map((t) => t.color))}`;
+  </linearGradient>${stars ? k.starsFill(m.starHistory) : ""}${k.tileGradients(tileItems.map((t) => t.color))}`;
 
   return k.frame({ height: y, title: `${name}'s GitHub activity`, desc, defs, body: parts.join("\n"), contentTop, ledge: contentTop });
 }
