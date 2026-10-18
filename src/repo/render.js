@@ -1,15 +1,16 @@
 // The repository card: header, hero, twelve stat tiles, a year of commits (a
-// chart of daily counts, or GitHub's calendar), the weekly rhythm, languages
-// and essentials, latest commits and releases, contributors. Every section
+// chart of daily counts, or GitHub's calendar), the stars over the
+// repository's life, the weekly rhythm, languages and essentials, latest
+// commits and releases, contributors. Every section
 // but the header can be left out; when one of a side-by-side pair is, the
 // other takes the full width.
 
 import { HALF, IW, kit, PAD, SECTION, W } from "../svg.js";
 import { THEMES } from "../theme.js";
 import { compact, esc, excerpt, fit, full, plural, size, SLACK, textWidth, wrap } from "../text.js";
-import { age, ago, formatDay, MONTHS } from "../time.js";
+import { age, ago, daysBetween, formatDay, MONTHS } from "../time.js";
 
-export const REPO_SECTIONS = ["hero", "tiles", "activity", "rhythm", "code", "commits", "releases", "contributors"];
+export const REPO_SECTIONS = ["hero", "tiles", "activity", "stars", "rhythm", "code", "commits", "releases", "contributors"];
 
 export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, images = {}, calendar = "chart" } = {}) {
   const k = kit(theme);
@@ -182,6 +183,33 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
   <text x="${lx + levels.length * step + 5}" y="${y + h - 16}" class="axis">More</text>`;
     return { h, svg: `${head(h)}
   ${months}${days}${cells}${legend}${capped(gx - labelW, h)}` };
+  }
+
+  // ─── Stars ───
+
+  function stars(y) {
+    const x = PAD;
+    const s = m.stars;
+    const since = s?.first ? ` since ${MONTHS[Number(s.first.slice(5, 7)) - 1]} ${s.first.slice(0, 4)}` : "";
+    const head = (h) => `
+  ${k.panel(x, y, IW, h)}
+  ${k.panelTitle(x, y, "star", A.yellow, "Stars", { x: x + IW - 18, text: `${plural(r.stargazerCount, "star")}${since}` })}`;
+    if (!s?.total) {
+      const h = 96;
+      const note = s ? "No stars yet." : "GitHub returned no star history.";
+      return { h, svg: `${head(h)}
+  <text x="${x + 18}" y="${y + 70}" class="excerpt">${note}</text>` };
+    }
+    // A history younger than a year has no last year apart from its total.
+    const best = s.best.day;
+    const chips = k.flow(x + 18, y + 44, IW - 36, [
+      { label: "Last 30 days", value: `+${full(s.last30)}`, icon: "star", color: A.yellow },
+      ...(daysBetween(s.points[0].day, m.today) >= 365 ? [{ label: "Last year", value: `+${full(s.lastYear)}`, icon: "calendar", color: A.blue }] : []),
+      { label: "Best week", value: `+${full(s.best.count)} · ${MONTHS[Number(best.slice(5, 7)) - 1]} ${best.slice(0, 4)}`, icon: "trophy", color: A.orange },
+    ]);
+    const h = 232;
+    return { h, svg: `${head(h)}
+  ${chips.svg}${k.growthChart(s.points, x + 18, y + 92, IW - 36, 102, A.yellow, "stars-fill")}` };
   }
 
   // ─── Side-by-side panels: each returns the height it needs and a draw(h) ───
@@ -388,6 +416,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
   if (on.has("hero")) add(hero(y));
   if (on.has("tiles")) add(k.tiles(tileItems, y, 6));
   if (on.has("activity")) add(activity(y));
+  if (on.has("stars")) add(stars(y));
   pair({ name: "rhythm", make: rhythm }, { name: "code", make: code });
   pair({ name: "commits", make: commits }, { name: "releases", make: releases });
   if (on.has("contributors")) add(contributors(y));
@@ -407,7 +436,15 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
   <linearGradient id="spark" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0" stop-color="${A.contributions}" stop-opacity="${theme.spark}"/>
     <stop offset="1" stop-color="${A.contributions}" stop-opacity="0"/>
-  </linearGradient>${k.tileGradients(tileItems.map((t) => t.color))}`;
+  </linearGradient>${
+    on.has("stars") && m.stars?.total
+      ? `
+  <linearGradient id="stars-fill" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="${A.yellow}" stop-opacity="${theme.spark}"/>
+    <stop offset="1" stop-color="${A.yellow}" stop-opacity="0"/>
+  </linearGradient>`
+      : ""
+  }${k.tileGradients(tileItems.map((t) => t.color))}`;
 
   return k.frame({ height, title: `${r.nameWithOwner} at a glance`, desc, defs, body: parts.join("\n"), contentTop, ledge: contentTop + 68 });
 }

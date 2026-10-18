@@ -22,10 +22,10 @@ test("themes: both, dark, light and the looks, in any mix", () => {
 });
 
 test("sections", () => {
-  assert.equal(parseSections("all").length, 8);
-  assert.equal(parseSections("").length, 8);
-  assert.deepEqual(parseSections("hero, code"), ["hero", "code"]);
-  assert.throws(() => parseSections("hero, stars"), /unknown section stars/);
+  assert.equal(parseSections("all").length, 9);
+  assert.equal(parseSections("").length, 9);
+  assert.deepEqual(parseSections("hero, stars"), ["hero", "stars"]);
+  assert.throws(() => parseSections("hero, forks"), /unknown section forks/);
 });
 
 test("calendar: a chart unless told grid", () => {

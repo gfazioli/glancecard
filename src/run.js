@@ -111,7 +111,7 @@ export async function renderCards({
   const bases = fileBases(repos);
   for (const full of repos) {
     try {
-      const data = await fetchRepo(client, full, { now, timeZone, maxCommits, allowPrivate });
+      const data = await fetchRepo(client, full, { now, timeZone, maxCommits, allowPrivate, stars: sections.includes("stars") });
       const model = repoModel(data, { now, timeZone });
       const images = await loadImages(client, model.contributors.map((c) => c.avatarUrl), 56);
       for (const [theme, name] of fileNames(bases.get(full), themes)) {

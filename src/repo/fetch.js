@@ -130,10 +130,37 @@ async function fetchTree(client, full, branch) {
 }
 
 /**
- * Fetches a repository's card data. `now` and `timeZone` set how far back the
- * commit history goes: to the first day the calendar draws.
+ * The weeks the repository was starred in, oldest first: `week` is its
+ * Sunday, and `days` the stars of each day from it, counted in Pacific time.
+ * GitHub answers 30 weeks a page whatever `per_page` asks, empty ones
+ * included, back to the repository's creation, and only for stars still
+ * given: an unstar leaves no trace. Null where the endpoint does not exist
+ * (an older GitHub Enterprise Server).
  */
-export async function fetchRepo(client, full, { now = new Date(), timeZone = "UTC", maxCommits = 5000, allowPrivate = false } = {}) {
+export async function fetchStars(client, full) {
+  const path = `/repos/${full}/stargazers/history`;
+  let first;
+  try {
+    first = await client.rest(path);
+  } catch (error) {
+    if (/: HTTP 404$/.test(error.message)) return null;
+    throw error;
+  }
+  const last = Number(first.link.match(/[?&]page=(\d+)>; rel="last"/)?.[1] ?? 1);
+  const rest = await Promise.all(Array.from({ length: last - 1 }, (_, i) => client.rest(`${path}?page=${i + 2}`)));
+  return [first, ...rest]
+    .flatMap((page) => page.data)
+    .filter((w) => w.total > 0)
+    .map((w) => ({ week: new Date(w.week * 1000).toISOString().slice(0, 10), days: w.days }))
+    .sort((a, b) => (a.week < b.week ? -1 : 1));
+}
+
+/**
+ * Fetches a repository's card data. `now` and `timeZone` set how far back the
+ * commit history goes: to the first day the calendar draws. `stars` asks for
+ * the star history, a request for every 30 weeks of the repository's life.
+ */
+export async function fetchRepo(client, full, { now = new Date(), timeZone = "UTC", maxCommits = 5000, allowPrivate = false, stars = true } = {}) {
   const [owner, name, extra] = String(full).split("/");
   if (!owner || !name || extra !== undefined) throw new Error(`"${full}" is not owner/name`);
   const repo = (await client.graphql(REPO_QUERY, { owner, name })).repository;
@@ -144,11 +171,12 @@ export async function fetchRepo(client, full, { now = new Date(), timeZone = "UT
   if (!repo.defaultBranchRef) throw new Error(`${full} has no commits yet`);
 
   const since = `${addDays(calendarStart(clock(timeZone).day(now)), -1)}T00:00:00Z`;
-  const [history, releases, contributors, tree] = await Promise.all([
+  const [history, releases, contributors, tree, starHistory] = await Promise.all([
     fetchHistory(client, owner, name, since, maxCommits),
     fetchReleases(client, owner, name),
     fetchContributors(client, `${owner}/${name}`),
     fetchTree(client, `${owner}/${name}`, repo.defaultBranchRef.name),
+    stars ? fetchStars(client, `${owner}/${name}`) : null,
   ]);
-  return { kind: "repo", fetchedAt: new Date(now).toISOString(), repo, history, releases, contributors, tree };
+  return { kind: "repo", fetchedAt: new Date(now).toISOString(), repo, history, releases, contributors, tree, stars: starHistory };
 }

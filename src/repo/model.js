@@ -39,6 +39,47 @@ export function quartiles(counts) {
   return [q(0.25), q(0.5), q(0.75)];
 }
 
+/**
+ * The star history from `start` to `today`: the running total before and
+ * after each day with stars, so the line holds flat between them and climbs
+ * on the day; the stars of the last 30 and 365 days; and the best week, named
+ * by its first starred day. GitHub counts its days in Pacific time, so a star
+ * can land a day off the card's own day, even before the repository's: the
+ * line then starts the day before its first star, so the first climb, like
+ * every other, takes a day. Null without a history; a history without stars
+ * has a total of 0.
+ */
+export function starHistory(weeks, start, today) {
+  if (!weeks) return null;
+  const starred = weeks.flatMap(({ week, days }) =>
+    days.flatMap((n, i) => {
+      const day = addDays(week, i);
+      return n && day <= today ? [{ week, day, n }] : [];
+    }),
+  );
+  const first = starred[0]?.day ?? null;
+  const points = [{ day: first && first <= start ? addDays(first, -1) : start, total: 0 }];
+  const perWeek = new Map();
+  let total = 0;
+  let last30 = 0;
+  let lastYear = 0;
+  for (const { week, day, n } of starred) {
+    if (daysBetween(points.at(-1).day, day) > 1) points.push({ day: addDays(day, -1), total });
+    total += n;
+    points.push({ day, total });
+    const back = daysBetween(day, today);
+    if (back < 30) last30 += n;
+    if (back < 365) lastYear += n;
+    const w = perWeek.get(week) ?? { day, count: 0 };
+    w.count += n;
+    perWeek.set(week, w);
+  }
+  if (points.at(-1).day < today) points.push({ day: today, total });
+  // The earliest of the busiest weeks.
+  const best = [...perWeek.values()].reduce((a, w) => (!a || w.count > a.count ? w : a), null);
+  return { points, total, last30, lastYear, best, first };
+}
+
 export function repoModel(data, { now = new Date(data.fetchedAt), timeZone = "UTC" } = {}) {
   const clk = clock(timeZone);
   const { repo, history, releases, contributors, tree } = data;
@@ -107,5 +148,6 @@ export function repoModel(data, { now = new Date(data.fetchedAt), timeZone = "UT
     contributors: contributors.list,
     contributorCount: contributors.total,
     bots: contributors.bots,
+    stars: starHistory(data.stars, clk.day(repo.createdAt), today),
   };
 }

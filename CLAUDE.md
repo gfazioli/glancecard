@@ -32,6 +32,16 @@ even `@actions/core`: the runner protocol is `INPUT_*` variables,
   validate an assertion by breaking what it protects.
 - **Dates are local days.** GitHub returns UTC and drops the author's offset;
   every day and hour goes through `clock(timeZone)`.
+- **The star history counts its days in Pacific time.**
+  `/repos/{owner}/{repo}/stargazers/history` names each week by its Sunday at
+  00:00 UTC, but `days[i]` is that Sunday plus `i` in America/Los_Angeles:
+  against the exact timestamps, 0 of 35 days differ in Pacific time and 23 in
+  UTC. It cannot be moved to the card's zone, so a star may sit a day off.
+  It answers 30 weeks a page whatever `per_page` asks, empty weeks included,
+  and counts only the stars still given. The stargazer list behind the old
+  star-history charts is for admins and collaborators only since July 2026,
+  so it is no substitute: the workflow token cannot read it for another
+  repository.
 
 ## The looks
 

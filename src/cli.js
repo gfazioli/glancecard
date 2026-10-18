@@ -23,7 +23,7 @@ Options:
   --all-seasons        wear Halloween and Christmas out of their season
   --time-zone <zone>   IANA zone for commit days and hours (default: this machine's)
   --sections <list>    repository card sections, comma-separated (default: all):
-                       hero, tiles, activity, rhythm, code, commits, releases, contributors
+                       hero, tiles, activity, stars, rhythm, code, commits, releases, contributors
   --calendar <style>   how a year of contributions or commits is drawn (default: chart):
                        chart, a line of daily counts; grid, GitHub's calendar
   --max-commits <n>    commits read for the last year, at most (default: 5000)
