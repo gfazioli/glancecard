@@ -74,7 +74,8 @@ test("a push that lands first is rebased onto, not lost", () => {
 test("the star histories are committed with the cards, unless git ignores them", () => {
   const stars = path.join(work, "glancecard", ".stars.json");
   writeFileSync(stars, "{}\n");
-  assert.deepEqual(kept(work, [stars]), ["glancecard/.stars.json"]);
+  // In the platform's separators, as the cards' own paths are.
+  assert.deepEqual(kept(work, [stars]), [path.join("glancecard", ".stars.json")]);
   writeFileSync(path.join(work, ".gitignore"), "glancecard/.stars.json\n");
   assert.deepEqual(kept(work, [stars]), []);
 });
