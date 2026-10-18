@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0 — 2026-10-18
+
+**Three ways to draw the stars, and a card you can try before you copy.**
+
+- `stars-chart` (CLI: `--stars-chart`) picks how both cards draw the stars: `steps`, the default and what 0.4.0 drew, the running total exactly; `smooth`, a soft line through it that still never turns back down; or `bars`, the new stars of each month (each week, under half a year), on their own axis.
+- The website's Looks section and its setup editor are one, Make it yours: the choices, the card they make, drawn in the page by glancecard's own renderer from the author's data, and the workflow and the embed to copy under it. It writes `stars-chart` too.
+
 ## 0.4.0 — 2026-10-18
 
 **Every star.**
