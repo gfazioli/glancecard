@@ -178,3 +178,19 @@ test("the stars as a smooth line: fewer points than the steps, still only rising
   const ys = starLine(smooth);
   assert.ok(ys.every((y, i) => i === 0 || y <= ys[i - 1] + 0.05), "the smooth line turns back down");
 });
+
+test("a short history's bars stay inside the plot", async () => {
+  const { kit } = await import("../src/svg.js");
+  const points = [
+    { day: "2026-10-07", total: 0 },
+    { day: "2026-10-08", total: 2 },
+    { day: "2026-10-16", total: 2 },
+    { day: "2026-10-17", total: 5 },
+  ];
+  const svg = kit(THEMES.dark).growthChart(points, 100, 50, 600, 100, "#facc15", "stars-fill", "bars");
+  const bars = [...svg.matchAll(/<rect x="([\d.]+)" y="[\d.]+" width="([\d.]+)"/g)].map((m) => Number(m[1]) + Number(m[2]));
+  assert.equal(bars.length, 2);
+  assert.ok(bars.every((right) => right <= 700 + 1e-9), `a bar ends at ${Math.max(...bars)}, past 700`);
+  assert.match(svg, /class="axis">stars a week</);
+});
+

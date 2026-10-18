@@ -274,8 +274,9 @@ export function kit(t) {
       const bars = bins
         .map((b, i) => {
           if (!counts[i]) return "";
+          // The last bin ends a day past the plot's last day: held to its edge.
           const bx = at(b.from);
-          const bw = Math.max(1.5, at(addDays(b.to, 1)) - bx - 1.5);
+          const bw = Math.max(1.5, Math.min(at(addDays(b.to, 1)), end) - bx - 1.5);
           const bh = Math.max(1.5, (counts[i] / top) * h);
           return `<rect x="${bx.toFixed(1)}" y="${(y + h - bh).toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="${Math.min(2, bw / 2).toFixed(1)}" fill="${color}"/>`;
         })
