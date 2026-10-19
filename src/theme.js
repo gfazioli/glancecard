@@ -183,7 +183,9 @@ const LOOKS = {
 // lettering, and every accent darkened until it reads at 4.5:1 on a panel.
 // A dark calendar's brightest level is near white, lost on an empty day:
 // a level that does not stand off the empty one by 1.15:1 takes the middle
-// of the next level and the empty one.
+// of the next level and the empty one. And the first level stays light, as
+// GitHub's does: one standing off an empty day by more than 2:1 moves
+// halfway toward it.
 // What a rule cannot know is set by hand below: the paper, and for Halloween
 // the header and GitHub's own light Halloween calendar. Their decorations
 // are drawn in an ink that shows on paper (src/decor.js).
@@ -254,7 +256,9 @@ const LIGHT_SIDES = {
 function calendar(heat) {
   const empty = LOOKS.daylight.heat[0];
   const levels = heat.slice(1).reverse();
-  return [empty, ...levels.map((c, i) => (contrast(c, empty) < 1.15 && levels[i + 1] ? mix(levels[i + 1], empty, 0.45) : c))];
+  const lifted = levels.map((c, i) => (contrast(c, empty) < 1.15 && levels[i + 1] ? mix(levels[i + 1], empty, 0.45) : c));
+  if (contrast(lifted[0], empty) > 2) lifted[0] = mix(lifted[0], empty, 0.5);
+  return [empty, ...lifted];
 }
 
 /** The light side of the dark look `look`: by rule, but for what `hand` sets. */

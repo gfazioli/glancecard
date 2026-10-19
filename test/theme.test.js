@@ -64,6 +64,7 @@ for (const look of LIGHT_SIDES) {
     for (const ring of t.avatarRing.filter((c) => c.startsWith("#"))) assert.ok(contrast(ring, panel) >= 3, `ring ${ring}`);
     if (t.nameInk) assert.ok(contrast(t.nameInk, panel) >= 4.5, `name ${t.nameInk}`);
     for (const level of t.levels.slice(1)) assert.ok(contrast(level, t.levels[0]) >= 1.05, `level ${level} on ${t.levels[0]}`);
+    assert.ok(contrast(t.levels[1], t.levels[0]) <= 2, `the first level ${t.levels[1]} stays light`);
     // A bulb's highlight sits on its bulb; a star or a strand of web in white would sit on paper.
     assert.doesNotMatch(renderProfile(profile, { theme: t }), /stroke="#fff"|<circle[^>]*fill="#fff"/, "nothing drawn in white on the paper");
   });
