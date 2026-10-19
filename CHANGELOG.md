@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.0 — 2026-10-19
+
+**Every look, both sides.**
+
+- Every dark look but Midnight, whose light side is Daylight, has a light side of its own for readers on GitHub's light theme: `aurora-light`, `upside-down-light`, `hyperspace-light`, `bridge-light`, `nebula-light`, `halloween-light` and `christmas-light`. Pair a look with its own in a `<picture>`: `theme: nebula, nebula-light`.
+- Each is drawn from its dark look by a rule, the same glows, lettering and decorations on paper, every accent darkened to read at 4.5:1 and the calendar turned around, the darkest the most; the paper, and the ink of decorations that are white in the dark, are chosen by hand. `halloween-light` wears GitHub's own light Halloween calendar.
+- Out of season, `halloween-light` and `christmas-light` are Daylight.
+- The dark looks do not change.
+- The website's editor pairs a dark look with its light side, or with Daylight, lists the light looks for a card that always wears one, and picks the repository card's sections.
+
 ## 0.5.0 — 2026-10-18
 
 **Three ways to draw the stars, and a card you can try before you copy.**

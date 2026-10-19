@@ -58,7 +58,7 @@ Use the gh CLI; if it is missing or not signed in, stop and tell me how to fix i
        timeout-minutes: 10
        steps:
          - uses: actions/checkout@v7
-         - uses: gfazioli/glancecard@v0.5.0
+         - uses: gfazioli/glancecard@v0.6.0
            with:
              profile: <login>
              repos: |
@@ -112,7 +112,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
-      - uses: gfazioli/glancecard@v0.5.0
+      - uses: gfazioli/glancecard@v0.6.0
         with:
           profile: your-login
           repos: |
@@ -149,7 +149,7 @@ updates:
       interval: weekly
 ```
 
-Dependabot also follows a line pinned to a commit SHA with the version as a comment (`gfazioli/glancecard@<sha> # v0.5.0`), the safest way to pin an action that runs with a write token. To be told about releases without Dependabot, watch the repository for releases (*Watch → Custom → Releases*). The README embeds in your other repositories need nothing: they point at the files, not at a version.
+Dependabot also follows a line pinned to a commit SHA with the version as a comment (`gfazioli/glancecard@<sha> # v0.6.0`), the safest way to pin an action that runs with a write token. To be told about releases without Dependabot, watch the repository for releases (*Watch → Custom → Releases*). The README embeds in your other repositories need nothing: they point at the files, not at a version.
 
 ## Inputs
 
