@@ -128,7 +128,7 @@
   <rect x="24" y="58" width="832" height="104" rx="14" fill="url(#hero)" stroke="rgba(250,122,24,0.3)"/>
   <circle cx="80" cy="110" r="36" fill="#d0d7de"/>
     <circle cx="80" cy="110" r="37.5" fill="none" stroke="url(#ring)" stroke-width="3"/>
-  <text x="136" y="96"><tspan class="name disp" style="fill: #B35900">Giovambattista Fazioli</tspan><tspan dx="8" class="login">@gfazioli</tspan></text>
+  <text x="136" y="96"><tspan class="name disp" style="fill: #994C00">Giovambattista Fazioli</tspan><tspan dx="8" class="login">@gfazioli</tspan></text>
   <text x="136" y="118" class="bio">I am an Italian Lead Developer working at Namecheap</text>
   <text x="136" y="142" class="h-meta">Namecheap, Inc.  ·  Roma, Italia  ·  gfazioli.github.io</text>
   <text x="840" y="86" class="updated" text-anchor="end">Updated Oct 15, 2026</text>

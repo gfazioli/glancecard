@@ -62,7 +62,8 @@ for (const look of LIGHT_SIDES) {
     const panel = ground(t);
     for (const [role, colour] of Object.entries(t.accent)) assert.ok(contrast(colour, panel) >= 4.5, `${role} ${colour} at ${contrast(colour, panel).toFixed(2)}:1`);
     for (const ring of t.avatarRing.filter((c) => c.startsWith("#"))) assert.ok(contrast(ring, panel) >= 3, `ring ${ring}`);
-    if (t.nameInk) assert.ok(contrast(t.nameInk, panel) >= 4.5, `name ${t.nameInk}`);
+    // The profile's name sits on the header, the repository's on the paper.
+    for (const g of [panel, ...t.header, t.canvas[0]]) if (t.nameInk) assert.ok(contrast(t.nameInk, g) >= 4.5, `name ${t.nameInk} on ${g} at ${contrast(t.nameInk, g).toFixed(2)}:1`);
     for (const level of t.levels.slice(1)) assert.ok(contrast(level, t.levels[0]) >= 1.05, `level ${level} on ${t.levels[0]}`);
     assert.ok(contrast(t.levels[1], t.levels[0]) <= 2, `the first level ${t.levels[1]} stays light`);
     // A bulb's highlight sits on its bulb; a star or a strand of web in white would sit on paper.

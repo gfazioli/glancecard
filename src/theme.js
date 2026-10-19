@@ -225,14 +225,15 @@ function fromHsl([h, s, l]) {
 }
 /**
  * `hex` darkened a step at a time, its hue and saturation kept, until it
- * reads at `target` on `ground`. A yellow turns to gold on the way, as it
- * does in print: darkened as it is, it would be olive.
+ * reads at `target` on every one of `grounds`. A yellow turns to gold on the
+ * way, as it does in print: darkened as it is, it would be olive.
  */
-function deepen(hex, ground, target) {
+function deepen(hex, grounds, target) {
   const [h, s, l] = hsl(hex);
   const hue = h >= 45 && h <= 70 ? 40 : h;
+  const worst = (c) => Math.min(...grounds.map((g) => contrast(c, g)));
   let c = hex;
-  for (let v = l; contrast(c, ground) < target && v > 0; v -= 0.01) c = fromHsl([hue, s, v]);
+  for (let v = l; worst(c) < target && v > 0; v -= 0.01) c = fromHsl([hue, s, v]);
   return c;
 }
 
@@ -266,15 +267,16 @@ function lightSide(look, hand) {
   const L = LOOKS[look];
   const surface = hand.surface ?? white(0.74);
   const panel = over(surface, hand.canvas[1]);
-  const deep = (c, target = 4.5) => deepen(c, panel, target);
+  const deep = (c, target = 4.5) => deepen(c, [panel], target);
   const accent = L.accent ?? L.heat[4];
   const second = L.secondAccent ?? "#38D9A9";
+  const header = hand.header ?? [mix(accent, "#FFFFFF", 0.84), mix(second, "#FFFFFF", 0.84)];
   return {
     family: L.family,
     isDark: false,
     canvas: hand.canvas,
     glows: L.glows.map(([c, o, x, y, r]) => [c, Math.round(o * 600) / 1000, x, y, r]),
-    header: hand.header ?? [mix(accent, "#FFFFFF", 0.84), mix(second, "#FFFFFF", 0.84)],
+    header,
     headerOutline: `rgba(${rgb(accent).join(",")},0.3)`,
     avatarRing: L.avatarRing.map((c) => (c.startsWith("#") ? deep(c, 3) : c)),
     heat: hand.heat ?? calendar(L.heat),
@@ -282,7 +284,8 @@ function lightSide(look, hand) {
     accent: deep(accent),
     secondAccent: deep(second),
     type: L.type,
-    nameInk: L.nameInk && deep(L.nameInk),
+    // The profile's name sits on its header, the repository's on the paper.
+    nameInk: L.nameInk && deepen(L.nameInk, [panel, ...header, hand.canvas[0]], 4.5),
     topBand: L.topBand,
     bottomBand: L.bottomBand,
     surface,
