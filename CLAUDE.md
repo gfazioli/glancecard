@@ -80,9 +80,15 @@ by-hand workflow and the README embed (the README's), and the publisher line
 from exclusive choices (a card that follows the reader's theme, one dark look
 beside Daylight, the only light one; or one look always; and the refresh,
 whose hour is a UTC hour offered under its local time, so an untouched editor
-keeps the README's `30 5 * * *`) by exact-string swaps
+keeps the README's `30 5 * * *`; and the repository card's sections,
+checkboxes written only when some are left out, never none, since the action
+reads an empty list as all) by exact-string swaps
 that must find their anchor once: change the README's wording there and
-`test/editor.test.js` says which anchor moved.
+`test/editor.test.js` says which anchor moved. A choice the card on show
+would not draw turns the preview to the card that draws it (a dark look to
+the dark side, a section to the repository card): on the light side every
+dark look drew Daylight, and a click that changes nothing on screen read as
+a bug (2026-10-19).
 Reveals move only `translate`, `scale` and `opacity`, every hiding rule
 requires `data-armed`, and the page loads nothing from another host. Buttons
 are flat pills with no border: a gradient under a transparent border repeats

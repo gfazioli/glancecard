@@ -121,6 +121,16 @@ test("the editor's choices are radio groups, each with one choice made", async (
   assert.match(index, /<fieldset data-editor-when="one" hidden>/, "the one-look group waits for its mode");
 });
 
+test("the sections are checkboxes, every one of the action's, all checked", async () => {
+  const { REPO_SECTIONS } = await import("../src/repo/render.js");
+  const boxes = [...index.matchAll(/<input type="checkbox" name="editor-sections" value="([a-z]+)"( checked)? \/>/g)];
+  assert.deepEqual(
+    boxes.map((m) => m[1]),
+    REPO_SECTIONS,
+  );
+  assert.ok(boxes.every((m) => m[2]), "the default is all of them");
+});
+
 test("the footer carries the publisher line and its two pages", () => {
   assert.match(index, /P\.IVA&nbsp;12343751009/);
   assert.match(index, /<a href="legal\.html">Legal<\/a>/);

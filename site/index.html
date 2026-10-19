@@ -730,9 +730,9 @@
         gap: 8px;
       }
       /* The editor's choices are native radios, one group each, so a group
-         is one tab stop and the arrows move within it. The input sits
-         invisible over what it draws: a chip, or a half of the segmented
-         control. */
+         is one tab stop and the arrows move within it, and the sections
+         native checkboxes. The input sits invisible over what it draws: a
+         chip, or a half of the segmented control. */
       .pick,
       .segmented label {
         position: relative;
@@ -880,8 +880,61 @@
       }
       .editor-fixed {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
+        gap: 8px 10px;
+        margin: 0;
+      }
+      .editor-fixed .editor-note {
+        margin: 0;
+      }
+      .chip-fixed {
+        cursor: default;
+        color: var(--text);
+      }
+      /* A card that follows the reader's theme wears two looks, in two
+         rows: the dark one to pick, and Daylight, the only light one. The
+         row the card on the right shows is ringed and says so. */
+      .side {
+        margin: 0 -12px;
+        padding: 10px 12px 12px;
+        border-radius: 14px;
+        transition: box-shadow 0.15s ease, background-color 0.15s ease;
+      }
+      .side + .side {
+        margin-top: 6px;
+      }
+      .side-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         gap: 8px;
+        min-height: 22px;
+        margin: 0 0 8px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .side-shown {
+        display: none;
+        padding: 2px 9px;
+        border-radius: 999px;
+        background: rgba(74, 222, 128, 0.14);
+        color: #86efac;
+        font-size: 12px;
+        font-weight: 650;
+      }
+      .editor[data-side="dark"] .side[data-side="dark"],
+      .editor[data-side="light"] .side[data-side="light"] {
+        box-shadow: inset 0 0 0 1px rgba(74, 222, 128, 0.35);
+        background: rgba(74, 222, 128, 0.05);
+      }
+      .editor[data-side="dark"] .side[data-side="dark"] .side-shown,
+      .editor[data-side="light"] .side[data-side="light"] .side-shown {
+        display: inline-block;
+      }
+      .editor[data-side="light"] .chip-fixed {
+        box-shadow: inset 0 0 0 1px rgba(74, 222, 128, 0.6);
+        background: rgba(74, 222, 128, 0.12);
       }
       /* One column the width of the panel: sized by its content, the
          longest line of a <pre> would push the card past the edge. */
@@ -1297,7 +1350,7 @@
           <div data-scope>
             <p class="kicker" data-reveal="rise">Make it yours</p>
             <h2 id="looks-title" data-reveal="rise">Nine looks, and the year and the stars your way</h2>
-            <p class="section-lead" data-reveal="rise">Pick a look, how the year and the stars are drawn, and when the cards refresh. The card is drawn right here, by glancecard itself, from the author's data, and the workflow under it is the one to copy.</p>
+            <p class="section-lead" data-reveal="rise">Pick a look, how the year and the stars are drawn, what the repository card shows, and when the cards refresh. The card is drawn right here, by glancecard itself, from the author's data, and the workflow under it is the one to copy.</p>
           </div>
           <div class="maker" data-reveal="morph">
             <div class="editor" data-editor hidden>
@@ -1309,18 +1362,24 @@
                 </div>
               </fieldset>
               <fieldset data-editor-when="follow">
-                <legend>Dark look</legend>
-                <div class="chips">
-                  <label class="pick"><input type="radio" name="editor-dark" value="midnight" checked /><span class="chip"><i style="background: linear-gradient(135deg, #1a2140, #2e5199 55%, #a61e9c)"></i>midnight</span></label>
-                  <label class="pick"><input type="radio" name="editor-dark" value="aurora" /><span class="chip"><i style="background: linear-gradient(135deg, #0a2a30, #0f5f66 55%, #6741d9)"></i>aurora</span></label>
-                  <label class="pick"><input type="radio" name="editor-dark" value="upside-down" /><span class="chip"><i style="background: linear-gradient(135deg, #07040a, #2a0a0e 55%, #b3001b)"></i>upside-down</span></label>
-                  <label class="pick"><input type="radio" name="editor-dark" value="hyperspace" /><span class="chip"><i style="background: linear-gradient(135deg, #02030a, #0b1026 55%, #1c2e6e)"></i>hyperspace</span></label>
-                  <label class="pick"><input type="radio" name="editor-dark" value="bridge" /><span class="chip"><i style="background: linear-gradient(135deg, #000, #16110c 55%, #3a2a55)"></i>bridge</span></label>
-                  <label class="pick"><input type="radio" name="editor-dark" value="nebula" /><span class="chip"><i style="background: linear-gradient(135deg, #0b0620, #2a1650 55%, #c2255c)"></i>nebula</span></label>
-                  <label class="pick"><input type="radio" name="editor-dark" value="halloween" /><span class="chip"><i style="background: linear-gradient(135deg, #0d0612, #3c096c 55%, #e85d04)"></i>halloween</span></label>
-                  <label class="pick"><input type="radio" name="editor-dark" value="christmas" /><span class="chip"><i style="background: linear-gradient(135deg, #081c15, #1b4332 55%, #c1121f)"></i>christmas</span></label>
+                <legend>Looks</legend>
+                <div class="side" data-side="dark">
+                  <p class="side-head"><span id="editor-dark-head">On GitHub's dark theme</span><span class="side-shown" aria-hidden="true">in the preview</span></p>
+                  <div class="chips" role="radiogroup" aria-labelledby="editor-dark-head">
+                    <label class="pick"><input type="radio" name="editor-dark" value="midnight" checked /><span class="chip"><i style="background: linear-gradient(135deg, #1a2140, #2e5199 55%, #a61e9c)"></i>midnight</span></label>
+                    <label class="pick"><input type="radio" name="editor-dark" value="aurora" /><span class="chip"><i style="background: linear-gradient(135deg, #0a2a30, #0f5f66 55%, #6741d9)"></i>aurora</span></label>
+                    <label class="pick"><input type="radio" name="editor-dark" value="upside-down" /><span class="chip"><i style="background: linear-gradient(135deg, #07040a, #2a0a0e 55%, #b3001b)"></i>upside-down</span></label>
+                    <label class="pick"><input type="radio" name="editor-dark" value="hyperspace" /><span class="chip"><i style="background: linear-gradient(135deg, #02030a, #0b1026 55%, #1c2e6e)"></i>hyperspace</span></label>
+                    <label class="pick"><input type="radio" name="editor-dark" value="bridge" /><span class="chip"><i style="background: linear-gradient(135deg, #000, #16110c 55%, #3a2a55)"></i>bridge</span></label>
+                    <label class="pick"><input type="radio" name="editor-dark" value="nebula" /><span class="chip"><i style="background: linear-gradient(135deg, #0b0620, #2a1650 55%, #c2255c)"></i>nebula</span></label>
+                    <label class="pick"><input type="radio" name="editor-dark" value="halloween" /><span class="chip"><i style="background: linear-gradient(135deg, #0d0612, #3c096c 55%, #e85d04)"></i>halloween</span></label>
+                    <label class="pick"><input type="radio" name="editor-dark" value="christmas" /><span class="chip"><i style="background: linear-gradient(135deg, #081c15, #1b4332 55%, #c1121f)"></i>christmas</span></label>
+                  </div>
                 </div>
-                <p class="editor-note editor-fixed"><i style="background: linear-gradient(135deg, #f7f9fd, #dce8ff 55%, #fcc2d7)"></i><span>Light look: <code>daylight</code>, the only light one, for readers on GitHub's light theme.</span></p>
+                <div class="side" data-side="light">
+                  <p class="side-head"><span>On GitHub's light theme</span><span class="side-shown" aria-hidden="true">in the preview</span></p>
+                  <p class="editor-fixed"><span class="chip chip-fixed"><i style="background: linear-gradient(135deg, #f7f9fd, #dce8ff 55%, #fcc2d7)"></i>daylight</span><span class="editor-note">the only light look, whichever dark one you pick</span></p>
+                </div>
               </fieldset>
               <fieldset data-editor-when="one" hidden>
                 <legend>Look</legend>
@@ -1351,6 +1410,21 @@
                   <label class="pick"><input type="radio" name="editor-stars" value="bars" /><span class="chip">bars</span></label>
                 </div>
                 <p class="editor-note">Steps: the running total, exactly. Smooth: a soft line through it. Bars: the new stars of each month.</p>
+              </fieldset>
+              <fieldset>
+                <legend>Repository card sections</legend>
+                <div class="chips">
+                  <label class="pick"><input type="checkbox" name="editor-sections" value="hero" checked /><span class="chip">hero</span></label>
+                  <label class="pick"><input type="checkbox" name="editor-sections" value="tiles" checked /><span class="chip">tiles</span></label>
+                  <label class="pick"><input type="checkbox" name="editor-sections" value="activity" checked /><span class="chip">activity</span></label>
+                  <label class="pick"><input type="checkbox" name="editor-sections" value="stars" checked /><span class="chip">stars</span></label>
+                  <label class="pick"><input type="checkbox" name="editor-sections" value="rhythm" checked /><span class="chip">rhythm</span></label>
+                  <label class="pick"><input type="checkbox" name="editor-sections" value="code" checked /><span class="chip">code</span></label>
+                  <label class="pick"><input type="checkbox" name="editor-sections" value="commits" checked /><span class="chip">commits</span></label>
+                  <label class="pick"><input type="checkbox" name="editor-sections" value="releases" checked /><span class="chip">releases</span></label>
+                  <label class="pick"><input type="checkbox" name="editor-sections" value="contributors" checked /><span class="chip">contributors</span></label>
+                </div>
+                <p class="editor-note">The header always stays, and one section at least. Left out of a side-by-side pair, rhythm and code or commits and releases, the other takes the full width. <code>stars</code> is the profile card's too: without it neither card reads the star history, the first run's costliest requests.</p>
               </fieldset>
               <fieldset>
                 <legend>Refresh</legend>

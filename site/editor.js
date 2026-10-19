@@ -1,10 +1,11 @@
 /*
- * editor.js — the setup editor: how the card wears its look, and how the
- * year and the stars a visitor picks are drawn, turned into the workflow,
- * the one-paste prompt and the README embed, and into the card itself,
- * drawn beside them by glancecard's own renderer. The choices are
- * exclusive: a card that follows the reader's theme has one dark look
- * beside Daylight, the only light one; a card that doesn't wears one look.
+ * editor.js — the setup editor: how the card wears its look, how the year
+ * and the stars a visitor picks are drawn and which sections the repository
+ * card shows, turned into the workflow, the one-paste prompt and the README
+ * embed, and into the card itself, drawn beside them by glancecard's own
+ * renderer. The choices are exclusive: a card that follows the reader's
+ * theme has one dark look beside Daylight, the only light one; a card that
+ * doesn't wears one look.
  *
  * The page's own default text is the input (each block is held to the
  * README by test/site.test.js), and every change is an exact string put in
@@ -24,7 +25,9 @@ export const DARK_LOOKS = LOOKS.filter((l) => l !== LIGHT);
 export const SEASONS = { halloween: "from 1 October to 2 November", christmas: "from 1 December to 6 January" };
 /** How the stars are drawn (src/svg.js STARS_CHARTS); steps is the action's default. */
 export const STARS = ["steps", "smooth", "bars"];
-export const DEFAULT = { mode: "follow", dark: "midnight", look: "midnight", calendar: "chart", stars: "steps" };
+/** The repository card's sections, in the card's order (src/repo/render.js REPO_SECTIONS); all of them is the action's default. */
+export const SECTIONS = ["hero", "tiles", "activity", "stars", "rhythm", "code", "commits", "releases", "contributors"];
+export const DEFAULT = { mode: "follow", dark: "midnight", look: "midnight", calendar: "chart", stars: "steps", sections: SECTIONS };
 
 // ─── The refresh: how often, at what hour, in which zone ───
 //
@@ -102,17 +105,23 @@ export function parseThemes(value) {
 export const fileNames = (base, themes) => (themes.length > 1 ? themes.map((t) => [t, `${base}-${t}.svg`]) : [[themes[0], `${base}.svg`]]);
 
 /**
- * What a choice writes: the `theme`, `calendar` and `stars-chart` lines
- * (null where the default needs none), the themes the action will render,
- * and the embed.
+ * What a choice writes: the `theme`, `sections`, `calendar` and
+ * `stars-chart` lines (null where the default needs none), the themes the
+ * action will render, and the embed.
  *
  * - `follow` with Midnight is the default, `both`: `dark` and `light`.
  * - `follow` with another dark look is that look and `light`, a <picture>
  *   of `-<look>.svg` and `-light.svg`.
  * - `one` is one look and one file, `<name>.svg`, in a plain <img>.
+ * - `sections` are listed in the card's order, and only when some are left
+ *   out: the action reads an empty list as all of them, so one must stay.
  */
-export function plan({ mode = DEFAULT.mode, dark = DEFAULT.dark, look = DEFAULT.look, calendar = DEFAULT.calendar, stars = DEFAULT.stars, refresh = DEFAULT_REFRESH } = {}) {
+export function plan({ mode = DEFAULT.mode, dark = DEFAULT.dark, look = DEFAULT.look, calendar = DEFAULT.calendar, stars = DEFAULT.stars, sections = DEFAULT.sections, refresh = DEFAULT_REFRESH } = {}) {
   if (!STARS.includes(stars)) throw new Error(`editor: no stars chart "${stars}"`);
+  const unknown = sections.filter((s) => !SECTIONS.includes(s));
+  if (unknown.length) throw new Error(`editor: no section "${unknown.join(", ")}"`);
+  if (!sections.length) throw new Error("editor: one section at least");
+  const shown = SECTIONS.filter((s) => sections.includes(s));
   let value;
   let embed;
   let worn;
@@ -129,6 +138,7 @@ export function plan({ mode = DEFAULT.mode, dark = DEFAULT.dark, look = DEFAULT.
   }
   return {
     theme: value === "both" ? null : value,
+    sections: shown.length === SECTIONS.length ? null : shown.join(", "),
     calendar: calendar === "grid" ? "grid" : null,
     stars: stars === "steps" ? null : stars,
     themes: parseThemes(value),
@@ -150,7 +160,7 @@ const fileOf = (p, base, look) => fileNames(base, p.themes).find(([t]) => t === 
 
 /** The workflow's extra inputs, each on its own line at `indent`. */
 const inputs = (p, indent) =>
-  [p.theme && `theme: ${p.theme}`, p.calendar && `calendar: ${p.calendar}`, p.stars && `stars-chart: ${p.stars}`]
+  [p.theme && `theme: ${p.theme}`, p.sections && `sections: ${p.sections}`, p.calendar && `calendar: ${p.calendar}`, p.stars && `stars-chart: ${p.stars}`]
     .filter(Boolean)
     .map((l) => `\n${indent}${l}`)
     .join("");
@@ -237,10 +247,18 @@ export function previewFile(p, card, side) {
 
 const named = (look) => look.split("-").map((w) => w[0].toUpperCase() + w.slice(1)).join(" ");
 
+/** The sections a plan's line names, or all of them. */
+export const sectionsOf = (line) => (line ? line.split(", ") : SECTIONS);
+
+/** A list read aloud: "a", "a and b", "a, b and c". */
+const spoken = (list) => (list.length < 2 ? list.join("") : `${list.slice(0, -1).join(", ")} and ${list.at(-1)}`);
+
 /** What the card's alt says. */
-export function previewAlt({ card, look, calendar, stars }) {
+export function previewAlt({ card, look, calendar, stars, sections = SECTIONS }) {
   const what = card === "repo" ? "octoscope's repository card" : "The profile card";
-  return `${what} in the ${named(look)} look, its year as a ${calendar} and its stars as ${stars}`;
+  const drawn = sections.includes("stars") ? `its year as a ${calendar} and its stars as ${stars}` : `its year as a ${calendar}, without its stars`;
+  const only = card === "repo" && sections.length < SECTIONS.length ? `, showing ${spoken(sections)} only` : "";
+  return `${what} in the ${named(look)} look, ${drawn}${only}`;
 }
 
 // ─── The page ───
@@ -273,7 +291,7 @@ function wirePreview(doc) {
   const bar = doc.querySelector("[data-preview-bar]");
   const side = doc.querySelector("[data-preview-side]");
   const note = doc.querySelector("[data-preview-note]");
-  const initial = { mode: "follow", dark: "midnight", side: "dark", card: "profile", calendar: "chart", stars: "steps" };
+  const initial = { mode: "follow", dark: "midnight", side: "dark", card: "profile", calendar: "chart", stars: "steps", sections: null };
   let draw = null;
   let wanted = null;
   let drawn = false;
@@ -288,8 +306,12 @@ function wirePreview(doc) {
         const tz = m.DATA.timeZone;
         const models = { profile: m.profileModel(m.DATA.profile, { timeZone: tz }), repo: m.repoModel(m.DATA.repo, { timeZone: tz }) };
         draw = (c) => {
+          const sections = sectionsOf(c.sections);
           const options = { theme: m.theme(c.look), calendar: c.calendar, starsChart: c.stars, images: m.DATA.images };
-          const svg = c.card === "repo" ? m.renderRepo(models.repo, options) : m.renderProfile(models.profile, options);
+          const svg =
+            c.card === "repo"
+              ? m.renderRepo(models.repo, { ...options, sections })
+              : m.renderProfile(models.profile, { ...options, stars: sections.includes("stars") });
           const [, w, h] = svg.match(/<svg[^>]* width="(\d+)" height="(\d+)"/);
           const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
           const next = new Image();
@@ -299,7 +321,7 @@ function wirePreview(doc) {
             img.width = Number(w);
             img.height = Number(h);
             img.src = url;
-            img.alt = previewAlt(c);
+            img.alt = previewAlt({ ...c, sections });
             if (shown) URL.revokeObjectURL(shown);
             shown = url;
           };
@@ -322,7 +344,9 @@ function wirePreview(doc) {
       note.hidden = false;
       const who = c.card === "repo" ? "octoscope's card, as an example" : "the author's card";
       const reader = c.mode === "one" ? "every reader sees" : `readers on GitHub's ${c.side} theme see`;
-      note.textContent = `${c.file}: what ${reader}, drawn here from ${who}.`;
+      // Every dark look pairs with Daylight: say so where the card shows it.
+      const light = c.mode === "follow" && c.side === "light" ? ", in Daylight, the only light look" : "";
+      note.textContent = `${c.file}: what ${reader}${light}, drawn here from ${who}.`;
     }
     if (!draw) return;
     const same = Object.keys(initial).every((k) => c[k] === initial[k]);
@@ -393,6 +417,11 @@ function wire(doc) {
 
   const preview = wirePreview(doc);
   const pickedIn = (name) => doc.querySelector(`input[name="${name}"]:checked`)?.value;
+  const pick = (name, v) => {
+    const input = doc.querySelector(`input[name="${name}"][value="${v}"]`);
+    if (input) input.checked = true;
+  };
+  const sectionBoxes = () => [...panel.querySelectorAll('input[name="editor-sections"]')];
 
   function render(changed = false) {
     const mode = value("editor-mode") === "one" ? "one" : "follow";
@@ -407,6 +436,7 @@ function wire(doc) {
       look: value("editor-look"),
       calendar: value("editor-calendar"),
       stars: value("editor-stars") ?? DEFAULT.stars,
+      sections: sectionBoxes().length ? sectionBoxes().filter((b) => b.checked).map((b) => b.value) : SECTIONS,
       refresh: refresh.touched ? { often, utcHour: refresh.utcHour, zone: refresh.zone, explicit: refresh.explicit } : DEFAULT_REFRESH,
     });
     promptEl.textContent = prompt(base.prompt, p);
@@ -423,6 +453,8 @@ function wire(doc) {
     }
     const card = pickedIn("preview-card") === "repo" ? "repo" : "profile";
     const sideOf = pickedIn("preview-side") === "light" ? "light" : "dark";
+    // The looks' two rows: the one the card shows is marked.
+    panel.dataset.side = sideOf;
     const choice = { mode, dark: value("editor-dark"), look: value("editor-look") };
     const look = previewLook(choice, sideOf);
     preview(
@@ -434,6 +466,7 @@ function wire(doc) {
         look,
         calendar: value("editor-calendar") === "grid" ? "grid" : "chart",
         stars: value("editor-stars") ?? DEFAULT.stars,
+        sections: p.sections,
         file: previewFile(p, card, sideOf),
       },
       changed,
@@ -442,6 +475,15 @@ function wire(doc) {
 
   panel.addEventListener("change", (event) => {
     const t = event.target;
+    // A choice the card on show would not draw turns it to the card that
+    // does: a dark look to the dark side, a section to the repository card
+    // (the profile card has the stars only).
+    if (t.name === "editor-dark") pick("preview-side", "dark");
+    if (t.name === "editor-sections") {
+      // The action reads no sections as all of them: the last one stays.
+      if (!sectionBoxes().some((b) => b.checked)) t.checked = true;
+      if (t.value !== "stars") pick("preview-card", "repo");
+    }
     if (t === hourEl) {
       refresh.utcHour = Number(hourEl.value);
       refresh.touched = refresh.hourPicked = true;

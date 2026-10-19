@@ -20,6 +20,8 @@ import {
   prompt,
   refreshNote,
   refreshPlan,
+  SECTIONS,
+  sectionsOf,
   seasonHint,
   STARS,
   THEME_ORDER,
@@ -236,5 +238,35 @@ test("the card beside the choices wears the look the reader would see, and names
   assert.equal(previewFile(plan({ dark: "nebula" }), "profile", "dark"), "profile-nebula.svg");
   assert.equal(previewFile(plan({ mode: "one", look: "upside-down" }), "repo", "dark"), "your-repo.svg");
   assert.equal(previewAlt({ card: "profile", look: "upside-down", calendar: "grid", stars: "bars" }), "The profile card in the Upside Down look, its year as a grid and its stars as bars");
+});
+
+test("the sections, as the action reads them: all writes nothing, some their line in the card's order", async () => {
+  const { REPO_SECTIONS } = await import("../src/repo/render.js");
+  assert.deepEqual(SECTIONS, REPO_SECTIONS);
+  assert.equal(plan().sections, null);
+  assert.equal(plan({ sections: [...SECTIONS].reverse() }).sections, null, "all of them, in any order, is the default");
+  const p = plan({ mode: "one", look: "nebula", sections: ["contributors", "hero", "stars"], calendar: "grid" });
+  assert.equal(p.sections, "hero, stars, contributors");
+  assert.deepEqual(sectionsOf(p.sections), ["hero", "stars", "contributors"]);
+  assert.deepEqual(sectionsOf(null), SECTIONS);
+  assert.equal(workflow(YAML, p), YAML.replace("another-repo", "another-repo\n          theme: nebula\n          sections: hero, stars, contributors\n          calendar: grid"));
+  assert.ok(prompt(PROMPT, p).includes("             time-zone: <zone>\n             theme: nebula\n             sections: hero, stars, contributors\n             calendar: grid\n\n"));
+  assert.equal(embed(EMBED, p), embed(EMBED, plan({ mode: "one", look: "nebula" })), "the embed does not change");
+  assert.throws(() => plan({ sections: [] }), /one section at least/);
+  assert.throws(() => plan({ sections: ["hero", "header"] }), /no section "header"/);
+});
+
+test("the card's alt says which sections it shows, and when the stars are left out", () => {
+  const some = ["hero", "tiles", "activity"];
+  assert.equal(
+    previewAlt({ card: "repo", look: "midnight", calendar: "chart", stars: "steps", sections: some }),
+    "octoscope's repository card in the Midnight look, its year as a chart, without its stars, showing hero, tiles and activity only",
+  );
+  assert.equal(
+    previewAlt({ card: "profile", look: "aurora", calendar: "chart", stars: "steps", sections: some }),
+    "The profile card in the Aurora look, its year as a chart, without its stars",
+    "the profile card has the stars only",
+  );
+  assert.equal(previewAlt({ card: "repo", look: "nebula", calendar: "grid", stars: "bars", sections: ["stars"] }), "octoscope's repository card in the Nebula look, its year as a grid and its stars as bars, showing stars only");
 });
 
