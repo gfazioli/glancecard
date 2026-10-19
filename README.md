@@ -27,7 +27,7 @@ Daily SVG cards for your READMEs, rendered by GitHub Actions in your own reposit
 
 - **A repository card** for any public repository: status, age and latest tag, description and topics, commits in the last 30 days with a 26-week sparkline, twelve stat tiles, a year of commits with streaks (a chart of daily counts, or GitHub's calendar), the stars over the repository's whole life with the last 30 days, the last year and the best week, the weekly rhythm (day × hour), languages and essentials (README, license, contributing guide, security policy, CI), the latest commits and releases with their cadence, contributors.
 - **A profile card** for any user: followers, stars, repositories, pull requests, issues, commits, a year of contributions as a chart or as GitHub's calendar, the stars of all their public repositories since the first one, the most starred repositories and their languages.
-- **Nine looks**, after the ones of [FinderGit](https://findergit.app)'s Profile Card, for both cards: Midnight, Aurora and Daylight; Upside Down, Hyperspace, Bridge and Nebula; Halloween and Christmas in their season. `dark` and `light` are Midnight and Daylight, a pair of files for a `<picture>` that shows the one matching the reader's GitHub theme.
+- **Nine looks**, after the ones of [FinderGit](https://findergit.app)'s Profile Card, for both cards: Midnight, Aurora and Daylight; Upside Down, Hyperspace, Bridge and Nebula; Halloween and Christmas in their season. `dark` and `light` are Midnight and Daylight, a pair of files for a `<picture>` that shows the one matching the reader's GitHub theme, and every other dark look has a **light side** of its own, such as `nebula-light`, for readers on GitHub's light theme.
 - **Refreshed by your own workflow**, on your schedule, with the token GitHub Actions already gives every run. The cards are plain files committed to your repository.
 
 ## Set it up in one paste
@@ -158,7 +158,7 @@ Dependabot also follows a line pinned to a commit SHA with the version as a comm
 | `repos` | | Repositories, as `owner/name`, separated by newlines, commas or spaces. |
 | `profile` | | A login to render a profile card for. |
 | `out-dir` | `glancecard` | Folder the cards are written to, relative to the workspace. |
-| `theme` | `both` | `both` (`dark` and `light`), or looks, comma-separated: `dark`, `light`, `midnight`, `aurora`, `daylight`, `upside-down`, `hyperspace`, `bridge`, `nebula`, `halloween`, `christmas`. With one theme the file is `<name>.svg`, with several `<name>-<theme>.svg`. See [Looks](#looks). |
+| `theme` | `both` | `both` (`dark` and `light`), or looks, comma-separated: `dark`, `light`, `midnight`, `aurora`, `daylight`, `upside-down`, `hyperspace`, `bridge`, `nebula`, `halloween`, `christmas`, and the light sides `aurora-light`, `upside-down-light`, `hyperspace-light`, `bridge-light`, `nebula-light`, `halloween-light`, `christmas-light`. With one theme the file is `<name>.svg`, with several `<name>-<theme>.svg`. See [Looks](#looks). |
 | `time-zone` | `UTC` | IANA zone, such as `Europe/Rome`, for the commit calendar and rhythm. |
 | `sections` | `all` | Repository card sections to draw: `hero`, `tiles`, `activity`, `stars`, `rhythm`, `code`, `commits`, `releases`, `contributors`. When one of a side-by-side pair is left out, the other takes the full width. `stars` also draws the profile card's Stars, and leaving it out leaves out both, and the star history they read. |
 | `calendar` | `chart` | How a year is drawn, on both cards: `chart`, a line of daily contributions (profile) or commits (repository) over a value axis, or `grid`, GitHub's calendar of squares. |
@@ -183,7 +183,21 @@ Nine looks, after the ones of [FinderGit](https://findergit.app)'s Profile Card:
 | <img src="https://gfazioli.github.io/glancecard/cards/profile-upside-down.svg" width="280" alt="Upside Down"><br>`upside-down` | <img src="https://gfazioli.github.io/glancecard/cards/profile-hyperspace.svg" width="280" alt="Hyperspace"><br>`hyperspace` | <img src="https://gfazioli.github.io/glancecard/cards/profile-bridge.svg" width="280" alt="Bridge"><br>`bridge` |
 | <img src="https://gfazioli.github.io/glancecard/cards/profile-nebula.svg" width="280" alt="Nebula"><br>`nebula` | <img src="https://gfazioli.github.io/glancecard/cards/profile-halloween.svg" width="280" alt="Halloween"><br>`halloween` | <img src="https://gfazioli.github.io/glancecard/cards/profile-christmas.svg" width="280" alt="Christmas"><br>`christmas` |
 
-`halloween` and `christmas` are worn in their season only, from 1 October to 2 November and from 1 December to 6 January in the card's `time-zone`; the rest of the year they are Midnight, and they come back on their own next season. The CLI's `--all-seasons` wears them any day, for a preview.
+### Light sides
+
+Every dark look but Midnight, whose light side is Daylight, has one of its own: `<look>-light`, for readers on GitHub's light theme. A rule draws it from its dark look, so the two read as one: the same glows, lettering and decorations, on paper, with every accent darkened until it reads at 4.5:1 and the calendar turned around, the darkest the most. The paper is chosen by hand, and so is the ink of decorations that are white in the dark. Pair a look with its light side in a `<picture>`:
+
+```yaml
+theme: nebula, nebula-light
+```
+
+| | | |
+|:-:|:-:|:-:|
+| <img src="https://gfazioli.github.io/glancecard/cards/profile-aurora-light.svg" width="280" alt="Aurora's light side"><br>`aurora-light` | <img src="https://gfazioli.github.io/glancecard/cards/profile-upside-down-light.svg" width="280" alt="Upside Down's light side"><br>`upside-down-light` | <img src="https://gfazioli.github.io/glancecard/cards/profile-hyperspace-light.svg" width="280" alt="Hyperspace's light side"><br>`hyperspace-light` |
+| <img src="https://gfazioli.github.io/glancecard/cards/profile-bridge-light.svg" width="280" alt="Bridge's light side"><br>`bridge-light` | <img src="https://gfazioli.github.io/glancecard/cards/profile-nebula-light.svg" width="280" alt="Nebula's light side"><br>`nebula-light` | <img src="https://gfazioli.github.io/glancecard/cards/profile-halloween-light.svg" width="280" alt="Halloween's light side"><br>`halloween-light` |
+| <img src="https://gfazioli.github.io/glancecard/cards/profile-christmas-light.svg" width="280" alt="Christmas's light side"><br>`christmas-light` | | |
+
+`halloween` and `christmas` are worn in their season only, from 1 October to 2 November and from 1 December to 6 January in the card's `time-zone`; the rest of the year they are Midnight, their light sides Daylight, and they come back on their own next season. The CLI's `--all-seasons` wears them any day, for a preview.
 
 ## Preview from a terminal
 

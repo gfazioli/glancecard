@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { fileNames as runFileNames, parseThemes as runParseThemes } from "../src/run.js";
-import { LOOK_NAMES, theme, THEME_NAMES } from "../src/theme.js";
+import { lightOf as themeLightOf, LOOK_NAMES, theme, THEME_NAMES } from "../src/theme.js";
 import {
   DARK_LOOKS,
   DEFAULT,
@@ -11,6 +11,9 @@ import {
   fileNames,
   hours,
   LIGHT,
+  LIGHT_LOOKS,
+  LIGHT_SWATCHES,
+  lightOf,
   LOOKS,
   parseThemes,
   plan,
@@ -40,14 +43,18 @@ const STEP4 = (inner) => `4. Add my profile card to my profile README where it f
 test("the editor knows the looks, and reads themes and names files as the action does", () => {
   assert.deepEqual(THEME_ORDER, THEME_NAMES);
   assert.deepEqual(LOOKS, LOOK_NAMES);
-  assert.deepEqual(
-    LOOKS.filter((l) => !theme(l).isDark),
-    [LIGHT],
-    "Daylight is the only light look",
-  );
+  assert.deepEqual(LIGHT_LOOKS, LOOK_NAMES.filter((l) => !theme(l).isDark));
+  assert.equal(LIGHT, "daylight");
   assert.deepEqual(DARK_LOOKS, LOOK_NAMES.filter((l) => theme(l).isDark));
-  for (const look of [...DARK_LOOKS, ...LOOKS]) {
-    for (const p of [plan({ mode: "follow", dark: DARK_LOOKS.includes(look) ? look : "midnight" }), plan({ mode: "one", look })]) {
+  for (const look of LOOKS) assert.equal(lightOf(look), themeLightOf(look), look);
+  // A light side's chip is its paper, its header and its accent.
+  for (const look of LIGHT_LOOKS.filter((l) => l !== LIGHT)) {
+    const t = theme(look);
+    assert.equal(LIGHT_SWATCHES[look], `linear-gradient(135deg, ${t.canvas[0]}, ${t.header[0]} 55%, ${t.accent.contributions})`.toLowerCase(), look);
+  }
+  for (const look of LOOKS) {
+    const dark = DARK_LOOKS.includes(look) ? look : "midnight";
+    for (const p of [plan({ mode: "follow", dark }), plan({ mode: "follow", dark, light: "daylight" }), plan({ mode: "one", look })]) {
       assert.deepEqual(p.themes, runParseThemes(p.theme ?? "both"), look);
       assert.deepEqual(fileNames("profile", p.themes), runFileNames("profile", p.themes), look);
     }
@@ -65,8 +72,34 @@ test("the default choice gives the README's blocks back, byte for byte", () => {
   assert.equal(embed(EMBED, p), EMBED);
 });
 
-test("follows the reader's theme, Nebula in the dark", () => {
+test("follows the reader's theme, Nebula in the dark and its own light side in the light", () => {
   const p = plan({ mode: "follow", dark: "nebula" });
+  assert.equal(p.theme, "nebula, nebula-light");
+  assert.equal(p.season, null);
+  const out = prompt(PROMPT, p);
+  assert.ok(out.includes("             time-zone: <zone>\n             theme: nebula, nebula-light\n\n   Then make sure"));
+  assert.ok(out.includes("check that glancecard/profile-nebula.svg is now on the default branch"));
+  assert.ok(
+    out.includes(
+      STEP4(`   <picture>
+     <source media="(prefers-color-scheme: dark)" srcset="glancecard/profile-nebula.svg">
+     <img src="glancecard/profile-nebula-light.svg" width="880" alt="<login>'s GitHub activity">
+   </picture>`),
+    ),
+  );
+  assert.ok(out.includes(`with the same <picture> pointing at ${RAW}<name>-nebula.svg and -nebula-light.svg. Don't merge them`));
+  assert.equal(workflow(YAML, p), YAML.replace("another-repo", "another-repo\n          theme: nebula, nebula-light"));
+  assert.equal(
+    embed(EMBED, p),
+    `<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="glancecard/your-repo-nebula.svg">
+  <img src="glancecard/your-repo-nebula-light.svg" width="880" alt="your-repo at a glance">
+</picture>`,
+  );
+});
+
+test("follows the reader's theme, Nebula in the dark and Daylight in the light", () => {
+  const p = plan({ mode: "follow", dark: "nebula", light: "daylight" });
   assert.equal(p.theme, "nebula, light");
   assert.equal(p.season, null);
   const out = prompt(PROMPT, p);
@@ -91,17 +124,26 @@ test("follows the reader's theme, Nebula in the dark", () => {
   );
 });
 
-test("follows the reader's theme, Halloween in the dark, and says it is seasonal", () => {
+test("follows the reader's theme, Halloween on both sides, and says both are seasonal", () => {
   const p = plan({ mode: "follow", dark: "halloween" });
-  assert.equal(p.theme, "halloween, light");
+  assert.equal(p.theme, "halloween, halloween-light");
   assert.equal(p.season, "halloween");
-  assert.equal(seasonHint(p.season), "Halloween is worn from 1 October to 2 November only; out of season the card wears Midnight.");
+  assert.equal(p.seasonPaired, true);
+  assert.equal(seasonHint(p.season, p.seasonPaired), "Halloween is worn from 1 October to 2 November only; out of season the card wears Midnight, and Daylight on the light side.");
   const out = prompt(PROMPT, p);
-  assert.ok(out.includes("             theme: halloween, light\n"));
+  assert.ok(out.includes("             theme: halloween, halloween-light\n"));
   assert.ok(out.includes("check that glancecard/profile-halloween.svg is now"));
-  assert.ok(out.includes(`srcset="glancecard/profile-halloween.svg"`) && out.includes(`src="glancecard/profile-light.svg"`));
-  assert.ok(out.includes(`${RAW}<name>-halloween.svg and -light.svg.`));
+  assert.ok(out.includes(`srcset="glancecard/profile-halloween.svg"`) && out.includes(`src="glancecard/profile-halloween-light.svg"`));
+  assert.ok(out.includes(`${RAW}<name>-halloween.svg and -halloween-light.svg.`));
   assert.ok(embed(EMBED, p).includes(`srcset="glancecard/your-repo-halloween.svg"`));
+  // With Daylight on the light side, only the dark side is seasonal.
+  const q = plan({ mode: "follow", dark: "halloween", light: "daylight" });
+  assert.equal(q.theme, "halloween, light");
+  assert.equal(seasonHint(q.season, q.seasonPaired), "Halloween is worn from 1 October to 2 November only; out of season the card wears Midnight.");
+  // One look, Halloween's light side: Daylight out of season.
+  const one = plan({ mode: "one", look: "halloween-light" });
+  assert.equal(one.theme, "halloween-light");
+  assert.equal(seasonHint(one.season, one.seasonPaired), "Halloween Light is worn from 1 October to 2 November only; out of season the card wears Daylight.");
 });
 
 test("always one look, Daylight: one file and a plain <img>", () => {
@@ -131,6 +173,8 @@ test("always one look, Hyperspace, its year as a grid", () => {
 
 test("only real choices: a light look on the dark side, or no look, is refused", () => {
   assert.throws(() => plan({ mode: "follow", dark: "daylight" }), /no dark look "daylight"/);
+  assert.throws(() => plan({ mode: "follow", dark: "nebula-light" }), /no dark look "nebula-light"/);
+  assert.throws(() => plan({ mode: "follow", dark: "nebula", light: "aurora-light" }), /no light side "aurora-light"/);
   assert.throws(() => plan({ mode: "one", look: "dark" }), /no look "dark"/);
   assert.equal(seasonHint("nebula"), "");
 });
@@ -231,7 +275,10 @@ test("the stars, drawn as the action draws them: steps writes nothing, the other
 
 test("the card beside the choices wears the look the reader would see, and names its file", () => {
   assert.equal(previewLook({ mode: "follow", dark: "nebula", look: "midnight" }, "dark"), "nebula");
-  assert.equal(previewLook({ mode: "follow", dark: "nebula", look: "midnight" }, "light"), "daylight");
+  assert.equal(previewLook({ mode: "follow", dark: "nebula", look: "midnight" }, "light"), "nebula-light");
+  assert.equal(previewLook({ mode: "follow", dark: "nebula", light: "daylight", look: "midnight" }, "light"), "daylight");
+  assert.equal(previewLook({ mode: "follow", dark: "midnight", look: "midnight" }, "light"), "daylight");
+  assert.equal(previewFile(plan({ dark: "nebula" }), "repo", "light"), "your-repo-nebula-light.svg");
   assert.equal(previewLook({ mode: "one", dark: "nebula", look: "bridge" }, "light"), "bridge");
   assert.equal(previewFile(plan(), "profile", "dark"), "profile-dark.svg");
   assert.equal(previewFile(plan(), "repo", "light"), "your-repo-light.svg");

@@ -4,8 +4,8 @@
  * card shows, turned into the workflow, the one-paste prompt and the README
  * embed, and into the card itself, drawn beside them by glancecard's own
  * renderer. The choices are exclusive: a card that follows the reader's
- * theme has one dark look beside Daylight, the only light one; a card that
- * doesn't wears one look.
+ * theme has one dark look, and on the light side that look's own light side
+ * or Daylight; a card that doesn't wears one look.
  *
  * The page's own default text is the input (each block is held to the
  * README by test/site.test.js), and every change is an exact string put in
@@ -15,19 +15,36 @@
  * decides what to arm. Without it the page reads as it always did.
  */
 
+/** The light sides of the dark looks but Midnight, whose light side is Daylight (src/theme.js LIGHT_SIDES). */
+const SIDES = ["aurora-light", "upside-down-light", "hyperspace-light", "bridge-light", "nebula-light", "halloween-light", "christmas-light"];
 /** The theme names, in the order the action lists them (src/theme.js THEME_NAMES). */
-export const THEME_ORDER = ["dark", "light", "midnight", "aurora", "daylight", "upside-down", "hyperspace", "bridge", "nebula", "halloween", "christmas"];
-/** The nine looks by name (src/theme.js LOOK_NAMES); Daylight is the only light one. */
-export const LOOKS = ["midnight", "aurora", "daylight", "upside-down", "hyperspace", "bridge", "nebula", "halloween", "christmas"];
+export const THEME_ORDER = ["dark", "light", "midnight", "aurora", "daylight", "upside-down", "hyperspace", "bridge", "nebula", "halloween", "christmas", ...SIDES];
+/** The looks by name (src/theme.js LOOK_NAMES): FinderGit's nine, then the light sides. */
+export const LOOKS = ["midnight", "aurora", "daylight", "upside-down", "hyperspace", "bridge", "nebula", "halloween", "christmas", ...SIDES];
 export const LIGHT = "daylight";
-export const DARK_LOOKS = LOOKS.filter((l) => l !== LIGHT);
-/** When a seasonal look is worn (src/theme.js inSeason); out of it, Midnight. */
+export const LIGHT_LOOKS = [LIGHT, ...SIDES];
+export const DARK_LOOKS = LOOKS.filter((l) => !LIGHT_LOOKS.includes(l));
+/** A dark look's light side (src/theme.js lightOf), a light look itself. */
+export const lightOf = (look) => (LIGHT_LOOKS.includes(look) ? look : look === "midnight" ? LIGHT : `${look}-light`);
+/** The light sides' chips, from each one's paper, header and accent (held to src/theme.js by a test). */
+export const LIGHT_SWATCHES = {
+  daylight: "linear-gradient(135deg, #f7f9fd, #dce8ff 55%, #fcc2d7)",
+  "aurora-light": "linear-gradient(135deg, #eef8f5, #e6fbf5 55%, #158260)",
+  "upside-down-light": "linear-gradient(135deg, #f8f1ea, #ffe0e0 55%, #e80000)",
+  "hyperspace-light": "linear-gradient(135deg, #f4f7fd, #e0f1fd 55%, #0a76c4)",
+  "bridge-light": "linear-gradient(135deg, #f7f4ef, #ffefe7 55%, #cc4400)",
+  "nebula-light": "linear-gradient(135deg, #f9f2fb, #f3eeff 55%, #7d52fa)",
+  "halloween-light": "linear-gradient(135deg, #fbf4e6, #ffe2c0 55%, #bc5404)",
+  "christmas-light": "linear-gradient(135deg, #eef5f1, #e3f3ec 55%, #347e5c)",
+};
+/** When a seasonal look is worn, its light side with it (src/theme.js inSeason); out of it, Midnight, or Daylight for a light side. */
 export const SEASONS = { halloween: "from 1 October to 2 November", christmas: "from 1 December to 6 January" };
+const seasonOf = (look) => look.replace(/-light$/, "");
 /** How the stars are drawn (src/svg.js STARS_CHARTS); steps is the action's default. */
 export const STARS = ["steps", "smooth", "bars"];
 /** The repository card's sections, in the card's order (src/repo/render.js REPO_SECTIONS); all of them is the action's default. */
 export const SECTIONS = ["hero", "tiles", "activity", "stars", "rhythm", "code", "commits", "releases", "contributors"];
-export const DEFAULT = { mode: "follow", dark: "midnight", look: "midnight", calendar: "chart", stars: "steps", sections: SECTIONS };
+export const DEFAULT = { mode: "follow", dark: "midnight", light: "own", look: "midnight", calendar: "chart", stars: "steps", sections: SECTIONS };
 
 // ─── The refresh: how often, at what hour, in which zone ───
 //
@@ -110,13 +127,14 @@ export const fileNames = (base, themes) => (themes.length > 1 ? themes.map((t) =
  * action will render, and the embed.
  *
  * - `follow` with Midnight is the default, `both`: `dark` and `light`.
- * - `follow` with another dark look is that look and `light`, a <picture>
- *   of `-<look>.svg` and `-light.svg`.
+ * - `follow` with another dark look is that look and its light side, a
+ *   <picture> of `-<look>.svg` and `-<look>-light.svg`; or, with `light`
+ *   set to `daylight`, that look and `light`, `-<look>.svg` and `-light.svg`.
  * - `one` is one look and one file, `<name>.svg`, in a plain <img>.
  * - `sections` are listed in the card's order, and only when some are left
  *   out: the action reads an empty list as all of them, so one must stay.
  */
-export function plan({ mode = DEFAULT.mode, dark = DEFAULT.dark, look = DEFAULT.look, calendar = DEFAULT.calendar, stars = DEFAULT.stars, sections = DEFAULT.sections, refresh = DEFAULT_REFRESH } = {}) {
+export function plan({ mode = DEFAULT.mode, dark = DEFAULT.dark, light = DEFAULT.light, look = DEFAULT.look, calendar = DEFAULT.calendar, stars = DEFAULT.stars, sections = DEFAULT.sections, refresh = DEFAULT_REFRESH } = {}) {
   if (!STARS.includes(stars)) throw new Error(`editor: no stars chart "${stars}"`);
   const unknown = sections.filter((s) => !SECTIONS.includes(s));
   if (unknown.length) throw new Error(`editor: no section "${unknown.join(", ")}"`);
@@ -125,6 +143,7 @@ export function plan({ mode = DEFAULT.mode, dark = DEFAULT.dark, look = DEFAULT.
   let value;
   let embed;
   let worn;
+  let paired = false;
   if (mode === "one") {
     if (!LOOKS.includes(look)) throw new Error(`editor: no look "${look}"`);
     value = look;
@@ -132,9 +151,12 @@ export function plan({ mode = DEFAULT.mode, dark = DEFAULT.dark, look = DEFAULT.
     worn = look;
   } else {
     if (!DARK_LOOKS.includes(dark)) throw new Error(`editor: no dark look "${dark}"`);
-    value = dark === "midnight" ? "both" : `${dark}, light`;
-    embed = { picture: true, dark: dark === "midnight" ? "dark" : dark, light: "light" };
+    if (light !== "own" && light !== LIGHT) throw new Error(`editor: no light side "${light}"`);
+    const side = light === "own" ? lightOf(dark) : LIGHT;
+    value = side === LIGHT ? (dark === "midnight" ? "both" : `${dark}, light`) : `${dark}, ${side}`;
+    embed = { picture: true, dark: dark === "midnight" ? "dark" : dark, light: side === LIGHT ? "light" : side };
     worn = dark;
+    paired = side !== LIGHT;
   }
   return {
     theme: value === "both" ? null : value,
@@ -143,7 +165,8 @@ export function plan({ mode = DEFAULT.mode, dark = DEFAULT.dark, look = DEFAULT.
     stars: stars === "steps" ? null : stars,
     themes: parseThemes(value),
     embed,
-    season: SEASONS[worn] ? worn : null,
+    season: SEASONS[seasonOf(worn)] ? worn : null,
+    seasonPaired: Boolean(SEASONS[seasonOf(worn)]) && paired,
     refresh: refreshPlan(refresh),
   };
 }
@@ -233,10 +256,11 @@ export function prompt(text, p) {
 /** The module that draws the card; the build appends its content's hash. */
 const PREVIEW = "./preview.js";
 
-/** The look the card wears for a choice: its one look, or the dark one, or Daylight on the light side. */
-export function previewLook({ mode, dark, look }, side) {
+/** The look the card wears for a choice: its one look, or the dark one, or on the light side its light side or Daylight. */
+export function previewLook({ mode, dark, light = "own", look }, side) {
   if (mode === "one") return look;
-  return side === "light" ? LIGHT : dark;
+  if (side !== "light") return dark;
+  return light === LIGHT ? LIGHT : lightOf(dark);
 }
 
 /** The file the shown card is written to: the profile's, or `your-repo`'s, for the reader's side or the one look. */
@@ -263,9 +287,12 @@ export function previewAlt({ card, look, calendar, stars, sections = SECTIONS })
 
 // ─── The page ───
 
-/** The line under the choices when a seasonal look is worn. */
-export function seasonHint(look) {
-  return SEASONS[look] ? `${look[0].toUpperCase()}${look.slice(1)} is worn ${SEASONS[look]} only; out of season the card wears Midnight.` : "";
+/** The line under the choices when a seasonal look is worn, `paired` with its light side or not. */
+export function seasonHint(look, paired = false) {
+  const season = look && SEASONS[seasonOf(look)];
+  if (!season) return "";
+  const instead = look.endsWith("-light") ? "Daylight" : "Midnight";
+  return `${named(look)} is worn ${season} only; out of season the card wears ${instead}${paired ? ", and Daylight on the light side" : ""}.`;
 }
 
 /** The day a weekly run starts on, in UTC, for the zone's Monday. */
@@ -344,9 +371,7 @@ function wirePreview(doc) {
       note.hidden = false;
       const who = c.card === "repo" ? "octoscope's card, as an example" : "the author's card";
       const reader = c.mode === "one" ? "every reader sees" : `readers on GitHub's ${c.side} theme see`;
-      // Every dark look pairs with Daylight: say so where the card shows it.
-      const light = c.mode === "follow" && c.side === "light" ? ", in Daylight, the only light look" : "";
-      note.textContent = `${c.file}: what ${reader}${light}, drawn here from ${who}.`;
+      note.textContent = `${c.file}: what ${reader}, drawn here from ${who}.`;
     }
     if (!draw) return;
     const same = Object.keys(initial).every((k) => c[k] === initial[k]);
@@ -422,9 +447,19 @@ function wire(doc) {
     if (input) input.checked = true;
   };
   const sectionBoxes = () => [...panel.querySelectorAll('input[name="editor-sections"]')];
+  const ownName = panel.querySelector("[data-light-name]");
+  const ownSwatch = panel.querySelector("[data-light-swatch]");
+  const daylightPick = panel.querySelector("[data-light-daylight]");
 
   function render(changed = false) {
     const mode = value("editor-mode") === "one" ? "one" : "follow";
+    // The light row offers the dark look's own light side, or Daylight;
+    // Midnight's own is Daylight, so it offers one.
+    const darkLook = value("editor-dark") ?? DEFAULT.dark;
+    if (ownName) ownName.textContent = lightOf(darkLook);
+    if (ownSwatch) ownSwatch.style.background = LIGHT_SWATCHES[lightOf(darkLook)];
+    if (daylightPick) daylightPick.hidden = darkLook === "midnight";
+    if (darkLook === "midnight") pick("editor-light", "own");
     panel.querySelectorAll("[data-editor-when]").forEach((group) => {
       group.hidden = group.getAttribute("data-editor-when") !== mode;
     });
@@ -433,6 +468,7 @@ function wire(doc) {
     const p = plan({
       mode,
       dark: value("editor-dark"),
+      light: value("editor-light") ?? DEFAULT.light,
       look: value("editor-look"),
       calendar: value("editor-calendar"),
       stars: value("editor-stars") ?? DEFAULT.stars,
@@ -444,7 +480,7 @@ function wire(doc) {
     embedEl.textContent = embed(base.embed, p);
     if (hint) {
       hint.hidden = !p.season;
-      hint.textContent = seasonHint(p.season);
+      hint.textContent = seasonHint(p.season, p.seasonPaired);
     }
     if (zoneNote) {
       zoneNote.textContent = refresh.touched
@@ -455,7 +491,7 @@ function wire(doc) {
     const sideOf = pickedIn("preview-side") === "light" ? "light" : "dark";
     // The looks' two rows: the one the card shows is marked.
     panel.dataset.side = sideOf;
-    const choice = { mode, dark: value("editor-dark"), look: value("editor-look") };
+    const choice = { mode, dark: value("editor-dark"), light: value("editor-light") ?? DEFAULT.light, look: value("editor-look") };
     const look = previewLook(choice, sideOf);
     preview(
       {
@@ -476,9 +512,10 @@ function wire(doc) {
   panel.addEventListener("change", (event) => {
     const t = event.target;
     // A choice the card on show would not draw turns it to the card that
-    // does: a dark look to the dark side, a section to the repository card
-    // (the profile card has the stars only).
+    // does: a dark look to the dark side, a light one to the light side, a
+    // section to the repository card (the profile card has the stars only).
     if (t.name === "editor-dark") pick("preview-side", "dark");
+    if (t.name === "editor-light") pick("preview-side", "light");
     if (t.name === "editor-sections") {
       // The action reads no sections as all of them: the last one stays.
       if (!sectionBoxes().some((b) => b.checked)) t.checked = true;
@@ -509,6 +546,15 @@ function wire(doc) {
     } else if (t.name === "editor-often") {
       refresh.touched = true;
     }
+    render(true);
+  });
+  // A look already picked sends no change when it is clicked again, but the
+  // click still asks to see its side.
+  panel.addEventListener("click", (event) => {
+    const t = event.target;
+    const side = { "editor-dark": "dark", "editor-light": "light" }[t.name];
+    if (!side || pickedIn("preview-side") === side) return;
+    pick("preview-side", side);
     render(true);
   });
   doc.querySelector("[data-preview-bar]")?.addEventListener("change", () => render(true));

@@ -59,6 +59,20 @@ and top and bottom bands, never over a figure; `test/theme.test.js` holds the
 content below the top band. The seasonal looks resolve to Midnight out of
 season (`resolveLook`), in the card's time zone.
 
+The light sides (`<look>-light`, since 0.6.0) are glancecard's own, not
+FinderGit's: the dark nine stay in step with the app, the seven light sides
+do not exist there. Chosen on 2026-10-19 as the middle way between a pure
+rule, which drew a generic paper and lost every white decoration, and a
+palette drawn by hand for each look. `lightSide` derives them by rule (glows
+at 60%, the calendar turned around, every accent darkened in HSL to 4.5:1 on
+a panel, yellows turned to gold on the way, since a darkened yellow is
+olive), and `LIGHT_SIDES` holds what is chosen by hand: the paper, and for
+Halloween its header and GitHub's light Halloween calendar. Decorations a
+dark look draws in white get an ink in `decor.js`; the dark looks' defaults
+keep their golden files byte for byte. A test holds every light side to its
+contrasts and to nothing white on the paper. Out of season a light side is
+Daylight.
+
 ## The website
 
 `site/` is hand-authored HTML, CSS, one deferred script (`site.js`) and one
@@ -78,7 +92,8 @@ by-hand workflow and the README embed (the README's), and the publisher line
 (octoscope's). A release bumps the version in all of them. The setup editor
 (`site/editor.js`) rewrites the prompt, the workflow and the embed at runtime
 from exclusive choices (a card that follows the reader's theme, one dark look
-beside Daylight, the only light one; or one look always; and the refresh,
+and on the light side its own light side or Daylight; or one look always,
+dark or light; and the refresh,
 whose hour is a UTC hour offered under its local time, so an untouched editor
 keeps the README's `30 5 * * *`; and the repository card's sections,
 checkboxes written only when some are left out, never none, since the action
@@ -86,9 +101,9 @@ reads an empty list as all) by exact-string swaps
 that must find their anchor once: change the README's wording there and
 `test/editor.test.js` says which anchor moved. A choice the card on show
 would not draw turns the preview to the card that draws it (a dark look to
-the dark side, a section to the repository card): on the light side every
-dark look drew Daylight, and a click that changes nothing on screen read as
-a bug (2026-10-19).
+the dark side, a light one to the light side, a section to the repository
+card): when the light side was Daylight for every dark look, a click that
+changed nothing on screen read as a bug (2026-10-19).
 Reveals move only `translate`, `scale` and `opacity`, every hiding rule
 requires `data-armed`, and the page loads nothing from another host. Buttons
 are flat pills with no border: a gradient under a transparent border repeats

@@ -2,7 +2,8 @@
 // the content: what shows between and through the panels (stars, streaks,
 // spores, snow). In front: only in the card's margins and its top and bottom
 // bands, never over a figure. Drawn from fixed seeds, so a card is the same
-// picture every day its data is.
+// picture every day its data is. A light side draws its dark look's, in an
+// ink that shows on paper where the dark look draws in white.
 
 const f = (n) => Number(n.toFixed(1));
 
@@ -32,42 +33,42 @@ function glow(defs, x, y, radius, color, opacity) {
 const sparkle = (x, y, s, fill) =>
   `<path d="M${f(x)} ${f(y - s)}Q${f(x)} ${f(y)} ${f(x + s)} ${f(y)}Q${f(x)} ${f(y)} ${f(x)} ${f(y + s)}Q${f(x)} ${f(y)} ${f(x - s)} ${f(y)}Q${f(x)} ${f(y)} ${f(x)} ${f(y - s)}Z" fill="${fill}"/>`;
 
-function stars(r, w, h, count, size, alpha) {
+function stars(r, w, h, count, size, alpha, colour = "#fff") {
   let out = "";
   for (let i = 0; i < count; i++) {
     const x = between(r, 0, w);
     const y = between(r, 0, h);
-    out += disc(x, y, between(r, ...size), "#fff", between(r, ...alpha));
+    out += disc(x, y, between(r, ...size), colour, between(r, ...alpha));
   }
   return out;
 }
 
 // ─── Behind ──────────────────────────────────────────────────────────────────
 
-function starCloud(w, h, defs) {
+function starCloud(w, h, defs, { star = "#fff", glint = "#FFFFFF", sparkleInk = "rgba(255,255,255,0.9)", wisp = 0.22, alpha = [0.25, 0.85] } = {}) {
   const r = seeded(0x4e45);
   defs.add(`<filter id="wisp" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="46"/></filter>`);
   const wisps = ["#F783AC", "#9775FA", "#66D9E8", "#E599F7"]
     .map((c, i) => {
       const cx = w * [0.2, 0.75, 0.35, 0.85][i];
       const cy = h * [0.3, 0.2, 0.7, 0.75][i];
-      return `<ellipse cx="${f(cx)}" cy="${f(cy)}" rx="220" ry="70" fill="${c}" opacity="0.22"/>`;
+      return `<ellipse cx="${f(cx)}" cy="${f(cy)}" rx="220" ry="70" fill="${c}" opacity="${wisp}"/>`;
     })
     .join("");
   let glints = "";
-  const field = stars(r, w, h, 190, [0.35, 1.2], [0.25, 0.85]);
+  const field = stars(r, w, h, 190, [0.35, 1.2], alpha, star);
   for (let i = 0; i < 12; i++) {
     const x = between(r, 0, w);
     const y = between(r, 0, h);
     const reach = between(r, 3, 7);
-    glints += glow(defs, x, y, reach * 2.2, "#FFFFFF", 0.25) + sparkle(x, y, reach, "rgba(255,255,255,0.9)");
+    glints += glow(defs, x, y, reach * 2.2, glint, 0.25) + sparkle(x, y, reach, sparkleInk);
   }
   return `<g filter="url(#wisp)">${wisps}</g>${field}${glints}`;
 }
 
-function jumpStreaks(w, h, defs) {
+function jumpStreaks(w, h, defs, { star = "#fff", tints = ["#CFEFFF", "#FFFFFF"], strength = 1, alpha = [0.3, 0.85] } = {}) {
   const r = seeded(0x4859);
-  const field = stars(r, w, h, 160, [0.3, 1.1], [0.3, 0.85]);
+  const field = stars(r, w, h, 160, [0.3, 1.1], alpha, star);
   const cx = w * 0.5;
   const cy = h * 0.4;
   let streaks = "";
@@ -77,8 +78,8 @@ function jumpStreaks(w, h, defs) {
     const length = between(r, 30, 280);
     const [x1, y1] = [cx + Math.cos(angle) * start, cy + Math.sin(angle) * start];
     const [x2, y2] = [cx + Math.cos(angle) * (start + length), cy + Math.sin(angle) * (start + length)];
-    const tint = r() < 0.5 ? "#CFEFFF" : "#FFFFFF";
-    const opacity = between(r, 0.25, 0.55);
+    const tint = r() < 0.5 ? tints[0] : tints[1];
+    const opacity = between(r, 0.25, 0.55) * strength;
     const width = between(r, 0.5, 1.5);
     defs.add(
       `<linearGradient id="streak-${i}" gradientUnits="userSpaceOnUse" x1="${f(x1)}" y1="${f(y1)}" x2="${f(x2)}" y2="${f(y2)}"><stop offset="0" stop-color="${tint}" stop-opacity="0"/><stop offset="1" stop-color="${tint}" stop-opacity="${opacity.toFixed(2)}"/></linearGradient>`,
@@ -88,15 +89,15 @@ function jumpStreaks(w, h, defs) {
   return field + streaks;
 }
 
-function spores(w, h, defs) {
+function spores(w, h, defs, ash = ["#FFFFFF", "#FFB4A8"]) {
   const r = seeded(0x5157);
   defs.add(`<filter id="spore" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.1"/></filter>`);
   let out = "";
   for (let i = 0; i < 80; i++) {
     const x = between(r, 0, w);
     const y = between(r, 0, h);
-    const ash = r() < 0.5 ? "#FFFFFF" : "#FFB4A8";
-    out += disc(x, y, between(r, 0.8, 2.6), ash, between(r, 0.12, 0.42));
+    const colour = r() < 0.5 ? ash[0] : ash[1];
+    out += disc(x, y, between(r, 0.8, 2.6), colour, between(r, 0.12, 0.42));
   }
   return `<g filter="url(#spore)">${out}</g>`;
 }
@@ -122,16 +123,16 @@ function snowflake(x, y, side) {
   return d;
 }
 
-function snowfall(w, h) {
+function snowfall(w, h, ink = "#fff") {
   const r = seeded(0x534e);
   let flakes = "";
   for (let i = 0; i < 56; i++) {
     const side = between(r, 5, 16);
     const x = between(r, 0, w);
     const y = between(r, 0, h);
-    flakes += `<path d="${snowflake(x + side / 2, y + side / 2, side)}" stroke="#fff" stroke-width="${f(Math.max(0.6, side / 14))}" stroke-linecap="round" opacity="${between(r, 0.12, 0.42).toFixed(2)}"/>`;
+    flakes += `<path d="${snowflake(x + side / 2, y + side / 2, side)}" stroke="${ink}" stroke-width="${f(Math.max(0.6, side / 14))}" stroke-linecap="round" opacity="${between(r, 0.12, 0.42).toFixed(2)}"/>`;
   }
-  return `<g fill="none">${flakes}</g>${stars(r, w, h, 90, [0.7, 1.9], [0.2, 0.6])}`;
+  return `<g fill="none">${flakes}</g>${stars(r, w, h, 90, [0.7, 1.9], [0.2, 0.6], ink)}`;
 }
 
 // ─── In front ────────────────────────────────────────────────────────────────
@@ -245,7 +246,7 @@ function pumpkin(x, y, size, face, defs) {
   return `${out}<path d="${eyes}${mouth}" fill="#FFE066"/>`;
 }
 
-function halloweenNight(w, h, contentTop, defs) {
+function halloweenNight(w, h, contentTop, defs, { web: webInk = "#fff", webOpacity = 0.26 } = {}) {
   // A web in the top left corner, in the margin and the top band.
   const reach = 52;
   const spokes = [0, 1, 2, 3, 4, 5].map((k) => (k * (Math.PI / 2)) / 5);
@@ -257,7 +258,7 @@ function halloweenNight(w, h, contentTop, defs) {
       web += `M${f(Math.cos(a) * ring)} ${f(Math.sin(a) * ring)}Q${f(Math.cos(mid) * ring * 0.86)} ${f(Math.sin(mid) * ring * 0.86)} ${f(Math.cos(b) * ring)} ${f(Math.sin(b) * ring)}`;
     }
   }
-  let out = `<path d="${web}" fill="none" stroke="#fff" stroke-opacity="0.26" stroke-width="0.7"/>`;
+  let out = `<path d="${web}" fill="none" stroke="${webInk}" stroke-opacity="${webOpacity}" stroke-width="0.7"/>`;
   // The moon in the top band, and bats crossing it.
   const [mx, my] = [w - 74, contentTop / 2];
   defs.add(`<radialGradient id="moon" cx="0.35" cy="0.35" r="0.65"><stop offset="0" stop-color="#FFF3C4"/><stop offset="1" stop-color="#FFC857"/></radialGradient>`);
@@ -272,7 +273,7 @@ function halloweenNight(w, h, contentTop, defs) {
   return out;
 }
 
-function christmasTop(w, h, ledge, defs) {
+function christmasTop(w, h, ledge, defs, { threadInk = "#fff", shade = null } = {}) {
   const r = seeded(0x584d);
   const baubles = ["#E63946", "#FFD166", "#52B788", "#D8DEE9", "#74C0FC"];
   let out = "";
@@ -287,7 +288,7 @@ function christmasTop(w, h, ledge, defs) {
     const id = `bauble-${colour.replace("#", "")}`;
     defs.add(`<radialGradient id="${id}" cx="0.32" cy="0.32" r="0.9"><stop offset="0" stop-color="#fff" stop-opacity="0.9"/><stop offset="0.45" stop-color="${colour}"/><stop offset="1" stop-color="${colour}" stop-opacity="0.8"/></radialGradient>`);
     out +=
-      `<line x1="${f(x)}" y1="4" x2="${f(x)}" y2="${f(cy - radius)}" stroke="#fff" stroke-opacity="0.5" stroke-width="0.6"/>` +
+      `<line x1="${f(x)}" y1="4" x2="${f(x)}" y2="${f(cy - radius)}" stroke="${threadInk}" stroke-opacity="0.5" stroke-width="0.6"/>` +
       glow(defs, x, cy, radius * 2.4, colour, 0.35) +
       disc(x, cy, radius, `url(#${id})`) +
       `<rect x="${f(x - 1.8)}" y="${f(cy - radius - 2)}" width="3.6" height="2.6" fill="#D4A017"/>`;
@@ -301,7 +302,9 @@ function christmasTop(w, h, ledge, defs) {
       lumps += `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(radius)}" ry="${f(radius * 0.7)}"/>`;
       x += radius * 1.3;
     }
-    return `<g fill="#fff" fill-opacity="0.92">${lumps}</g>`;
+    // On paper, white snow needs its shadow to be seen.
+    const under = shade ? `<g fill="${shade}" transform="translate(0 1.6)">${lumps}</g>` : "";
+    return `${under}<g fill="#fff" fill-opacity="0.92">${lumps}</g>`;
   };
   out += drift(0, w, 4, 7, 12) + drift(38, w - 38, ledge, 4, 8);
   // A tree and two presents in the bottom band.
@@ -353,6 +356,28 @@ export function decorate(look, { width, height, contentTop, ledge }) {
     case "christmas":
       layers.behind = snowfall(width, height);
       layers.front = christmasTop(width, height, ledge, defs);
+      break;
+    // The light sides: the dark look's decorations, inked for paper.
+    case "upside-down-light":
+      layers.behind = spores(width, height, defs, ["#7A1F1F", "#C4161C"]);
+      layers.front = fairyLights(width, defs);
+      break;
+    case "hyperspace-light":
+      layers.behind = jumpStreaks(width, height, defs, { star: "#1C2E6E", tints: ["#3A6FB0", "#1C2E6E"], strength: 0.55, alpha: [0.15, 0.45] });
+      break;
+    case "bridge-light":
+      layers.front = consoleRails(width, height);
+      break;
+    case "nebula-light":
+      layers.behind = starCloud(width, height, defs, { star: "#5F3DC4", glint: "#7048E8", sparkleInk: "rgba(95,61,196,0.75)", wisp: 0.16, alpha: [0.15, 0.5] });
+      break;
+    case "halloween-light":
+      layers.behind = stars(seeded(0x4841), width, height, 50, [0.5, 1.4], [0.18, 0.4], "#7A4A22");
+      layers.front = halloweenNight(width, height, contentTop, defs, { web: "#3B2340", webOpacity: 0.42 });
+      break;
+    case "christmas-light":
+      layers.behind = snowfall(width, height, "#5B8DB8");
+      layers.front = christmasTop(width, height, ledge, defs, { threadInk: "#7A8B99", shade: "#C3D3E2" });
       break;
     default:
       break;

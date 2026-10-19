@@ -861,8 +861,7 @@
         background: rgba(74, 222, 128, 0.12);
         color: var(--text);
       }
-      .chip i,
-      .editor-fixed i {
+      .chip i {
         width: 14px;
         height: 14px;
         border-radius: 50%;
@@ -878,23 +877,16 @@
       .editor-hint {
         color: #fbbf77;
       }
-      .editor-fixed {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 8px 10px;
-        margin: 0;
+      .pick[hidden] {
+        display: none;
       }
-      .editor-fixed .editor-note {
-        margin: 0;
-      }
-      .chip-fixed {
-        cursor: default;
-        color: var(--text);
+      .chips + .side-head {
+        margin-top: 14px;
       }
       /* A card that follows the reader's theme wears two looks, in two
-         rows: the dark one to pick, and Daylight, the only light one. The
-         row the card on the right shows is ringed and says so. */
+         rows: the dark one, and on the light side its own light side or
+         Daylight. The row the card on the right shows is ringed and says
+         so. */
       .side {
         margin: 0 -12px;
         padding: 10px 12px 12px;
@@ -931,10 +923,6 @@
       .editor[data-side="dark"] .side[data-side="dark"] .side-shown,
       .editor[data-side="light"] .side[data-side="light"] .side-shown {
         display: inline-block;
-      }
-      .editor[data-side="light"] .chip-fixed {
-        box-shadow: inset 0 0 0 1px rgba(74, 222, 128, 0.6);
-        background: rgba(74, 222, 128, 0.12);
       }
       /* One column the width of the panel: sized by its content, the
          longest line of a <pre> would push the card past the edge. */
@@ -1377,22 +1365,37 @@
                   </div>
                 </div>
                 <div class="side" data-side="light">
-                  <p class="side-head"><span>On GitHub's light theme</span><span class="side-shown" aria-hidden="true">in the preview</span></p>
-                  <p class="editor-fixed"><span class="chip chip-fixed"><i style="background: linear-gradient(135deg, #f7f9fd, #dce8ff 55%, #fcc2d7)"></i>daylight</span><span class="editor-note">the only light look, whichever dark one you pick</span></p>
+                  <p class="side-head"><span id="editor-light-head">On GitHub's light theme</span><span class="side-shown" aria-hidden="true">in the preview</span></p>
+                  <div class="chips" role="radiogroup" aria-labelledby="editor-light-head">
+                    <label class="pick"><input type="radio" name="editor-light" value="own" checked /><span class="chip"><i data-light-swatch style="background: linear-gradient(135deg, #f7f9fd, #dce8ff 55%, #fcc2d7)"></i><span data-light-name>daylight</span></span></label>
+                    <label class="pick" data-light-daylight hidden><input type="radio" name="editor-light" value="daylight" /><span class="chip"><i style="background: linear-gradient(135deg, #f7f9fd, #dce8ff 55%, #fcc2d7)"></i>daylight</span></label>
+                  </div>
+                  <p class="editor-note">Each dark look has a light side of its own. Daylight, Midnight's, goes with any of them.</p>
                 </div>
               </fieldset>
               <fieldset data-editor-when="one" hidden>
                 <legend>Look</legend>
+                <p class="side-head"><span>Dark</span></p>
                 <div class="chips">
                   <label class="pick"><input type="radio" name="editor-look" value="midnight" checked /><span class="chip"><i style="background: linear-gradient(135deg, #1a2140, #2e5199 55%, #a61e9c)"></i>midnight</span></label>
                   <label class="pick"><input type="radio" name="editor-look" value="aurora" /><span class="chip"><i style="background: linear-gradient(135deg, #0a2a30, #0f5f66 55%, #6741d9)"></i>aurora</span></label>
-                  <label class="pick"><input type="radio" name="editor-look" value="daylight" /><span class="chip"><i style="background: linear-gradient(135deg, #f7f9fd, #dce8ff 55%, #fcc2d7)"></i>daylight</span></label>
                   <label class="pick"><input type="radio" name="editor-look" value="upside-down" /><span class="chip"><i style="background: linear-gradient(135deg, #07040a, #2a0a0e 55%, #b3001b)"></i>upside-down</span></label>
                   <label class="pick"><input type="radio" name="editor-look" value="hyperspace" /><span class="chip"><i style="background: linear-gradient(135deg, #02030a, #0b1026 55%, #1c2e6e)"></i>hyperspace</span></label>
                   <label class="pick"><input type="radio" name="editor-look" value="bridge" /><span class="chip"><i style="background: linear-gradient(135deg, #000, #16110c 55%, #3a2a55)"></i>bridge</span></label>
                   <label class="pick"><input type="radio" name="editor-look" value="nebula" /><span class="chip"><i style="background: linear-gradient(135deg, #0b0620, #2a1650 55%, #c2255c)"></i>nebula</span></label>
                   <label class="pick"><input type="radio" name="editor-look" value="halloween" /><span class="chip"><i style="background: linear-gradient(135deg, #0d0612, #3c096c 55%, #e85d04)"></i>halloween</span></label>
                   <label class="pick"><input type="radio" name="editor-look" value="christmas" /><span class="chip"><i style="background: linear-gradient(135deg, #081c15, #1b4332 55%, #c1121f)"></i>christmas</span></label>
+                </div>
+                <p class="side-head"><span>Light</span></p>
+                <div class="chips">
+                  <label class="pick"><input type="radio" name="editor-look" value="daylight" /><span class="chip"><i style="background: linear-gradient(135deg, #f7f9fd, #dce8ff 55%, #fcc2d7)"></i>daylight</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="aurora-light" /><span class="chip"><i style="background: linear-gradient(135deg, #eef8f5, #e6fbf5 55%, #158260)"></i>aurora-light</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="upside-down-light" /><span class="chip"><i style="background: linear-gradient(135deg, #f8f1ea, #ffe0e0 55%, #e80000)"></i>upside-down-light</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="hyperspace-light" /><span class="chip"><i style="background: linear-gradient(135deg, #f4f7fd, #e0f1fd 55%, #0a76c4)"></i>hyperspace-light</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="bridge-light" /><span class="chip"><i style="background: linear-gradient(135deg, #f7f4ef, #ffefe7 55%, #cc4400)"></i>bridge-light</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="nebula-light" /><span class="chip"><i style="background: linear-gradient(135deg, #f9f2fb, #f3eeff 55%, #7d52fa)"></i>nebula-light</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="halloween-light" /><span class="chip"><i style="background: linear-gradient(135deg, #fbf4e6, #ffe2c0 55%, #bc5404)"></i>halloween-light</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="christmas-light" /><span class="chip"><i style="background: linear-gradient(135deg, #eef5f1, #e3f3ec 55%, #347e5c)"></i>christmas-light</span></label>
                 </div>
               </fieldset>
               <fieldset>

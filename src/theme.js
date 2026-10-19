@@ -2,6 +2,7 @@
 // (https://findergit.app): a look sets every colour a card draws, and most
 // past the classics a typeface and decorations (src/decor.js). `dark` and
 // `light` are Midnight and Daylight under the names a <picture> pair uses.
+// Every other dark look has a light side of its own, `<look>-light`.
 // Accents are 6-digit hex so a tint can append an alpha.
 
 import { clock } from "./time.js";
@@ -172,8 +173,125 @@ const LOOKS = {
   },
 };
 
-/** Every look's name, in FinderGit's order. */
+// ─── The light sides ───
+//
+// Every dark look but Midnight, whose light side is Daylight, has one of its
+// own, `<look>-light`, for readers on GitHub's light theme. They are
+// glancecard's: FinderGit draws its looks on one ground. A rule derives each
+// from its dark look, so the eight stay one family: the look's glows at 60%,
+// its calendar turned around (on paper the darkest is the most), its
+// lettering, and every accent darkened until it reads at 4.5:1 on a panel.
+// A dark calendar's brightest level is near white, lost on an empty day:
+// a level that does not stand off the empty one by 1.15:1 takes the middle
+// of the next level and the empty one.
+// What a rule cannot know is set by hand below: the paper, and for Halloween
+// the header and GitHub's own light Halloween calendar. Their decorations
+// are drawn in an ink that shows on paper (src/decor.js).
+
+const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+const hexOf = (c) => `#${c.map((v) => Math.round(Math.min(255, Math.max(0, v))).toString(16).padStart(2, "0")).join("").toUpperCase()}`;
+/** `a` moved toward `b` by `t`. */
+const mix = (a, b, t) => hexOf(rgb(a).map((v, i) => v + (rgb(b)[i] - v) * t));
+/** An rgba() fill laid over the opaque `under`. */
+function over(fill, under) {
+  const [r, g, b, a] = fill.match(/[\d.]+/g).map(Number);
+  return hexOf(rgb(under).map((v, i) => v + ([r, g, b][i] - v) * a));
+}
+function luminance(hex) {
+  const [r, g, b] = rgb(hex).map((v) => (v / 255 <= 0.03928 ? v / 255 / 12.92 : ((v / 255 + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+/** WCAG's contrast ratio of two opaque colours. */
+export function contrast(a, b) {
+  const [x, y] = [luminance(a), luminance(b)].sort((m, n) => n - m);
+  return (x + 0.05) / (y + 0.05);
+}
+function hsl(hex) {
+  const [r, g, b] = rgb(hex).map((v) => v / 255);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (max === min) return [0, 0, l];
+  const d = max - min;
+  const h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [(h * 60 + 360) % 360, d / (1 - Math.abs(2 * l - 1)), l];
+}
+function fromHsl([h, s, l]) {
+  const k = (n) => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  return hexOf([0, 8, 4].map((n) => (l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1))) * 255));
+}
+/**
+ * `hex` darkened a step at a time, its hue and saturation kept, until it
+ * reads at `target` on `ground`. A yellow turns to gold on the way, as it
+ * does in print: darkened as it is, it would be olive.
+ */
+function deepen(hex, ground, target) {
+  const [h, s, l] = hsl(hex);
+  const hue = h >= 45 && h <= 70 ? 40 : h;
+  let c = hex;
+  for (let v = l; contrast(c, ground) < target && v > 0; v -= 0.01) c = fromHsl([hue, s, v]);
+  return c;
+}
+
+const LIGHT_SIDES = {
+  aurora: { canvas: ["#EEF8F5", "#EEF2FA", "#F5EFFA"] },
+  "upside-down": { canvas: ["#F8F1EA", "#F3E9E1", "#EFE2DB"] },
+  hyperspace: { canvas: ["#F4F7FD", "#EBF0FA", "#E5ECF8"] },
+  bridge: { canvas: ["#F7F4EF", "#F2EFEA", "#EFECF3"] },
+  nebula: { canvas: ["#F9F2FB", "#F3EFFB", "#FBEFF4"] },
+  halloween: {
+    // Parchment, warmer at the bottom where the pumpkins sit.
+    canvas: ["#FBF4E6", "#F7EBD8", "#F3E3D3"],
+    header: ["#FFE2C0", "#EADCF4"],
+    heat: ["#ECE3D2", "#FFEE4A", "#FFC501", "#FE9600", "#03001C"],
+    surface: "rgba(255,251,244,0.8)",
+  },
+  christmas: { canvas: ["#EEF5F1", "#EAF1F6", "#F0F4F8"] },
+};
+
+/** A dark look's calendar levels on paper: the empty day, then the four turned around. */
+function calendar(heat) {
+  const empty = LOOKS.daylight.heat[0];
+  const levels = heat.slice(1).reverse();
+  return [empty, ...levels.map((c, i) => (contrast(c, empty) < 1.15 && levels[i + 1] ? mix(levels[i + 1], empty, 0.45) : c))];
+}
+
+/** The light side of the dark look `look`: by rule, but for what `hand` sets. */
+function lightSide(look, hand) {
+  const L = LOOKS[look];
+  const surface = hand.surface ?? white(0.74);
+  const panel = over(surface, hand.canvas[1]);
+  const deep = (c, target = 4.5) => deepen(c, panel, target);
+  const accent = L.accent ?? L.heat[4];
+  const second = L.secondAccent ?? "#38D9A9";
+  return {
+    family: L.family,
+    isDark: false,
+    canvas: hand.canvas,
+    glows: L.glows.map(([c, o, x, y, r]) => [c, Math.round(o * 600) / 1000, x, y, r]),
+    header: hand.header ?? [mix(accent, "#FFFFFF", 0.84), mix(second, "#FFFFFF", 0.84)],
+    headerOutline: `rgba(${rgb(accent).join(",")},0.3)`,
+    avatarRing: L.avatarRing.map((c) => (c.startsWith("#") ? deep(c, 3) : c)),
+    heat: hand.heat ?? calendar(L.heat),
+    tiles: L.tiles?.map((c) => deep(c)),
+    accent: deep(accent),
+    secondAccent: deep(second),
+    type: L.type,
+    nameInk: L.nameInk && deep(L.nameInk),
+    topBand: L.topBand,
+    bottomBand: L.bottomBand,
+    surface,
+  };
+}
+
+for (const [look, hand] of Object.entries(LIGHT_SIDES)) LOOKS[`${look}-light`] = lightSide(look, hand);
+
+/** Every look's name: FinderGit's nine in its order, then the light sides. */
 export const LOOK_NAMES = Object.keys(LOOKS);
+
+/** The light side of a dark look, the look itself for a light one. */
+export const lightOf = (look) => (LOOKS[look].isDark === false ? look : look === "midnight" ? "daylight" : `${look}-light`);
 
 /** What a theme input may name: the looks, and `dark` and `light`. */
 export const ALIASES = { dark: "midnight", light: "daylight" };
@@ -201,9 +319,11 @@ export const alpha = (hex, a) => `${hex}${Math.round(a * 255).toString(16).padSt
 
 /**
  * Whether a look is worn on `day` (YYYY-MM-DD): always, but Halloween only
- * from 1 October to 2 November and Christmas from 1 December to 6 January.
+ * from 1 October to 2 November and Christmas from 1 December to 6 January,
+ * their light sides with them.
  */
-export function inSeason(look, day) {
+export function inSeason(name, day) {
+  const look = name.replace(/-light$/, "");
   const [, m, d] = day.split("-").map(Number);
   if (look === "halloween") return m === 10 || (m === 11 && d <= 2);
   if (look === "christmas") return m === 12 || (m === 1 && d <= 6);
@@ -212,13 +332,15 @@ export function inSeason(look, day) {
 
 /**
  * The look a theme name wears at `now` in `timeZone`: its alias resolved,
- * and Midnight for a seasonal look out of its season, so a Halloween card is
- * Midnight in November and Halloween again next October.
+ * and Midnight for a seasonal look out of its season, Daylight for its light
+ * side, so a Halloween card is Midnight in November and Halloween again next
+ * October.
  */
 export function resolveLook(name, { now = new Date(), timeZone = "UTC", allSeasons = false } = {}) {
   const look = ALIASES[name] ?? name;
   if (!LOOKS[look]) throw new Error(`unknown theme "${name}" (choose from ${THEME_NAMES.join(", ")})`);
-  return allSeasons || inSeason(look, clock(timeZone).day(now)) ? look : "midnight";
+  if (allSeasons || inSeason(look, clock(timeZone).day(now))) return look;
+  return LOOKS[look].isDark === false ? "daylight" : "midnight";
 }
 
 /** Everything the renderers draw with, for one look. */

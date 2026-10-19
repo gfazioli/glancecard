@@ -109,16 +109,25 @@ test("the editor's choices are radio groups, each with one choice made", async (
   const checked = (name) => [...index.matchAll(new RegExp(`<input type="radio" name="${name}" value="([a-z-]+)" checked`, "g"))].map((m) => m[1]);
   assert.deepEqual(values("editor-mode"), ["follow", "one"]);
   assert.deepEqual(values("editor-dark"), LOOK_NAMES.filter((l) => theme(l).isDark));
-  assert.deepEqual(values("editor-look"), LOOK_NAMES);
+  assert.deepEqual(values("editor-look").sort(), [...LOOK_NAMES].sort(), "every look, in a dark row and a light row");
+  assert.deepEqual(values("editor-light"), ["own", "daylight"]);
   assert.deepEqual(values("editor-calendar"), ["chart", "grid"]);
   assert.deepEqual(values("editor-stars"), ["steps", "smooth", "bars"]);
   assert.deepEqual(values("editor-often"), ["day", "week"]);
   assert.deepEqual(values("preview-card"), ["profile", "repo"]);
   assert.deepEqual(values("preview-side"), ["dark", "light"]);
-  for (const [name, choice] of [["editor-mode", "follow"], ["editor-dark", "midnight"], ["editor-look", "midnight"], ["editor-calendar", "chart"], ["editor-stars", "steps"], ["editor-often", "day"], ["preview-card", "profile"], ["preview-side", "dark"]]) {
+  for (const [name, choice] of [["editor-mode", "follow"], ["editor-dark", "midnight"], ["editor-light", "own"], ["editor-look", "midnight"], ["editor-calendar", "chart"], ["editor-stars", "steps"], ["editor-often", "day"], ["preview-card", "profile"], ["preview-side", "dark"]]) {
     assert.deepEqual(checked(name), [choice], `${name} starts on ${choice}`);
   }
   assert.match(index, /<fieldset data-editor-when="one" hidden>/, "the one-look group waits for its mode");
+});
+
+test("a light look's chip wears the swatch the editor gives it", async () => {
+  const { LIGHT_SWATCHES } = await import("../site/editor.js");
+  for (const [look, swatch] of Object.entries(LIGHT_SWATCHES)) {
+    const chip = index.match(new RegExp(`name="editor-look" value="${look}"[^>]*/><span class="chip"><i style="background: ([^"]+)"></i>`));
+    assert.equal(chip?.[1], swatch, look);
+  }
 });
 
 test("the sections are checkboxes, every one of the action's, all checked", async () => {
@@ -144,7 +153,7 @@ after(() => rmSync(out, { recursive: true, force: true }));
 
 test("the build makes every card the page shows, at its real size", async () => {
   const { cards } = await build(out, { fixtures: true });
-  assert.equal(cards.length, 19);
+  assert.equal(cards.length, 33);
   const built = readFileSync(path.join(out, "index.html"), "utf8");
   for (const [, tag, name] of built.matchAll(/(<img\b[^>]*\bdata-card="([^"]+)"[^>]*>)/g)) {
     const svg = readFileSync(path.join(out, "cards", `${name}.svg`), "utf8");

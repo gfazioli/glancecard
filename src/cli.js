@@ -19,7 +19,10 @@ Options:
   --out <dir>          where the cards go (default: glancecard)
   --theme <list>       both (dark and light), or looks, comma-separated (default: both):
                        dark, light, midnight, aurora, daylight, upside-down,
-                       hyperspace, bridge, nebula, halloween, christmas
+                       hyperspace, bridge, nebula, halloween, christmas, and
+                       each dark look's light side: aurora-light, upside-down-light,
+                       hyperspace-light, bridge-light, nebula-light,
+                       halloween-light, christmas-light
   --all-seasons        wear Halloween and Christmas out of their season
   --time-zone <zone>   IANA zone for commit days and hours (default: this machine's)
   --sections <list>    repository card sections, comma-separated (default: all):

@@ -100,7 +100,7 @@ export async function renderCards({
   starsChart = parseStarsChart(starsChart); // or way to draw the stars
 
   // The look each theme name wears today: a seasonal one out of its season
-  // is Midnight, and the log says so.
+  // is Midnight, or Daylight for its light side, and the log says so.
   const looks = new Map(
     themes.map((name) => {
       const look = resolveLook(name, { now, timeZone, allSeasons });

@@ -31,6 +31,9 @@ export const CASES = [
   { name: "octoscope-grid-light", fixture: "octoscope", theme: "light", calendar: "grid" },
   { name: "react-switch-button-bars-dark", fixture: "react-switch-button", theme: "dark", sections: ["hero", "stars"], starsChart: "bars" },
   { name: "profile-gfazioli-smooth-light", fixture: "profile-gfazioli", theme: "light", starsChart: "smooth" },
+  { name: "profile-gfazioli-halloween-light", fixture: "profile-gfazioli", theme: "halloween-light" },
+  { name: "profile-gfazioli-nebula-light-grid", fixture: "profile-gfazioli", theme: "nebula-light", calendar: "grid" },
+  { name: "octoscope-christmas-light", fixture: "octoscope", theme: "christmas-light", allSeasons: true },
 ];
 
 export function renderCase(c) {
