@@ -93,7 +93,10 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
   // ─── Tiles ───
 
   const [kb, unit] = size(r.diskUsage ?? 0);
-  const license = r.licenseInfo?.spdxId && r.licenseInfo.spdxId !== "NOASSERTION" ? r.licenseInfo.spdxId : "—";
+  // The licence's family is the tile's figure, and its full SPDX id the line
+  // under it: BSD-2-Clause is BSD, Apache-2.0 Apache, MIT stays MIT.
+  const spdx = r.licenseInfo?.spdxId && r.licenseInfo.spdxId !== "NOASSERTION" ? r.licenseInfo.spdxId : null;
+  const license = spdx ? spdx.replace(/-\d.*$/, "") : "—";
   const tileItems = [
     { icon: "git-commit", color: A.indigo, value: compact(m.totalCommits), label: "Commits", sub: m.commits[0] ? `last ${ago(m.commits[0].day, m.today)}` : "none yet" },
     { icon: "people", color: A.teal, value: compact(m.contributorCount), label: "Contributors", sub: m.bots ? `incl. ${plural(m.bots, "bot")}` : "all-time" },
@@ -102,7 +105,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
     { icon: "package", color: A.blue, value: compact(m.releaseCount), label: "Releases", sub: m.releases[0] ? `latest ${ago(m.releases[0].day, m.today)}` : "none yet" },
     m.downloads > 0
       ? { icon: "download", color: A.purple, value: compact(m.downloads), label: "Downloads", sub: "release assets" }
-      : { icon: "law", color: A.purple, value: license, label: "License", sub: "SPDX" },
+      : { icon: "law", color: A.purple, value: license, label: "License", sub: spdx && spdx !== license ? spdx : "SPDX" },
     { icon: "star", color: A.yellow, value: compact(r.stargazerCount), label: "Stars", sub: "stargazers" },
     { icon: "repo-forked", color: A.teal, value: compact(r.forkCount), label: "Forks", sub: "of this repo" },
     { icon: "eye", color: A.slate, value: compact(r.watchers.totalCount), label: "Watchers", sub: "subscribed" },

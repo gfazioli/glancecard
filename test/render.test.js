@@ -6,7 +6,7 @@ import { renderProfile } from "../src/profile/render.js";
 import { repoModel } from "../src/repo/model.js";
 import { REPO_SECTIONS, renderRepo } from "../src/repo/render.js";
 import { ticks } from "../src/svg.js";
-import { THEMES } from "../src/theme.js";
+import { LOOK_NAMES, theme as lookTheme, THEMES } from "../src/theme.js";
 import { CASES, fixture, goldenPath, renderCase } from "./support/cases.js";
 
 // A card is the golden file byte for byte. After a deliberate change, run
@@ -194,3 +194,49 @@ test("a short history's bars stay inside the plot", async () => {
   assert.match(svg, /class="axis">stars a week</);
 });
 
+
+// Each tile as drawn: its figure and label, the size each is set at when it
+// had to be set smaller, and the line under them.
+function drawnTiles(svg) {
+  const re = /class="value disp"(?: style="font-size: ([\d.]+)px")?>([^<]*)(?:<tspan[^>]*>[^<]*<\/tspan>)?<\/text>\s*<text[^>]*class="label disp"(?: style="font-size: ([\d.]+)px")?>([^<]*)<\/text>\s*<text[^>]*class="sub">([^<]*)</g;
+  return [...svg.matchAll(re)].map(([, valuePx, value, labelPx, label, sub]) => ({
+    value,
+    valuePx: valuePx ? Number(valuePx) : 26,
+    label,
+    labelPx: labelPx ? Number(labelPx) : 12,
+    sub,
+  }));
+}
+
+const licensed = (spdxId) => {
+  const data = fixture("octoscope");
+  // Without release downloads, the sixth tile is the licence.
+  return repoModel({ ...data, repo: { ...data.repo, licenseInfo: { spdxId } }, releases: [] }, { timeZone: "Europe/Rome" });
+};
+
+test("a licence is its family on the tile, and its SPDX id under it", () => {
+  const tile = (spdxId) => drawnTiles(renderRepo(licensed(spdxId), { theme: THEMES.dark })).find((t) => t.label === "License");
+  assert.deepEqual(tile("BSD-2-Clause"), { value: "BSD", valuePx: 26, label: "License", labelPx: 12, sub: "BSD-2-Clause" });
+  assert.deepEqual(tile("Apache-2.0"), { value: "Apache", valuePx: 26, label: "License", labelPx: 12, sub: "Apache-2.0" });
+  assert.deepEqual(tile("MIT"), { value: "MIT", valuePx: 26, label: "License", labelPx: 12, sub: "SPDX" });
+  assert.deepEqual(tile("NOASSERTION"), { value: "—", valuePx: 26, label: "License", labelPx: 12, sub: "SPDX" });
+});
+
+test("a figure or a label too wide for its tile is set smaller, not clipped, in every look", () => {
+  for (const look of LOOK_NAMES) {
+    const tiles = drawnTiles(renderRepo(licensed("PostgreSQL"), { theme: lookTheme(look) }));
+    assert.equal(tiles.length, 12, look);
+    for (const t of tiles) {
+      assert.doesNotMatch(`${t.value} ${t.label}`, /…/, `${look}: ${t.value} ${t.label} is clipped`);
+      assert.ok(t.valuePx >= 14 && t.labelPx >= 9.5, `${look}: ${t.label} set under the floor`);
+    }
+    const license = tiles.find((t) => /^license$/i.test(t.label));
+    assert.equal(license.value, "PostgreSQL", look);
+    assert.ok(license.valuePx < 26, `${look}: PostgreSQL is still set at 26 px`);
+  }
+  // Bridge's capitals: whole words, smaller, where the tile was too narrow.
+  const bridge = drawnTiles(renderRepo(licensed("MIT"), { theme: lookTheme("bridge") }));
+  const label = (name) => bridge.find((t) => t.label === name);
+  assert.ok(label("CONTRIBUTORS").labelPx < 12 && label("PULL REQUESTS").labelPx < 12);
+  assert.equal(label("COMMITS").labelPx, 12);
+});
