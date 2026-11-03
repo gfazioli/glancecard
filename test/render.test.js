@@ -5,7 +5,7 @@ import { profileModel } from "../src/profile/model.js";
 import { renderProfile } from "../src/profile/render.js";
 import { repoModel } from "../src/repo/model.js";
 import { REPO_SECTIONS, renderRepo } from "../src/repo/render.js";
-import { ticks } from "../src/svg.js";
+import { kit, ticks } from "../src/svg.js";
 import { LOOK_NAMES, theme as lookTheme, THEMES } from "../src/theme.js";
 import { CASES, fixture, goldenPath, renderCase } from "./support/cases.js";
 
@@ -239,4 +239,14 @@ test("a figure or a label too wide for its tile is set smaller, not clipped, in 
   const label = (name) => bridge.find((t) => t.label === name);
   assert.ok(label("CONTRIBUTORS").labelPx < 12 && label("PULL REQUESTS").labelPx < 12);
   assert.equal(label("COMMITS").labelPx, 12);
+});
+
+test("a figure and a label too wide even at their floor are clipped there", () => {
+  const long = "W".repeat(60);
+  const { svg } = kit(THEMES.dark).tiles([{ icon: "law", color: "#888888", value: long, label: long, sub: "SPDX" }], 0, 6);
+  const [tile] = drawnTiles(svg);
+  assert.match(tile.value, /^W+…$/);
+  assert.match(tile.label, /^W+…$/);
+  assert.equal(tile.valuePx, 14);
+  assert.equal(tile.labelPx, 9.5);
 });
