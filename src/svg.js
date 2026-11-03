@@ -90,10 +90,25 @@ export function kit(t) {
 
   const panel = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="14" class="panel"/>`;
 
-  /** Display text in the look's lettering, clipped to `max` px. */
-  const disp = (s, max, size, weight) => {
-    const text = display(t, s);
-    return max ? fit(text, max - t.type.tracking * text.length, size, weight) : text;
+  /** Display text in the look's lettering. */
+  const disp = (s) => display(t, s);
+
+  // The glyph tables are the system font's; the serif and rounded faces run
+  // wider, in Chrome on macOS New York by up to 9% at 26 px and SF Rounded by
+  // up to 7%. A compressed look is measured at full width, since a reader
+  // without a condensed face gets full-width letters.
+  const wider = { serif: 1.1, rounded: 1.08 }[t.type.design] ?? 1;
+
+  /**
+   * Display text `s`, already in the look's lettering, set to fit `max` px:
+   * at `size` when it can, else at the largest half pixel down to `min`, and
+   * clipped there if even that is too wide. `style` sets the smaller size.
+   */
+  const shrink = (s, max, size, weight, min) => {
+    const room = (max - t.type.tracking * Array.from(s).length) / wider;
+    let px = size;
+    while (px > min && textWidth(s, px, weight) > room) px -= 0.5;
+    return { text: fit(s, room, px, weight), style: px === size ? "" : ` style="font-size: ${px}px"` };
   };
 
   // The title's colour goes in style=, not fill=: the stylesheet's `text`
@@ -425,13 +440,19 @@ ${body}${decor.front ? `\n<g clip-path="url(#card)" aria-hidden="true">${decor.f
         const x = (PAD + (i % cols) * (w + GAP)).toFixed(1);
         const ty = y + Math.floor(i / cols) * (h + GAP);
         const tx = (Number(x) + 14).toFixed(1);
+        // A figure or a label too wide for the tile is set smaller before it
+        // is clipped: a licence such as PostgreSQL, Bridge's capitals.
+        const room = w - 28;
+        const unitW = item.unit ? 4 + textWidth(item.unit, 14, 600) : 0;
+        const value = shrink(String(item.value), room - unitW, 26, 700, 14);
+        const label = shrink(disp(item.label), room, 12, 600, 9.5);
         return `
   <g>
     <rect x="${x}" y="${ty}" width="${w.toFixed(1)}" height="${h}" rx="14" fill="url(#tile-${i})" stroke="${alpha(item.color, t.tile.stroke)}"/>
     ${icon(item.icon, Number(tx), ty + 14, item.color)}
-    <text x="${tx}" y="${ty + 60}" class="value disp">${esc(item.value)}${item.unit ? `<tspan dx="4" class="unit">${item.unit}</tspan>` : ""}</text>
-    <text x="${tx}" y="${ty + 78}" class="label disp">${esc(disp(item.label, w - 28, 12, 600))}</text>
-    <text x="${tx}" y="${ty + 91}" class="sub">${esc(fit(item.sub, w - 28, 10.5))}</text>
+    <text x="${tx}" y="${ty + 60}" class="value disp"${value.style}>${esc(value.text)}${item.unit ? `<tspan dx="4" class="unit">${item.unit}</tspan>` : ""}</text>
+    <text x="${tx}" y="${ty + 78}" class="label disp"${label.style}>${esc(label.text)}</text>
+    <text x="${tx}" y="${ty + 91}" class="sub">${esc(fit(item.sub, room, 10.5))}</text>
   </g>`;
       })
       .join("");
