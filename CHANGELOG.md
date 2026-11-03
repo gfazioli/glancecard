@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.1 — 2026-11-03
+
+**Every tile holds what it says.**
+
+- A repository's License tile shows the licence's family as its figure, `BSD`, `Apache`, `GPL`, `MIT`, and the full SPDX id on the line under it. `BSD-2-Clause` used to run past the tile's edge, and the card's, in every look.
+- A figure or a label too wide for its tile is set a little smaller before it is ever clipped, and the serif and rounded looks are measured as wide as they draw. Bridge's and Hyperspace's capitals now read `CONTRIBUTORS`, `PULL REQUESTS` and `YEARS ON GITHUB` in full.
+- Every tile that fitted before is drawn exactly as it was.
+
 ## 0.6.0 — 2026-10-19
 
 **Every look, both sides.**
