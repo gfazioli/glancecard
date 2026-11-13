@@ -38,7 +38,8 @@ const byHand = readme.split("## Set it up by hand")[1].split("## Staying up to d
 const YAML = byHand.match(/```yaml\n([\s\S]*?)\n```/)[1];
 const EMBED = byHand.match(/```html\n([\s\S]*?)\n```/)[1];
 const RAW = "https://raw.githubusercontent.com/<login>/<login>/<default branch>/glancecard/";
-const STEP4 = (inner) => `4. Add my profile card to my profile README where it fits best (ask me if unsure), then commit and push:\n\n${inner}\n\n5.`;
+const CREDIT = `<sub>Made with <a href="https://github.com/gfazioli/glancecard">glancecard</a> · refreshed daily</sub>`;
+const STEP4 = (inner) => `4. Add my profile card to my profile README where it fits best (ask me if unsure), then commit and push:\n\n${inner}<br>\n   ${CREDIT}\n\n5.`;
 
 test("the editor knows the looks, and reads themes and names files as the action does", () => {
   assert.deepEqual(THEME_ORDER, THEME_NAMES);
@@ -87,14 +88,15 @@ test("follows the reader's theme, Nebula in the dark and its own light side in t
    </picture>`),
     ),
   );
-  assert.ok(out.includes(`with the same <picture> pointing at ${RAW}<name>-nebula.svg and -nebula-light.svg. Don't merge them`));
+  assert.ok(out.includes(`with the same <picture> pointing at ${RAW}<name>-nebula.svg and -nebula-light.svg, and the same line under it. Don't merge them`));
   assert.equal(workflow(YAML, p), YAML.replace("another-repo", "another-repo\n          theme: nebula, nebula-light"));
   assert.equal(
     embed(EMBED, p),
     `<picture>
   <source media="(prefers-color-scheme: dark)" srcset="glancecard/your-repo-nebula.svg">
   <img src="glancecard/your-repo-nebula-light.svg" width="880" alt="your-repo at a glance">
-</picture>`,
+</picture><br>
+${CREDIT}`,
   );
 });
 
@@ -113,14 +115,15 @@ test("follows the reader's theme, Nebula in the dark and Daylight in the light",
    </picture>`),
     ),
   );
-  assert.ok(out.includes(`with the same <picture> pointing at ${RAW}<name>-nebula.svg and -light.svg. Don't merge them`));
+  assert.ok(out.includes(`with the same <picture> pointing at ${RAW}<name>-nebula.svg and -light.svg, and the same line under it. Don't merge them`));
   assert.equal(workflow(YAML, p), YAML.replace("another-repo", "another-repo\n          theme: nebula, light"));
   assert.equal(
     embed(EMBED, p),
     `<picture>
   <source media="(prefers-color-scheme: dark)" srcset="glancecard/your-repo-nebula.svg">
   <img src="glancecard/your-repo-light.svg" width="880" alt="your-repo at a glance">
-</picture>`,
+</picture><br>
+${CREDIT}`,
   );
 });
 
@@ -134,7 +137,7 @@ test("follows the reader's theme, Halloween on both sides, and says both are sea
   assert.ok(out.includes("             theme: halloween, halloween-light\n"));
   assert.ok(out.includes("check that glancecard/profile-halloween.svg is now"));
   assert.ok(out.includes(`srcset="glancecard/profile-halloween.svg"`) && out.includes(`src="glancecard/profile-halloween-light.svg"`));
-  assert.ok(out.includes(`${RAW}<name>-halloween.svg and -halloween-light.svg.`));
+  assert.ok(out.includes(`${RAW}<name>-halloween.svg and -halloween-light.svg,`));
   assert.ok(embed(EMBED, p).includes(`srcset="glancecard/your-repo-halloween.svg"`));
   // With Daylight on the light side, only the dark side is seasonal.
   const q = plan({ mode: "follow", dark: "halloween", light: "daylight" });
@@ -155,9 +158,9 @@ test("always one look, Daylight: one file and a plain <img>", () => {
   assert.ok(out.includes("check that glancecard/profile.svg is now on the default branch"));
   assert.ok(out.includes(STEP4(`   <img src="glancecard/profile.svg" width="880" alt="<login>'s GitHub activity">`)));
   assert.doesNotMatch(out, /^ *<picture>$|profile-dark|profile-light/m);
-  assert.ok(out.includes(`with the same <img> pointing at ${RAW}<name>.svg. Don't merge them`));
+  assert.ok(out.includes(`with the same <img> pointing at ${RAW}<name>.svg, and the same line under it. Don't merge them`));
   assert.equal(workflow(YAML, p), YAML.replace("another-repo", "another-repo\n          theme: daylight"));
-  assert.equal(embed(EMBED, p), `<img src="glancecard/your-repo.svg" width="880" alt="your-repo at a glance">`);
+  assert.equal(embed(EMBED, p), `<img src="glancecard/your-repo.svg" width="880" alt="your-repo at a glance"><br>\n${CREDIT}`);
 });
 
 test("always one look, Hyperspace, its year as a grid", () => {
@@ -168,7 +171,7 @@ test("always one look, Hyperspace, its year as a grid", () => {
   assert.ok(out.includes("             time-zone: <zone>\n             theme: hyperspace\n             calendar: grid\n\n"));
   assert.ok(out.includes(STEP4(`   <img src="glancecard/profile.svg" width="880" alt="<login>'s GitHub activity">`)));
   assert.equal(workflow(YAML, p), YAML.replace("another-repo", "another-repo\n          theme: hyperspace\n          calendar: grid"));
-  assert.equal(embed(EMBED, p), `<img src="glancecard/your-repo.svg" width="880" alt="your-repo at a glance">`);
+  assert.equal(embed(EMBED, p), `<img src="glancecard/your-repo.svg" width="880" alt="your-repo at a glance"><br>\n${CREDIT}`);
 });
 
 test("only real choices: a light look on the dark side, or no look, is refused", () => {
@@ -196,7 +199,7 @@ const MONDAY = "Once a week";
 
 test("the refresh, untouched, is the README's schedule and writes no zone", () => {
   assert.deepEqual(plan().refresh, refreshPlan(DEFAULT_REFRESH));
-  assert.deepEqual(plan().refresh, { cron: "30 5 * * *", comment: "every day", zone: null, promptZone: null });
+  assert.deepEqual(plan().refresh, { cron: "30 5 * * *", comment: "every day", cadence: "daily", zone: null, promptZone: null });
   assert.equal(workflow(YAML, plan()), YAML);
   assert.equal(prompt(PROMPT, plan()), PROMPT);
 });
@@ -231,7 +234,7 @@ test("a Monday morning east of UTC is a Sunday in UTC: the weekday moves", () =>
   const h = at("Pacific/Auckland", "08:30", OCT);
   assert.deepEqual([h.utcHour, h.shift], [19, -1]);
   const p = plan({ refresh: { often: "week", utcHour: h.utcHour, zone: "Pacific/Auckland", date: OCT } });
-  assert.deepEqual(p.refresh, { cron: "30 19 * * 0", comment: "every Monday", zone: "Pacific/Auckland", promptZone: null });
+  assert.deepEqual(p.refresh, { cron: "30 19 * * 0", comment: "every Monday", cadence: "weekly", zone: "Pacific/Auckland", promptZone: null });
   assert.ok(workflow(YAML, p).includes(`    - cron: "30 19 * * 0" # every Monday\n`));
   assert.equal(refreshNote({ often: "week", utcHour: 19, zone: "Pacific/Auckland", date: OCT }), "Every Monday at 08:30 in Pacific/Auckland, Sunday 19:30 UTC.");
 });
@@ -317,3 +320,12 @@ test("the card's alt says which sections it shows, and when the stars are left o
   assert.equal(previewAlt({ card: "repo", look: "nebula", calendar: "grid", stars: "bars", sections: ["stars"] }), "octoscope's repository card in the Nebula look, its year as a grid and its stars as bars, showing stars only");
 });
 
+test("the line under an embed says how often the card is refreshed", () => {
+  const week = { often: "week", utcHour: 5, zone: null };
+  for (const p of [plan({ refresh: week }), plan({ mode: "one", look: "daylight", refresh: week })]) {
+    assert.ok(embed(EMBED, p).endsWith(`<sub>Made with <a href="https://github.com/gfazioli/glancecard">glancecard</a> · refreshed weekly</sub>`));
+    assert.ok(prompt(PROMPT, p).includes(`   <sub>Made with <a href="https://github.com/gfazioli/glancecard">glancecard</a> · refreshed weekly</sub>\n\n5.`));
+    assert.doesNotMatch(prompt(PROMPT, p) + embed(EMBED, p), /refreshed daily/);
+  }
+  assert.ok(embed(EMBED, plan()).endsWith("· refreshed daily</sub>"));
+});

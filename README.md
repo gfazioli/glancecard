@@ -83,9 +83,10 @@ Use the gh CLI; if it is missing or not signed in, stop and tell me how to fix i
    <picture>
      <source media="(prefers-color-scheme: dark)" srcset="glancecard/profile-dark.svg">
      <img src="glancecard/profile-light.svg" width="880" alt="<login>'s GitHub activity">
-   </picture>
+   </picture><br>
+   <sub>Made with <a href="https://github.com/gfazioli/glancecard">glancecard</a> · refreshed daily</sub>
 
-5. For each repository above, open a pull request that adds its card right under the README's title, with the same <picture> pointing at https://raw.githubusercontent.com/<login>/<login>/<default branch>/glancecard/<name>-dark.svg and -light.svg. Don't merge them: give me their links.
+5. For each repository above, open a pull request that adds its card right under the README's title, with the same <picture> pointing at https://raw.githubusercontent.com/<login>/<login>/<default branch>/glancecard/<name>-dark.svg and -light.svg, and the same line under it. Don't merge them: give me their links.
 
 Change nothing else, and add no tokens or secrets: the workflow uses the token GitHub Actions already provides.
 ```
@@ -128,7 +129,8 @@ jobs:
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="glancecard/your-repo-dark.svg">
   <img src="glancecard/your-repo-light.svg" width="880" alt="your-repo at a glance">
-</picture>
+</picture><br>
+<sub>Made with <a href="https://github.com/gfazioli/glancecard">glancecard</a> · refreshed daily</sub>
 ```
 
 From another repository, point at the raw file instead: `https://raw.githubusercontent.com/<you>/<you>/main/glancecard/your-repo-dark.svg`. That way a project's own history gets no bot commits; the cards live, and refresh, in one place.
