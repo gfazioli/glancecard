@@ -191,7 +191,8 @@ const inputs = (p, indent) =>
 /**
  * A <picture> embed of `base`'s card, as the README writes it, for the
  * choice: the same <picture> with the files that exist, or its <img> alone,
- * at the <picture>'s indent.
+ * at the <picture>'s indent. What follows the <picture>, the "Made with
+ * glancecard" line, stays as it is.
  */
 function embedOf(snippet, base, p) {
   const darkSrc = `srcset="glancecard/${base}-dark.svg"`;
@@ -200,9 +201,9 @@ function embedOf(snippet, base, p) {
     const out = swap(snippet, darkSrc, `srcset="glancecard/${fileOf(p, base, p.embed.dark)}"`);
     return swap(out, lightSrc, `src="glancecard/${fileOf(p, base, p.embed.light)}"`);
   }
-  const indent = snippet.match(/^( *)<picture>/m)[1];
-  const img = snippet.match(/^ *(<img [^\n]*>)$/m)[1];
-  return `${indent}${swap(img, lightSrc, `src="glancecard/${fileOf(p, base, p.embed.look)}"`)}`;
+  const [picture, indent] = snippet.match(/^( *)<picture>\n[\s\S]*?<\/picture>/m);
+  const img = picture.match(/^ *(<img [^\n]*>)$/m)[1];
+  return swap(snippet, picture, `${indent}${swap(img, lightSrc, `src="glancecard/${fileOf(p, base, p.embed.look)}"`)}`);
 }
 
 /** The README's "Set it up by hand" workflow, for the choice. */
@@ -230,19 +231,19 @@ export function prompt(text, p) {
   const check = p.embed.picture ? fileOf(p, "profile", p.embed.dark) : fileOf(p, "profile", p.embed.look);
   out = swap(out, "check that glancecard/profile-dark.svg is now", `check that glancecard/${check} is now`);
 
-  const picture = out.match(/^ *<picture>\n[\s\S]*?glancecard\/profile-dark\.svg[\s\S]*?<\/picture>$/m)?.[0];
+  const picture = out.match(/^ *<picture>\n[\s\S]*?glancecard\/profile-dark\.svg[\s\S]*?<\/picture>/m)?.[0];
   if (!picture) throw new Error("editor: the profile card's <picture> is not in the prompt");
   out = swap(out, picture, embedOf(picture, "profile", p));
 
   const raw = "https://raw.githubusercontent.com/<login>/<login>/<default branch>/glancecard/";
-  const pair = `with the same <picture> pointing at ${raw}<name>-dark.svg and -light.svg.`;
+  const pair = `with the same <picture> pointing at ${raw}<name>-dark.svg and -light.svg,`;
   const name = (look) => fileOf(p, "<name>", look);
   return swap(
     out,
     pair,
     p.embed.picture
-      ? `with the same <picture> pointing at ${raw}${name(p.embed.dark)} and ${name(p.embed.light).slice("<name>".length)}.`
-      : `with the same <img> pointing at ${raw}${name(p.embed.look)}.`,
+      ? `with the same <picture> pointing at ${raw}${name(p.embed.dark)} and ${name(p.embed.light).slice("<name>".length)},`
+      : `with the same <img> pointing at ${raw}${name(p.embed.look)},`,
   );
 }
 

@@ -1652,7 +1652,8 @@ jobs:
                   <pre id="editor-embed"><!-- embed:begin -->&lt;picture&gt;
   &lt;source media="(prefers-color-scheme: dark)" srcset="glancecard/your-repo-dark.svg"&gt;
   &lt;img src="glancecard/your-repo-light.svg" width="880" alt="your-repo at a glance"&gt;
-&lt;/picture&gt;<!-- embed:end --></pre>
+&lt;/picture&gt;&lt;br&gt;
+&lt;sub&gt;Made with &lt;a href="https://github.com/gfazioli/glancecard"&gt;glancecard&lt;/a&gt; · refreshed daily&lt;/sub&gt;<!-- embed:end --></pre>
                 </div>
                 <p class="editor-note">The one-paste prompt further down follows your choices too.</p>
               </div>
@@ -1698,7 +1699,9 @@ glancecard/your-repo-light.svg</code></pre>
     srcset="glancecard/your-repo-dark.svg"&gt;
   &lt;img src="glancecard/your-repo-light.svg"
     width="880" alt="your-repo at a glance"&gt;
-&lt;/picture&gt;</code></pre>
+&lt;/picture&gt;&lt;br&gt;
+&lt;sub&gt;Made with &lt;a href="https://github.com/gfazioli/glancecard"&gt;glancecard&lt;/a&gt;
+  · refreshed daily&lt;/sub&gt;</code></pre>
             </div>
           </div>
         </div>
@@ -1764,9 +1767,10 @@ Use the gh CLI; if it is missing or not signed in, stop and tell me how to fix i
    &lt;picture&gt;
      &lt;source media="(prefers-color-scheme: dark)" srcset="glancecard/profile-dark.svg"&gt;
      &lt;img src="glancecard/profile-light.svg" width="880" alt="&lt;login&gt;'s GitHub activity"&gt;
-   &lt;/picture&gt;
+   &lt;/picture&gt;&lt;br&gt;
+   &lt;sub&gt;Made with &lt;a href="https://github.com/gfazioli/glancecard"&gt;glancecard&lt;/a&gt; · refreshed daily&lt;/sub&gt;
 
-5. For each repository above, open a pull request that adds its card right under the README's title, with the same &lt;picture&gt; pointing at https://raw.githubusercontent.com/&lt;login&gt;/&lt;login&gt;/&lt;default branch&gt;/glancecard/&lt;name&gt;-dark.svg and -light.svg. Don't merge them: give me their links.
+5. For each repository above, open a pull request that adds its card right under the README's title, with the same &lt;picture&gt; pointing at https://raw.githubusercontent.com/&lt;login&gt;/&lt;login&gt;/&lt;default branch&gt;/glancecard/&lt;name&gt;-dark.svg and -light.svg, and the same line under it. Don't merge them: give me their links.
 
 Change nothing else, and add no tokens or secrets: the workflow uses the token GitHub Actions already provides.<!-- prompt:end --></pre>
           </div>
