@@ -199,7 +199,7 @@ const MONDAY = "Once a week";
 
 test("the refresh, untouched, is the README's schedule and writes no zone", () => {
   assert.deepEqual(plan().refresh, refreshPlan(DEFAULT_REFRESH));
-  assert.deepEqual(plan().refresh, { cron: "30 5 * * *", comment: "every day", zone: null, promptZone: null });
+  assert.deepEqual(plan().refresh, { cron: "30 5 * * *", comment: "every day", cadence: "daily", zone: null, promptZone: null });
   assert.equal(workflow(YAML, plan()), YAML);
   assert.equal(prompt(PROMPT, plan()), PROMPT);
 });
@@ -234,7 +234,7 @@ test("a Monday morning east of UTC is a Sunday in UTC: the weekday moves", () =>
   const h = at("Pacific/Auckland", "08:30", OCT);
   assert.deepEqual([h.utcHour, h.shift], [19, -1]);
   const p = plan({ refresh: { often: "week", utcHour: h.utcHour, zone: "Pacific/Auckland", date: OCT } });
-  assert.deepEqual(p.refresh, { cron: "30 19 * * 0", comment: "every Monday", zone: "Pacific/Auckland", promptZone: null });
+  assert.deepEqual(p.refresh, { cron: "30 19 * * 0", comment: "every Monday", cadence: "weekly", zone: "Pacific/Auckland", promptZone: null });
   assert.ok(workflow(YAML, p).includes(`    - cron: "30 19 * * 0" # every Monday\n`));
   assert.equal(refreshNote({ often: "week", utcHour: 19, zone: "Pacific/Auckland", date: OCT }), "Every Monday at 08:30 in Pacific/Auckland, Sunday 19:30 UTC.");
 });
@@ -320,3 +320,12 @@ test("the card's alt says which sections it shows, and when the stars are left o
   assert.equal(previewAlt({ card: "repo", look: "nebula", calendar: "grid", stars: "bars", sections: ["stars"] }), "octoscope's repository card in the Nebula look, its year as a grid and its stars as bars, showing stars only");
 });
 
+test("the line under an embed says how often the card is refreshed", () => {
+  const week = { often: "week", utcHour: 5, zone: null };
+  for (const p of [plan({ refresh: week }), plan({ mode: "one", look: "daylight", refresh: week })]) {
+    assert.ok(embed(EMBED, p).endsWith(`<sub>Made with <a href="https://github.com/gfazioli/glancecard">glancecard</a> · refreshed weekly</sub>`));
+    assert.ok(prompt(PROMPT, p).includes(`   <sub>Made with <a href="https://github.com/gfazioli/glancecard">glancecard</a> · refreshed weekly</sub>\n\n5.`));
+    assert.doesNotMatch(prompt(PROMPT, p) + embed(EMBED, p), /refreshed daily/);
+  }
+  assert.ok(embed(EMBED, plan()).endsWith("· refreshed daily</sub>"));
+});

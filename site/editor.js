@@ -101,6 +101,7 @@ export function refreshPlan({ often = "day", utcHour = 5, zone = null, explicit 
   return {
     cron: `${MINUTE} ${utcHour} * * ${weekly ? (1 + shift + 7) % 7 : "*"}`,
     comment: weekly ? "every Monday" : "every day",
+    cadence: weekly ? "weekly" : "daily",
     zone,
     promptZone: explicit ? zone : null,
   };
@@ -206,6 +207,9 @@ function embedOf(snippet, base, p) {
   return swap(snippet, picture, `${indent}${swap(img, lightSrc, `src="glancecard/${fileOf(p, base, p.embed.look)}"`)}`);
 }
 
+/** The "Made with glancecard" line under an embed, saying how often the card is refreshed. */
+const credit = (text, p) => swap(text, "· refreshed daily</sub>", `· refreshed ${p.refresh.cadence}</sub>`);
+
 /** The README's "Set it up by hand" workflow, for the choice. */
 export function workflow(yaml, p) {
   const last = "            your-login/another-repo";
@@ -216,7 +220,7 @@ export function workflow(yaml, p) {
 
 /** The README's "Show a card" embed, for the choice. */
 export function embed(snippet, p) {
-  return embedOf(snippet, "your-repo", p);
+  return credit(embedOf(snippet, "your-repo", p), p);
 }
 
 /** The README's one-paste prompt, for the choice. */
@@ -233,7 +237,7 @@ export function prompt(text, p) {
 
   const picture = out.match(/^ *<picture>\n[\s\S]*?glancecard\/profile-dark\.svg[\s\S]*?<\/picture>/m)?.[0];
   if (!picture) throw new Error("editor: the profile card's <picture> is not in the prompt");
-  out = swap(out, picture, embedOf(picture, "profile", p));
+  out = credit(swap(out, picture, embedOf(picture, "profile", p)), p);
 
   const raw = "https://raw.githubusercontent.com/<login>/<login>/<default branch>/glancecard/";
   const pair = `with the same <picture> pointing at ${raw}<name>-dark.svg and -light.svg,`;
