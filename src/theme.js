@@ -294,6 +294,91 @@ function lightSide(look, hand) {
 
 for (const [look, hand] of Object.entries(LIGHT_SIDES)) LOOKS[`${look}-light`] = lightSide(look, hand);
 
+// ─── The terminal looks ───
+//
+// For the terminal's own people: the card as a 1970s–80s terminal shows it.
+// Phosphor is the tube: one phosphor's glow on black glass (P1 green, P3
+// amber, P4 white) or an 80s colour monitor's sixteen colours, every letter
+// monospaced, behind scanlines, a vignette and a glare (src/svg.js draws
+// the tube, `crt`). Its light side is Printout: the same card off a line
+// printer, on fanfold paper with tractor holes, green-bar, plain white,
+// canary yellow, or from a colour ribbon (`paper`).
+
+const rgba = (hex, a) => `rgba(${rgb(hex).join(",")},${a})`;
+const MONO = { design: "mono", uppercase: true, tracking: 0.4 };
+// An 80s colour monitor's bright colours, in the tiles' roles.
+const SIXTEEN = ["#5FA8FF", "#55FFFF", "#FFFF55", "#8C8CFF", "#55E6C1", "#FF55FF", "#55FF55", "#FFAA33", "#FF5577", "#B8B8B8"];
+
+/** A tube lit by `p` on the black `ground`; `palette` for a colour monitor, whose text is `p`. */
+function phosphor(p, ground, bright, palette) {
+  return {
+    family: "terminal",
+    canvas: [mix(ground, p, 0.05), ground, mix(ground, "#000000", 0.5)],
+    glows: [[palette ? "#9FB4FF" : p, 0.08, 0.5, 0.42, 720]],
+    header: [mix(p, ground, 0.88), mix(p, ground, 0.94)],
+    headerOutline: rgba(p, 0.45),
+    avatarRing: [palette ? palette[1] : p, palette ? palette[5] : mix(p, ground, 0.4)],
+    heat: palette
+      ? [mix(p, ground, 0.9), "#0F3D10", "#1F7A22", "#3BCB3F", "#55FF55"]
+      : [mix(p, ground, 0.9), mix(p, ground, 0.7), mix(p, ground, 0.46), mix(p, ground, 0.2), bright],
+    tiles: palette ?? Array(10).fill(p),
+    accent: palette ? palette[6] : p,
+    secondAccent: palette ? palette[1] : p,
+    type: MONO,
+    ink: p,
+    inkStrong: bright,
+    nameInk: bright,
+    topBand: 30,
+    bottomBand: 30,
+    surface: rgba(p, 0.035),
+    line: p,
+    corner: 3,
+    crt: { colour: Boolean(palette) },
+  };
+}
+
+/** Fanfold paper `paper` with its bars `bar`, printed in `ink`; `palette` for a colour ribbon. */
+function printout(paper, bar, ink, palette) {
+  return {
+    family: "terminal",
+    isDark: false,
+    canvas: [paper, paper, mix(paper, "#000000", 0.03)],
+    glows: [],
+    header: [mix(paper, bar ?? "#000000", bar ? 0.6 : 0.04), mix(paper, bar ?? "#000000", bar ? 0.4 : 0.02)],
+    headerOutline: rgba(ink, 0.35),
+    avatarRing: [ink, ink],
+    heat: palette
+      ? [mix(paper, "#000000", 0.07), "#9ED89A", "#4CAF50", "#2E7D32", "#123F14"]
+      : [mix(paper, "#000000", 0.07), mix(ink, paper, 0.72), mix(ink, paper, 0.5), mix(ink, paper, 0.26), ink],
+    tiles: palette ?? Array(10).fill(ink),
+    accent: palette ? palette[6] : ink,
+    secondAccent: palette ? palette[1] : ink,
+    type: MONO,
+    ink,
+    inkStrong: ink,
+    topBand: 30,
+    bottomBand: 30,
+    surface: "rgba(255,255,255,0)",
+    line: ink,
+    corner: 3,
+    paper: { bar },
+  };
+}
+
+// The ribbon's colours, deep enough to read on paper.
+const RIBBON = ["#1F4FB8", "#006B75", "#7F5400", "#4F46E5", "#0F766E", "#8E24AA", "#22682A", "#A3360A", "#B0164F", "#57606A"];
+
+Object.assign(LOOKS, {
+  "phosphor-green": phosphor("#33FF66", "#020A04", "#8CFFAA"),
+  "phosphor-amber": phosphor("#FFB81C", "#0B0600", "#FFD47A"),
+  "phosphor-white": phosphor("#DCE6F2", "#05070A", "#FFFFFF"),
+  "phosphor-color": phosphor("#C8C8C8", "#03030A", "#FFFFFF", SIXTEEN),
+  "phosphor-green-light": printout("#FBFCF8", "#DDEFD9", "#1E2A24"),
+  "phosphor-amber-light": printout("#FFF8DA", "#F7E8A6", "#2A2112"),
+  "phosphor-white-light": printout("#FCFCFA", null, "#1C1F24"),
+  "phosphor-color-light": printout("#FCFCFA", "#EBF1FA", "#1C1F24", RIBBON),
+});
+
 /** Every look's name: FinderGit's nine in its order, then the light sides. */
 export const LOOK_NAMES = Object.keys(LOOKS);
 
@@ -319,6 +404,7 @@ const FACES = {
   default: FONT,
   serif: `"New York", ui-serif, "Iowan Old Style", Georgia, "Times New Roman", serif`,
   rounded: `ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", Quicksand, ${FONT}`,
+  mono: `ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "DejaVu Sans Mono", "Liberation Mono", monospace`,
 };
 
 /** `hex` with an alpha channel, for tints of an accent. */
@@ -355,8 +441,11 @@ export function theme(look) {
   const L = LOOKS[look];
   if (!L) throw new Error(`unknown look "${look}"`);
   const dark = L.isDark !== false;
-  const ink = dark ? "#e6edf3" : "#111827";
-  const shade = (a) => (dark ? `rgba(230,237,243,${a})` : `rgba(17,24,39,${a})`);
+  const ink = L.ink ?? (dark ? "#e6edf3" : "#111827");
+  const shade = (a) => `rgba(${rgb(ink).join(",")},${a})`;
+  // A terminal look draws its lines in its own ink, where the others draw in white or black.
+  const line = (a, other) => (L.line ? rgba(L.line, a) : other);
+  const monochrome = Boolean(L.line) && L.tiles.every((c) => c === L.tiles[0]);
   const named = L.tiles ? Object.fromEntries(TILE_ROLES.map((role, i) => [role, L.tiles[i]])) : { ...CLASSIC[dark ? "dark" : "light"] };
   if (L.tiles) named.sky = L.tiles[1];
   const accent = {
@@ -372,16 +461,25 @@ export function theme(look) {
     isDark: dark,
     canvas: L.canvas,
     glows: L.glows,
-    frame: dark ? white(0.1) : "rgba(0,0,0,0.08)",
-    panel: { fill: L.surface ?? (dark ? white(0.045) : white(0.74)), stroke: dark ? white(0.09) : "rgba(0,0,0,0.08)" },
-    tile: { from: dark ? 0.3 : 0.17, to: dark ? 0.11 : 0.05, stroke: dark ? 0.3 : 0.26 },
-    chip: { fill: dark ? white(0.06) : "rgba(0,0,0,0.045)", stroke: dark ? white(0.08) : "rgba(0,0,0,0.08)", tint: dark ? 0.15 : 0.1, tintStroke: dark ? 0.2 : 0.24 },
-    link: { fill: dark ? white(0.05) : white(0.7), icon: shade(0.7) },
-    off: { fill: dark ? white(0.03) : "rgba(0,0,0,0.02)", icon: shade(0.4) },
-    track: dark ? white(0.08) : "rgba(0,0,0,0.08)",
-    dot: dark ? white(0.16) : "rgba(0,0,0,0.18)",
-    ring: dark ? white(0.18) : "rgba(0,0,0,0.14)",
-    placeholder: dark ? "#3b4256" : "#d0d7de",
+    frame: line(0.2, dark ? white(0.1) : "rgba(0,0,0,0.08)"),
+    panel: { fill: L.surface ?? (dark ? white(0.045) : white(0.74)), stroke: line(dark ? 0.4 : 0.55, dark ? white(0.09) : "rgba(0,0,0,0.08)") },
+    tile: L.line ? { from: dark ? 0.12 : 0.06, to: dark ? 0.04 : 0.02, stroke: dark ? 0.5 : 0.6 } : { from: dark ? 0.3 : 0.17, to: dark ? 0.11 : 0.05, stroke: dark ? 0.3 : 0.26 },
+    chip: { fill: line(dark ? 0.06 : 0.04, dark ? white(0.06) : "rgba(0,0,0,0.045)"), stroke: line(0.35, dark ? white(0.08) : "rgba(0,0,0,0.08)"), tint: dark ? 0.15 : 0.1, tintStroke: dark ? 0.2 : 0.24 },
+    link: { fill: line(0.05, dark ? white(0.05) : white(0.7)), icon: shade(0.7) },
+    off: { fill: line(0.02, dark ? white(0.03) : "rgba(0,0,0,0.02)"), icon: shade(0.4) },
+    track: line(0.16, dark ? white(0.08) : "rgba(0,0,0,0.08)"),
+    dot: line(0.25, dark ? white(0.16) : "rgba(0,0,0,0.18)"),
+    ring: line(0.3, dark ? white(0.18) : "rgba(0,0,0,0.14)"),
+    corner: L.corner ?? 14,
+    cell: L.corner ? 0.5 : 2.5,
+    // A colour of GitHub's own (a language's): as it is, but in the ink's
+    // steps on a one-colour terminal, the n-th of a list a step dimmer.
+    hue: (c, n = 0) => (monochrome ? mix(ink, L.canvas[1], [0, 0.24, 0.4, 0.52, 0.62][n % 5]) : c),
+    monochrome,
+    mono: type.design === "mono",
+    crt: L.crt ?? null,
+    paper: L.paper ?? null,
+    placeholder: L.line ? mix(ink, L.canvas[1], 0.78) : dark ? "#3b4256" : "#d0d7de",
     levels: L.heat,
     header: L.header,
     headerOutline: L.headerOutline ?? (dark ? white(0.16) : "rgba(0,0,0,0.06)"),
@@ -390,7 +488,7 @@ export function theme(look) {
     spark: dark ? 0.32 : 0.22,
     text: {
       base: ink,
-      strong: dark ? "#ffffff" : ink,
+      strong: L.inkStrong ?? (dark ? "#ffffff" : ink),
       high: dark ? shade(0.95) : ink,
       body: shade(0.88),
       soft: shade(0.75),
@@ -403,6 +501,8 @@ export function theme(look) {
     accent,
     type,
     face: type.width === "compressed" ? FONT : FACES[type.design],
+    // The font of every other text: the system's, but monospaced on a terminal.
+    body: type.design === "mono" ? FACES.mono : FONT,
     nameInk: L.nameInk ?? null,
     nameGlow: L.nameGlow ?? null,
     topBand: L.topBand ?? 0,
@@ -424,7 +524,7 @@ export function styles(t) {
     .filter(Boolean)
     .join(" ");
   return `
-  text { font-family: ${FONT}; fill: ${x.base}; }
+  text { font-family: ${t.body}; fill: ${x.base}; }
   .mono, .tagname { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; }
   .disp { ${disp} }
   .h-name { font-size: 26px; font-weight: 700; fill: ${x.strong}; }

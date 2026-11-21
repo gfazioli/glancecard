@@ -5,7 +5,7 @@
 
 import { HALF, IW, kit, PAD, SECTION } from "../svg.js";
 import { THEMES } from "../theme.js";
-import { compact, esc, fit, full, plural } from "../text.js";
+import { compact, esc, full, plural } from "../text.js";
 import { formatDay, MONTHS } from "../time.js";
 
 const LEVELS = ["NONE", "FIRST_QUARTILE", "SECOND_QUARTILE", "THIRD_QUARTILE", "FOURTH_QUARTILE"];
@@ -28,11 +28,11 @@ export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = 
     return {
       h,
       svg: `
-  <rect x="${PAD}" y="${y}" width="${IW}" height="${h}" rx="14" fill="url(#hero)" stroke="${theme.headerOutline}"/>
+  <rect x="${PAD}" y="${y}" width="${IW}" height="${h}" rx="${theme.corner}" fill="url(#hero)" stroke="${theme.headerOutline}"/>
   ${k.avatar("avatar", images[u.avatarUrl], cx, cy, 36, "url(#ring)", 3)}
   <text x="${tx}" y="${y + 38}"><tspan class="name disp"${ink}>${esc(k.disp(u.name || u.login))}</tspan><tspan dx="8" class="login">@${esc(u.login)}</tspan></text>
-  <text x="${tx}" y="${y + 60}" class="bio">${esc(fit((u.bio || "").trim(), textW, 13))}</text>
-  <text x="${tx}" y="${y + 84}" class="h-meta">${esc(fit(meta, textW, 11.5))}</text>
+  <text x="${tx}" y="${y + 60}" class="bio">${esc(k.fit((u.bio || "").trim(), textW, 13))}</text>
+  <text x="${tx}" y="${y + 84}" class="h-meta">${esc(k.fit(meta, textW, 11.5))}</text>
   <text x="${PAD + IW - 16}" y="${y + 28}" class="updated" text-anchor="end">Updated ${formatDay(m.today)}</text>`,
     };
   }
@@ -70,7 +70,7 @@ export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = 
     const cells = weeks
       .flatMap((week, wi) =>
         week.contributionDays.map(
-          (d) => `<rect x="${gx + wi * step}" y="${gy + d.weekday * step}" width="${cell}" height="${cell}" rx="2.5" fill="${fillOf(d.contributionLevel)}"/>`,
+          (d) => `<rect x="${gx + wi * step}" y="${gy + d.weekday * step}" width="${cell}" height="${cell}" rx="${theme.cell}" fill="${fillOf(d.contributionLevel)}"/>`,
         ),
       )
       .join("");
@@ -97,7 +97,7 @@ export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = 
     const lx = gx + gridW - levels.length * step - 30;
     const legend = `
   <text x="${lx - 8}" y="${y + h - 18}" class="axis" text-anchor="end">Less</text>
-  ${levels.map((f, i) => `<rect x="${lx + i * step}" y="${y + h - 27}" width="${cell}" height="${cell}" rx="2.5" fill="${f}"/>`).join("")}
+  ${levels.map((f, i) => `<rect x="${lx + i * step}" y="${y + h - 27}" width="${cell}" height="${cell}" rx="${theme.cell}" fill="${f}"/>`).join("")}
   <text x="${lx + levels.length * step + 5}" y="${y + h - 18}" class="axis">More</text>`;
 
     return { h, svg: `${head}
@@ -109,8 +109,8 @@ export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = 
       .map((r, i) => {
         const ry = y + 80 + i * 21;
         return `
-    <circle cx="${x + 23}" cy="${ry - 4}" r="4.5" fill="${r.primaryLanguage?.color ?? "#6e7681"}"/>
-    <text x="${x + 36}" y="${ry}" class="row">${esc(fit(r.name, w - 110, 12.5, 500))}</text>
+    <circle cx="${x + 23}" cy="${ry - 4}" r="4.5" fill="${theme.hue(r.primaryLanguage?.color ?? "#6e7681", i)}"/>
+    <text x="${x + 36}" y="${ry}" class="row">${esc(k.fit(r.name, w - 110, 12.5, 500))}</text>
     ${k.icon("star", x + w - 66, ry - 11, A.yellow, 13)}
     <text x="${x + w - 18}" y="${ry}" class="count" text-anchor="end">${full(r.stargazerCount)}</text>`;
       })
@@ -129,9 +129,9 @@ export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = 
     const barY = y + 46;
     let cursor = barX;
     const segments = m.languages
-      .map((l) => {
+      .map((l, i) => {
         const sw = (l.count / total) * barW;
-        const seg = `<rect x="${cursor.toFixed(2)}" y="${barY}" width="${sw.toFixed(2)}" height="8" fill="${l.color}"/>`;
+        const seg = `<rect x="${cursor.toFixed(2)}" y="${barY}" width="${sw.toFixed(2)}" height="8" fill="${theme.hue(l.color, i)}"/>`;
         cursor += sw;
         return seg;
       })
@@ -140,8 +140,8 @@ export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = 
       .map((l, i) => {
         const ry = y + 80 + i * 21;
         return `
-    <circle cx="${x + 23}" cy="${ry - 4}" r="4.5" fill="${l.color}"/>
-    <text x="${x + 36}" y="${ry}" class="row">${esc(fit(l.name, w - 130, 12.5, 500))}</text>
+    <circle cx="${x + 23}" cy="${ry - 4}" r="4.5" fill="${theme.hue(l.color, i)}"/>
+    <text x="${x + 36}" y="${ry}" class="row">${esc(k.fit(l.name, w - 130, 12.5, 500))}</text>
     <text x="${x + w - 54}" y="${ry}" class="pct" text-anchor="end">${Math.round((l.count / total) * 100)}%</text>
     <text x="${x + w - 18}" y="${ry}" class="count" text-anchor="end">${l.count}</text>`;
       })
@@ -195,5 +195,5 @@ export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = 
     <stop offset="1" stop-color="${A.contributions}" stop-opacity="0"/>
   </linearGradient>${stars ? k.starsFill(m.starHistory, starsChart) : ""}${k.tileGradients(tileItems.map((t) => t.color))}`;
 
-  return k.frame({ height: y, title: `${name}'s GitHub activity`, desc, defs, body: parts.join("\n"), contentTop, ledge: contentTop });
+  return k.frame({ height: y, title: `${name}'s GitHub activity`, desc, defs, body: parts.join("\n"), contentTop, ledge: contentTop, prompt: { user: u.login, command: `glancecard profile ${u.login}`, day: m.today } });
 }

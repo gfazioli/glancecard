@@ -7,7 +7,7 @@
 
 import { HALF, IW, kit, PAD, SECTION, W } from "../svg.js";
 import { THEMES } from "../theme.js";
-import { compact, esc, excerpt, fit, full, plural, size, SLACK, textWidth, wrap } from "../text.js";
+import { compact, esc, excerpt, full, plural, size, SLACK } from "../text.js";
 import { age, ago, formatDay, MONTHS } from "../time.js";
 
 export const REPO_SECTIONS = ["hero", "tiles", "activity", "stars", "rhythm", "code", "commits", "releases", "contributors"];
@@ -55,7 +55,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
     cy += badgeRow.h + 14;
 
     if (r.description) {
-      const lines = wrap(r.description, leftW, 15, 700, 2);
+      const lines = k.wrap(r.description, leftW, 15, 700, 2);
       lines.forEach((line, i) => parts.push(`<text x="${lx}" y="${cy + 14 + i * 21}" class="desc">${esc(line)}</text>`));
       cy += 14 + (lines.length - 1) * 21 + 14;
     }
@@ -76,11 +76,11 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
     const h = Math.max(cy - y, 168);
     const rx = x + IW - 18 - rightW;
     const big = full(m.last30);
-    const bigW = textWidth(big, 34, 700) / SLACK;
+    const bigW = k.textWidth(big, 34, 700) / SLACK;
     return {
       h,
       svg: `
-  <rect x="${x}" y="${y}" width="${IW}" height="${h}" rx="16" fill="url(#hero)" stroke="${theme.repoHero.stroke}"/>
+  <rect x="${x}" y="${y}" width="${IW}" height="${h}" rx="${theme.corner + 2}" fill="url(#hero)" stroke="${theme.repoHero.stroke}"/>
   ${parts.join("")}
   <text x="${rx}" y="${y + 50}" class="big disp">${big}</text>
   <text x="${(rx + bigW + 8).toFixed(1)}" y="${y + 50}" class="big-cap">commits in 30 days</text>
@@ -154,7 +154,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
         week.map((d, di) => {
           if (!d) return "";
           const today = d.day === m.today ? ` stroke="${A.contributions}" stroke-width="1.5"` : "";
-          return `<rect x="${gx + wi * step}" y="${gy + di * step}" width="${cell}" height="${cell}" rx="2.5" fill="${levels[level(d.count)]}"${today}/>`;
+          return `<rect x="${gx + wi * step}" y="${gy + di * step}" width="${cell}" height="${cell}" rx="${theme.cell}" fill="${levels[level(d.count)]}"${today}/>`;
         }),
       )
       .join("");
@@ -182,7 +182,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
     const lx = gx + gridW - levels.length * step - 30;
     const legend = `
   <text x="${lx - 8}" y="${y + h - 16}" class="axis" text-anchor="end">Less</text>
-  ${levels.map((f, i) => `<rect x="${lx + i * step}" y="${y + h - 25}" width="${cell}" height="${cell}" rx="2.5" fill="${f}"/>`).join("")}
+  ${levels.map((f, i) => `<rect x="${lx + i * step}" y="${y + h - 25}" width="${cell}" height="${cell}" rx="${theme.cell}" fill="${f}"/>`).join("")}
   <text x="${lx + levels.length * step + 5}" y="${y + h - 16}" class="axis">More</text>`;
     return { h, svg: `${head(h)}
   ${months}${days}${cells}${legend}${capped(gx - labelW, h)}` };
@@ -255,9 +255,9 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
     const draw = (h) => {
       let cursor = barX;
       const segments = m.languages
-        .map((l) => {
+        .map((l, i) => {
           const sw = l.share * barW;
-          const seg = `<rect x="${cursor.toFixed(2)}" y="${barY}" width="${Math.max(0, sw - 1).toFixed(2)}" height="10" fill="${l.color}"/>`;
+          const seg = `<rect x="${cursor.toFixed(2)}" y="${barY}" width="${Math.max(0, sw - 1).toFixed(2)}" height="10" fill="${theme.hue(l.color, i)}"/>`;
           cursor += sw;
           return seg;
         })
@@ -267,8 +267,8 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
           const lx = barX + (i % cols) * (colW + 24);
           const ly = y + 86 + Math.floor(i / cols) * 22;
           return `
-    <circle cx="${lx + 5}" cy="${ly - 4}" r="4.5" fill="${l.color}"/>
-    <text x="${lx + 17}" y="${ly}" class="row">${esc(fit(l.name, colW - 70, 12.5, 500))}</text>
+    <circle cx="${lx + 5}" cy="${ly - 4}" r="4.5" fill="${theme.hue(l.color, i)}"/>
+    <text x="${lx + 17}" y="${ly}" class="row">${esc(k.fit(l.name, colW - 70, 12.5, 500))}</text>
     <text x="${lx + colW}" y="${ly}" class="pct" text-anchor="end">${(l.share * 100).toFixed(1)}%</text>`;
         })
         .join("");
@@ -294,8 +294,8 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
           const who = c.author?.user?.login ?? c.author?.name ?? "unknown";
           return `
     <circle cx="${x + 25}" cy="${ry - 5}" r="5.5" fill="none" stroke="${A.indigo}" stroke-width="2.2"/>
-    <text x="${x + 42}" y="${ry}" class="commit">${esc(fit(c.messageHeadline, w - 60, 13, 600))}</text>
-    <text x="${x + 42}" y="${ry + 17}" class="meta"><tspan class="mono">${esc(c.abbreviatedOid)}</tspan> · ${esc(fit(who, 150, 11))} · ${ago(c.day, m.today)}</text>`;
+    <text x="${x + 42}" y="${ry}" class="commit">${esc(k.fit(c.messageHeadline, w - 60, 13, 600))}</text>
+    <text x="${x + 42}" y="${ry + 17}" class="meta"><tspan class="mono">${esc(c.abbreviatedOid)}</tspan> · ${esc(k.fit(who, 150, 11))} · ${ago(c.day, m.today)}</text>`;
         })
         .join("");
       return `
@@ -318,9 +318,9 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
           return `
     <circle cx="${x + 27}" cy="${ry - 5}" r="9" fill="${theme.canvas[1]}" stroke="${A.sky}" stroke-width="1.2"/>
     ${k.icon("tag", x + 21, ry - 11, A.sky, 12)}
-    <text x="${x + 46}" y="${ry}" class="tagname">${esc(fit(rel.tagName, w - 80 - textWidth(when, 11), 13, 700, true))}</text>
+    <text x="${x + 46}" y="${ry}" class="tagname">${esc(k.fit(rel.tagName, w - 80 - k.textWidth(when, 11), 13, 700, true))}</text>
     <text x="${x + w - 18}" y="${ry}" class="meta" text-anchor="end">${when}</text>
-    <text x="${x + 46}" y="${ry + 17}" class="excerpt">${esc(fit(excerpt(rel.description), w - 64, 11.5))}</text>`;
+    <text x="${x + 46}" y="${ry + 17}" class="excerpt">${esc(k.fit(excerpt(rel.description), w - 64, 11.5))}</text>`;
         })
         .join("");
       const line =
@@ -352,7 +352,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
         const ry = y + 58 + i * rowH;
         return `
     ${k.avatar(`av-${i}`, images[c.avatarUrl], x + 32, ry + 10, 14, theme.ring)}
-    <text x="${trackX}" y="${ry + 6}" class="who">${esc(fit(c.login, trackW - 60, 13, 600))}</text>
+    <text x="${trackX}" y="${ry + 6}" class="who">${esc(k.fit(c.login, trackW - 60, 13, 600))}</text>
     <text x="${x + IW - 18}" y="${ry + 6}" class="count" text-anchor="end">${full(c.contributions)}</text>
     <rect x="${trackX}" y="${ry + 15}" width="${trackW}" height="4" rx="2" fill="${theme.track}"/>
     <rect x="${trackX}" y="${ry + 15}" width="${Math.max(4, (c.contributions / max) * trackW).toFixed(1)}" height="4" rx="2" fill="${A.orange}"/>`;
@@ -414,5 +414,5 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
     <stop offset="1" stop-color="${A.contributions}" stop-opacity="0"/>
   </linearGradient>${on.has("stars") ? k.starsFill(m.stars, starsChart) : ""}${k.tileGradients(tileItems.map((t) => t.color))}`;
 
-  return k.frame({ height, title: `${r.nameWithOwner} at a glance`, desc, defs, body: parts.join("\n"), contentTop, ledge: contentTop + 68 });
+  return k.frame({ height, title: `${r.nameWithOwner} at a glance`, desc, defs, body: parts.join("\n"), contentTop, ledge: contentTop + 68, prompt: { user: r.nameWithOwner.split("/")[0], command: `glancecard repo ${r.nameWithOwner}`, day: m.today } });
 }

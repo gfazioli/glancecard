@@ -5,7 +5,7 @@
 import { decorate } from "./decor.js";
 import { OCTICONS } from "./icons.js";
 import { alpha, display, styles } from "./theme.js";
-import { compact, esc, fit, full, plural, textWidth } from "./text.js";
+import { compact, esc, fit, full, plural, textWidth, wrap } from "./text.js";
 import { addDays, daysBetween, MONTHS } from "./time.js";
 
 export const W = 880;
@@ -88,7 +88,12 @@ export function kit(t) {
     return `<g transform="translate(${x} ${y}) scale(${size / 16})" fill="${fill}">${paths}</g>`;
   };
 
-  const panel = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="14" class="panel"/>`;
+  // Widths in the look's letters: a terminal's are monospaced.
+  const tw = (s, size, weight = 400, mono = t.mono) => textWidth(s, size, weight, mono);
+  const fitT = (s, max, size, weight = 400, mono = t.mono) => fit(s, max, size, weight, mono);
+  const wrapT = (s, max, size, weight, lines) => wrap(s, max, size, weight, lines, t.mono);
+
+  const panel = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${t.corner}" class="panel"/>`;
 
   /** Display text in the look's lettering. */
   const disp = (s) => display(t, s);
@@ -107,8 +112,8 @@ export function kit(t) {
   const shrink = (s, max, size, weight, min) => {
     const room = (max - t.type.tracking * Array.from(s).length) / wider;
     let px = size;
-    while (px > min && textWidth(s, px, weight) > room) px -= 0.5;
-    return { text: fit(s, room, px, weight), style: px === size ? "" : ` style="font-size: ${px}px"` };
+    while (px > min && tw(s, px, weight) > room) px -= 0.5;
+    return { text: fitT(s, room, px, weight), style: px === size ? "" : ` style="font-size: ${px}px"` };
   };
 
   // The title's colour goes in style=, not fill=: the stylesheet's `text`
@@ -124,13 +129,13 @@ export function kit(t) {
     const h = 22;
     const padX = 9;
     const iconW = name ? 18 : 0;
-    const labelW = textWidth(label, 11.5, value ? 400 : 600);
-    const valueW = value ? 5 + textWidth(value, 11.5, 700) : 0;
+    const labelW = tw(label, 11.5, value ? 400 : 600);
+    const valueW = value ? 5 + tw(value, 11.5, 700) : 0;
     const w = padX * 2 + iconW + labelW + valueW;
     const bg = fill ?? (tint ? alpha(tint, t.chip.tint) : t.chip.fill);
     const line = stroke ?? (tint ? alpha(tint, t.chip.tintStroke) : t.chip.stroke);
     const svg = `
-  <rect x="${x}" y="${y}" width="${w.toFixed(1)}" height="${h}" rx="${h / 2}" fill="${bg}" stroke="${line}"/>
+  <rect x="${x}" y="${y}" width="${w.toFixed(1)}" height="${h}" rx="${t.corner < 14 ? 2 : h / 2}" fill="${bg}" stroke="${line}"/>
   ${name ? icon(name, x + padX - 1, y + 4, color, 14) : ""}
   <text x="${(x + padX + iconW).toFixed(1)}" y="${y + 15}" class="${value ? "pill-k" : labelClass}">${esc(label)}${
     value ? `<tspan dx="5" class="pill-v">${esc(value)}</tspan>` : ""
@@ -175,7 +180,7 @@ export function kit(t) {
   function yearChart(days, x, y, w, h, color) {
     const { step, top } = ticks(Math.max(0, ...days.map((d) => d.count)));
     const values = Array.from({ length: top / step + 1 }, (_, i) => i * step);
-    const labelW = Math.max(...values.map((v) => textWidth(compact(v), 10))) + 8;
+    const labelW = Math.max(...values.map((v) => tw(compact(v), 10))) + 8;
     const px = x + labelW;
     const pw = w - labelW;
     const at = (i) => px + (i * pw) / Math.max(1, days.length - 1);
@@ -197,7 +202,7 @@ export function kit(t) {
         const to = at(firsts[n + 1] ?? days.length - 1);
         const name = MONTHS[Number(days[i].day.slice(5, 7)) - 1];
         const rule = i > 0 ? `<line x1="${from.toFixed(1)}" y1="${y}" x2="${from.toFixed(1)}" y2="${y + h}" stroke="${t.track}" stroke-dasharray="2 3"/>` : "";
-        const label = to - from >= textWidth(name, 10) + 4 ? `<text x="${((from + to) / 2).toFixed(1)}" y="${y + h + 18}" class="axis" text-anchor="middle">${name}</text>` : "";
+        const label = to - from >= tw(name, 10) + 4 ? `<text x="${((from + to) / 2).toFixed(1)}" y="${y + h + 18}" class="axis" text-anchor="middle">${name}</text>` : "";
         return rule + label;
       })
       .join("");
@@ -251,7 +256,7 @@ export function kit(t) {
 
     const { step, top } = ticks(chart === "bars" ? Math.max(0, ...counts) : points.at(-1).total);
     const values = Array.from({ length: top / step + 1 }, (_, i) => i * step);
-    const labelW = Math.max(...values.map((v) => textWidth(compact(v), 10))) + 8;
+    const labelW = Math.max(...values.map((v) => tw(compact(v), 10))) + 8;
     const px = x + labelW;
     const pw = w - labelW;
     const at = (day) => px + (daysBetween(start, day) / span) * pw;
@@ -280,7 +285,7 @@ export function kit(t) {
         const from = at(f.day);
         const to = n + 1 < firsts.length ? at(firsts[n + 1].day) : end;
         const rule = n > 0 ? `<line x1="${from.toFixed(1)}" y1="${y}" x2="${from.toFixed(1)}" y2="${y + h}" stroke="${t.track}" stroke-dasharray="2 3"/>` : "";
-        const label = to - from >= textWidth(f.name, 10) + 4 ? `<text x="${((from + to) / 2).toFixed(1)}" y="${y + h + 18}" class="axis" text-anchor="middle">${f.name}</text>` : "";
+        const label = to - from >= tw(f.name, 10) + 4 ? `<text x="${((from + to) / 2).toFixed(1)}" y="${y + h + 18}" class="axis" text-anchor="middle">${f.name}</text>` : "";
         return rule + label;
       })
       .join("");
@@ -366,16 +371,157 @@ export function kit(t) {
     const face = data
       ? `<clipPath id="${id}"><circle cx="${cx}" cy="${cy}" r="${r}"/></clipPath><image href="${data}" x="${cx - r}" y="${cy - r}" width="${r * 2}" height="${r * 2}" clip-path="url(#${id})" preserveAspectRatio="xMidYMid slice"/>`
       : `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${t.placeholder}"/>`;
+    // On a terminal the photograph is drawn in the look's own ink.
+    if (data && (t.crt || t.paper)) return `<g filter="url(#photo)">${face}</g>
+    <circle cx="${cx}" cy="${cy}" r="${r + ringWidth / 2}" fill="none" stroke="${ring}" stroke-width="${ringWidth}"/>`;
     return `${face}
     <circle cx="${cx}" cy="${cy}" r="${r + ringWidth / 2}" fill="none" stroke="${ring}" stroke-width="${ringWidth}"/>`;
+  }
+
+  // ─── The terminal looks: a tube, or a sheet off a line printer ───
+
+  const BEZEL = 9;
+  const rgbOf = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const n3 = (v) => Number(v.toFixed(3));
+
+  /** The prompt a terminal look writes above the card and leaves blinking under it. */
+  function promptLines(height, prompt, colour) {
+    const ps1 = `${prompt.user}@github:~$ `;
+    const who = colour
+      ? `<tspan style="fill: #55FF55">${esc(prompt.user)}@github</tspan><tspan style="fill: #5FA8FF">:~</tspan>$ `
+      : `<tspan style="fill: ${t.text.strong}">${esc(prompt.user)}@github</tspan>:~$ `;
+    const end = height - PAD - 8;
+    return {
+      top: `<text x="${PAD}" y="${PAD + 12}" class="prompt">${who}${esc(prompt.command)}</text>`,
+      bottom: `<text x="${PAD}" y="${end}" class="prompt">${who}</text><rect class="cursor" x="${(PAD + tw(ps1, 12.5)).toFixed(1)}" y="${end - 11}" width="7.5" height="14" fill="${t.text.base}"/>`,
+    };
+  }
+
+  /**
+   * A photograph in the look's own ink: grey, in five levels, tinted with
+   * the phosphor; on paper, from the ink to the paper. A colour tube keeps
+   * its colours, four levels a channel.
+   */
+  function photoFilter(colour, from, to) {
+    const grey = "0.2126 0.7152 0.0722 0 0 ";
+    const steps = colour ? "0 0.34 0.67 1" : "0 0.25 0.5 0.75 1";
+    const posterize = `<feComponentTransfer><feFuncR type="discrete" tableValues="${steps}"/><feFuncG type="discrete" tableValues="${steps}"/><feFuncB type="discrete" tableValues="${steps}"/></feComponentTransfer>`;
+    if (colour) return `<filter id="photo" color-interpolation-filters="sRGB">${posterize}</filter>`;
+    const [a, b] = [rgbOf(from), rgbOf(to)];
+    const tint = [0, 1, 2].map((c) => [0, 1, 2].map((k) => (k === c ? n3(b[c] - a[c]) : 0)).join(" ") + ` 0 ${n3(a[c])}`).join(" ");
+    return `<filter id="photo" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="${grey.repeat(3)}0 0 0 1 0"/>${posterize}<feColorMatrix type="matrix" values="${tint} 0 0 0 1 0"/></filter>`;
+  }
+
+  /** A 1970s–80s monitor: a bezel, and the card on its glass, glowing, behind scanlines. */
+  function tube(height, prompt, lit) {
+    const colour = t.crt.colour;
+    const p = t.text.base;
+    const [sx, sy, sw, sh] = [BEZEL, BEZEL, W - BEZEL * 2, height - BEZEL * 2];
+    const glass = `x="${sx}" y="${sy}" width="${sw}" height="${sh}" rx="14"`;
+    // A colour tube's three guns never quite meet: red a little right, blue a little left.
+    const guns = colour
+      ? `
+    <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0" result="red"/>
+    <feOffset in="red" dx="0.6" result="red-off"/>
+    <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0" result="green"/>
+    <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0" result="blue"/>
+    <feOffset in="blue" dx="-0.6" result="blue-off"/>
+    <feBlend in="red-off" in2="green" mode="screen" result="red-green"/>
+    <feBlend in="red-green" in2="blue-off" mode="screen" result="beam"/>`
+      : "";
+    const beam = colour ? "beam" : "SourceGraphic";
+    const lines = prompt ? promptLines(height, prompt, colour) : { top: "", bottom: "" };
+    return {
+      css: `
+  .prompt { font-size: 12.5px; }
+  .roll { animation: roll 9s linear infinite; }
+  .cursor { animation: blink 1.06s steps(1) infinite; }
+  @keyframes roll { to { transform: translateY(${height + 160}px); } }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .roll, .cursor { animation: none; } }`,
+      defs: `
+  <clipPath id="glass"><rect ${glass}/></clipPath>
+  <linearGradient id="bezel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#36332E"/><stop offset="1" stop-color="#1A1917"/></linearGradient>
+  <filter id="bloom" x="-3%" y="-3%" width="106%" height="106%" color-interpolation-filters="sRGB">${guns}
+    <feGaussianBlur in="${beam}" stdDeviation="1.5" result="near"/>
+    <feGaussianBlur in="${beam}" stdDeviation="7" result="far"/>
+    <feComponentTransfer in="far" result="haze"><feFuncA type="linear" slope="0.55"/></feComponentTransfer>
+    <feMerge><feMergeNode in="haze"/><feMergeNode in="near"/><feMergeNode in="${beam}"/></feMerge>
+  </filter>
+  <linearGradient id="scanline" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="0.5" stop-color="#000" stop-opacity="0.55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient>
+  <pattern id="scan" width="8" height="3" patternUnits="userSpaceOnUse"><rect width="8" height="3" fill="url(#scanline)"/></pattern>
+  <linearGradient id="roll" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${p}" stop-opacity="0"/><stop offset="0.6" stop-color="${p}" stop-opacity="0.06"/><stop offset="1" stop-color="${p}" stop-opacity="0"/></linearGradient>
+  <radialGradient id="vignette" cx="0.5" cy="0.5" r="0.72"><stop offset="0.55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.62"/></radialGradient>
+  <linearGradient id="glare" x1="0" y1="0" x2="0.5" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.1"/><stop offset="0.5" stop-color="#fff" stop-opacity="0.025"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <filter id="edge" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="8"/></filter>
+  ${photoFilter(colour, "#000000", p)}`,
+      ground: `<g clip-path="url(#card)">
+<rect width="${W}" height="${height}" fill="url(#bezel)"/>
+<rect x="${sx - 2}" y="${sy - 2}" width="${sw + 4}" height="${sh + 4}" rx="16" fill="#050505"/>
+<g clip-path="url(#glass)"><rect ${glass} fill="url(#bg)"/>
+${lit}</g>
+</g>
+<rect x="0.5" y="0.5" width="${W - 1}" height="${height - 1}" rx="17.5" fill="none" stroke="rgba(255,255,255,0.1)"/>`,
+      body: (body) => `<g filter="url(#bloom)">${lines.top}
+${body}
+${lines.bottom}</g>`,
+      over: `
+<g clip-path="url(#glass)" aria-hidden="true">
+<rect ${glass} fill="url(#scan)"/>
+<rect class="roll" x="${sx}" y="-160" width="${sw}" height="160" fill="url(#roll)"/>
+<rect ${glass} fill="url(#vignette)"/>
+<rect ${glass} fill="none" stroke="#000" stroke-opacity="0.65" stroke-width="16" filter="url(#edge)"/>
+<path d="M${sx} ${sy}H${sx + sw}V${sy + 150}Q${W * 0.55} ${sy + 110} ${sx} ${sy + 250}Z" fill="url(#glare)"/>
+</g>
+<circle cx="${W - 34}" cy="${height - 4.5}" r="4" fill="${p}" opacity="0.25"/><circle cx="${W - 34}" cy="${height - 4.5}" r="1.6" fill="${p}"/>`,
+    };
+  }
+
+  /** Fanfold paper off a line printer: bars, tractor holes, perforations, the ink struck in dots. */
+  function sheet(height, prompt) {
+    const ink = t.text.base;
+    const paper = t.canvas[1];
+    const bar = t.paper.bar;
+    const edge = 20;
+    let holes = "";
+    for (let y = 12; y < height; y += 24) holes += `<circle cx="10" cy="${y}" r="3.6" fill="#000"/><circle cx="${W - 10}" cy="${y}" r="3.6" fill="#000"/>`;
+    const head = prompt
+      ? `<text x="${PAD + 6}" y="${PAD + 12}" class="prompt">${esc(`*** ${prompt.command.toUpperCase()} ***`)}</text><text x="${W - PAD - 6}" y="${PAD + 12}" class="prompt" text-anchor="end">${esc(`${prompt.day}  PAGE 001`)}</text>`
+      : "";
+    const foot = `<text x="${W / 2}" y="${height - PAD - 8}" class="prompt" text-anchor="middle">*** END OF LISTING ***</text>`;
+    return {
+      css: `
+  .prompt { font-size: 12.5px; font-weight: 600; letter-spacing: 0.4px; }`,
+      defs: `
+  <mask id="holes"><rect width="${W}" height="${height}" fill="#fff"/>${holes}</mask>
+  ${bar ? `<pattern id="bars" width="${W}" height="48" patternUnits="userSpaceOnUse"><rect width="${W}" height="24" fill="${bar}"/></pattern>` : ""}
+  <filter id="ink" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="1" seed="7" result="noise"/>
+    <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.6 1.9" result="dots"/>
+    <feComposite in="SourceGraphic" in2="dots" operator="in" result="struck"/>
+    <feGaussianBlur in="struck" stdDeviation="0.25"/>
+  </filter>
+  ${photoFilter(!t.monochrome, ink, paper)}`,
+      ground: `<g clip-path="url(#card)" mask="url(#holes)">
+<rect width="${W}" height="${height}" fill="url(#bg)"/>
+${bar ? `<rect x="${edge}" y="0" width="${W - edge * 2}" height="${height}" fill="url(#bars)"/>` : ""}
+<path d="M${edge} 0V${height}M${W - edge} 0V${height}" stroke="${ink}" stroke-opacity="0.22" stroke-dasharray="2 3"/>
+<rect x="0.5" y="0.5" width="${W - 1}" height="${height - 1}" rx="3.5" fill="none" stroke="rgba(0,0,0,0.14)"/>
+</g>`,
+      body: (body) => `<g filter="url(#ink)">${head}
+${body}
+${foot}</g>`,
+      over: "",
+    };
   }
 
   /**
    * The whole document: the look's ground and glows, the decorations behind,
    * the frame, `body`, then the decorations in front. `contentTop` is where
-   * the content starts, `ledge` the first panel's top edge.
+   * the content starts, `ledge` the first panel's top edge. A terminal look
+   * writes `prompt` ({ user, command, day }) above and below the card.
    */
-  function frame({ height, title, desc, defs = "", body, contentTop = PAD, ledge = PAD }) {
+  function frame({ height, title, desc, defs = "", body, contentTop = PAD, ledge = PAD, prompt = null }) {
     const decor = decorate(t.name, { width: W, height, contentTop, ledge });
     const glows = t.glows
       .map(
@@ -396,25 +542,29 @@ export function kit(t) {
     <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>`
       : "";
+    const term = t.crt ? tube(height, prompt, lit) : t.paper ? sheet(height, prompt) : null;
+    const ground = term
+      ? term.ground
+      : `<g clip-path="url(#card)">
+<rect width="${W}" height="${height}" fill="url(#bg)"/>
+${lit}${decor.behind ? `\n<g aria-hidden="true">${decor.behind}</g>` : ""}
+</g>
+<rect x="0.5" y="0.5" width="${W - 1}" height="${height - 1}" rx="17.5" fill="none" stroke="${t.frame}"/>`;
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${height}" viewBox="0 0 ${W} ${height}" role="img" aria-labelledby="t d">
 <title id="t">${esc(title)}</title>
 <desc id="d">${esc(desc)}</desc>
-<style>${styles(t)}
+<style>${styles(t)}${term ? term.css : ""}
 </style>
 <defs>
-  <clipPath id="card"><rect width="${W}" height="${height}" rx="18"/></clipPath>
+  <clipPath id="card"><rect width="${W}" height="${height}" rx="${t.paper ? 4 : 18}"/></clipPath>
   <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
     <stop offset="0" stop-color="${t.canvas[0]}"/>
     <stop offset="0.5" stop-color="${t.canvas[1]}"/>
     <stop offset="1" stop-color="${t.canvas[2]}"/>
-  </linearGradient>${glows}${nameGlow}${decor.defs ? `\n  ${decor.defs}` : ""}${defs}
+  </linearGradient>${glows}${nameGlow}${decor.defs ? `\n  ${decor.defs}` : ""}${term ? term.defs : ""}${defs}
 </defs>
-<g clip-path="url(#card)">
-<rect width="${W}" height="${height}" fill="url(#bg)"/>
-${lit}${decor.behind ? `\n<g aria-hidden="true">${decor.behind}</g>` : ""}
-</g>
-<rect x="0.5" y="0.5" width="${W - 1}" height="${height - 1}" rx="17.5" fill="none" stroke="${t.frame}"/>
-${body}${decor.front ? `\n<g clip-path="url(#card)" aria-hidden="true">${decor.front}</g>` : ""}
+${ground}
+${term ? term.body(body) : body}${decor.front ? `\n<g clip-path="url(#card)" aria-hidden="true">${decor.front}</g>` : ""}${term ? term.over : ""}
 </svg>
 `;
   }
@@ -443,21 +593,21 @@ ${body}${decor.front ? `\n<g clip-path="url(#card)" aria-hidden="true">${decor.f
         // A figure or a label too wide for the tile is set smaller before it
         // is clipped: a licence such as PostgreSQL, Bridge's capitals.
         const room = w - 28;
-        const unitW = item.unit ? 4 + textWidth(item.unit, 14, 600) : 0;
+        const unitW = item.unit ? 4 + tw(item.unit, 14, 600) : 0;
         const value = shrink(String(item.value), room - unitW, 26, 700, 14);
         const label = shrink(disp(item.label), room, 12, 600, 9.5);
         return `
   <g>
-    <rect x="${x}" y="${ty}" width="${w.toFixed(1)}" height="${h}" rx="14" fill="url(#tile-${i})" stroke="${alpha(item.color, t.tile.stroke)}"/>
+    <rect x="${x}" y="${ty}" width="${w.toFixed(1)}" height="${h}" rx="${t.corner}" fill="url(#tile-${i})" stroke="${alpha(item.color, t.tile.stroke)}"/>
     ${icon(item.icon, Number(tx), ty + 14, item.color)}
     <text x="${tx}" y="${ty + 60}" class="value disp"${value.style}>${esc(value.text)}${item.unit ? `<tspan dx="4" class="unit">${item.unit}</tspan>` : ""}</text>
     <text x="${tx}" y="${ty + 78}" class="label disp"${label.style}>${esc(label.text)}</text>
-    <text x="${tx}" y="${ty + 91}" class="sub">${esc(fit(item.sub, room, 10.5))}</text>
+    <text x="${tx}" y="${ty + 91}" class="sub">${esc(fitT(item.sub, room, 10.5))}</text>
   </g>`;
       })
       .join("");
     return { svg, h: Math.ceil(items.length / cols) * (h + GAP) - GAP };
   }
 
-  return { t, icon, panel, panelTitle, disp, pill, flow, sparkline, yearChart, growthChart, starsPanel, starsFill, avatar, frame, tileGradients, tiles };
+  return { t, icon, panel, panelTitle, disp, pill, flow, sparkline, yearChart, growthChart, starsPanel, starsFill, avatar, frame, tileGradients, tiles, textWidth: tw, fit: fitT, wrap: wrapT };
 }
