@@ -69,21 +69,21 @@ export function fit(s, max, size, weight = 400, mono = false) {
 }
 
 /** `s` broken into at most `lines` lines of `max` px, the last one clipped. */
-export function wrap(s, max, size, weight, lines) {
+export function wrap(s, max, size, weight, lines, mono = false) {
   const out = [];
   let line = "";
   const words = String(s).split(/\s+/).filter(Boolean);
   for (let i = 0; i < words.length; i++) {
     const next = line ? `${line} ${words[i]}` : words[i];
-    if (textWidth(next, size, weight) <= max || !line) {
+    if (textWidth(next, size, weight, mono) <= max || !line) {
       line = next;
       continue;
     }
-    if (out.length === lines - 1) return [...out, fit([line, ...words.slice(i)].join(" "), max, size, weight)];
+    if (out.length === lines - 1) return [...out, fit([line, ...words.slice(i)].join(" "), max, size, weight, mono)];
     out.push(line);
     line = words[i];
   }
-  if (line) out.push(fit(line, max, size, weight));
+  if (line) out.push(fit(line, max, size, weight, mono));
   return out;
 }
 
