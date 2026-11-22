@@ -191,10 +191,12 @@ const LOOKS = {
 // the header and GitHub's own light Halloween calendar. Their decorations
 // are drawn in an ink that shows on paper (src/decor.js).
 
-const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+export const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
 const hexOf = (c) => `#${c.map((v) => Math.round(Math.min(255, Math.max(0, v))).toString(16).padStart(2, "0")).join("").toUpperCase()}`;
 /** `a` moved toward `b` by `t`. */
 const mix = (a, b, t) => hexOf(rgb(a).map((v, i) => v + (rgb(b)[i] - v) * t));
+/** `hex` as an rgba() at alpha `a`. */
+const rgba = (hex, a) => `rgba(${rgb(hex).join(",")},${a})`;
 /** An rgba() fill laid over the opaque `under`. */
 function over(fill, under) {
   const [r, g, b, a] = fill.match(/[\d.]+/g).map(Number);
@@ -278,7 +280,7 @@ function lightSide(look, hand) {
     canvas: hand.canvas,
     glows: L.glows.map(([c, o, x, y, r]) => [c, Math.round(o * 600) / 1000, x, y, r]),
     header,
-    headerOutline: `rgba(${rgb(accent).join(",")},0.3)`,
+    headerOutline: rgba(accent, 0.3),
     avatarRing: L.avatarRing.map((c) => (c.startsWith("#") ? deep(c, 3) : c)),
     heat: hand.heat ?? calendar(L.heat),
     tiles: L.tiles?.map((c) => deep(c)),
@@ -308,15 +310,16 @@ for (const [look, hand] of Object.entries(LIGHT_SIDES)) LOOKS[`${look}-light`] =
 // holes, green-bar, canary yellow, plain white, or from a colour ribbon
 // (`paper`).
 
-const rgba = (hex, a) => `rgba(${rgb(hex).join(",")},${a})`;
 const MONO = { design: "mono", uppercase: true, tracking: 0.4 };
+/** What every terminal look shares: monospaced capitals, square corners, a band above and below for its header and its last line. */
+const TERMINAL = { family: "terminal", type: MONO, topBand: 30, bottomBand: 30, corner: 3, cell: 0.5, pill: 2 };
 // An 80s colour monitor's bright colours, in the tiles' roles.
 const SIXTEEN = ["#5FA8FF", "#55FFFF", "#FFFF55", "#8C8CFF", "#55E6C1", "#FF55FF", "#55FF55", "#FFAA33", "#FF5577", "#B8B8B8"];
 
 /** A tube lit by `p` on the black `ground`; `palette` for a colour monitor, whose text is `p`. */
 function phosphor(p, ground, bright, palette) {
   return {
-    family: "terminal",
+    ...TERMINAL,
     canvas: [mix(ground, p, 0.05), ground, mix(ground, "#000000", 0.5)],
     glows: [[palette ? "#9FB4FF" : p, 0.08, 0.5, 0.42, 720]],
     header: [mix(p, ground, 0.88), mix(p, ground, 0.94)],
@@ -328,23 +331,22 @@ function phosphor(p, ground, bright, palette) {
     tiles: palette ?? Array(10).fill(p),
     accent: palette ? palette[6] : p,
     secondAccent: palette ? palette[1] : p,
-    type: MONO,
     ink: p,
     inkStrong: bright,
     nameInk: bright,
-    topBand: 30,
-    bottomBand: 30,
     surface: rgba(p, 0.035),
     line: p,
-    corner: 3,
-    crt: { colour: Boolean(palette) },
+    monochrome: !palette,
+    // A monitor reads the same on a light page: the tube is its own light side.
+    ownLight: true,
+    crt: true,
   };
 }
 
 /** Fanfold paper `paper` with its bars `bar`, printed in `ink`; `palette` for a colour ribbon. */
 function printout(paper, bar, ink, palette) {
   return {
-    family: "terminal",
+    ...TERMINAL,
     isDark: false,
     canvas: [paper, paper, mix(paper, "#000000", 0.03)],
     glows: [],
@@ -357,14 +359,11 @@ function printout(paper, bar, ink, palette) {
     tiles: palette ?? Array(10).fill(ink),
     accent: palette ? palette[6] : ink,
     secondAccent: palette ? palette[1] : ink,
-    type: MONO,
     ink,
     inkStrong: ink,
-    topBand: 30,
-    bottomBand: 30,
     surface: "rgba(255,255,255,0)",
     line: ink,
-    corner: 3,
+    monochrome: !palette,
     paper: { bar },
   };
 }
@@ -387,7 +386,7 @@ Object.assign(LOOKS, {
 export const LOOK_NAMES = Object.keys(LOOKS);
 
 /** The light side of a dark look, the look itself for a light one and for a tube. */
-export const lightOf = (look) => (LOOKS[look].isDark === false || LOOKS[look].crt ? look : look === "midnight" ? "daylight" : `${look}-light`);
+export const lightOf = (look) => (LOOKS[look].isDark === false || LOOKS[look].ownLight ? look : look === "midnight" ? "daylight" : `${look}-light`);
 
 /** What a theme input may name: the looks, and `dark` and `light`. */
 export const ALIASES = { dark: "midnight", light: "daylight" };
@@ -446,10 +445,11 @@ export function theme(look) {
   if (!L) throw new Error(`unknown look "${look}"`);
   const dark = L.isDark !== false;
   const ink = L.ink ?? (dark ? "#e6edf3" : "#111827");
-  const shade = (a) => `rgba(${rgb(ink).join(",")},${a})`;
+  const shade = (a) => rgba(ink, a);
   // A terminal look draws its lines in its own ink, where the others draw in white or black.
   const line = (a, other) => (L.line ? rgba(L.line, a) : other);
-  const monochrome = Boolean(L.line) && L.tiles.every((c) => c === L.tiles[0]);
+  // On a one-colour terminal, GitHub's own colours become the ink's steps.
+  const steps = L.monochrome ? [0, 0.24, 0.4, 0.52, 0.62].map((w) => mix(ink, L.canvas[1], w)) : null;
   const named = L.tiles ? Object.fromEntries(TILE_ROLES.map((role, i) => [role, L.tiles[i]])) : { ...CLASSIC[dark ? "dark" : "light"] };
   if (L.tiles) named.sky = L.tiles[1];
   const accent = {
@@ -475,13 +475,14 @@ export function theme(look) {
     dot: line(0.25, dark ? white(0.16) : "rgba(0,0,0,0.18)"),
     ring: line(0.3, dark ? white(0.18) : "rgba(0,0,0,0.14)"),
     corner: L.corner ?? 14,
-    cell: L.corner ? 0.5 : 2.5,
-    // A colour of GitHub's own (a language's): as it is, but in the ink's
-    // steps on a one-colour terminal, the n-th of a list a step dimmer.
-    hue: (c, n = 0) => (monochrome ? mix(ink, L.canvas[1], [0, 0.24, 0.4, 0.52, 0.62][n % 5]) : c),
-    monochrome,
+    cell: L.cell ?? 2.5,
+    pill: L.pill ?? null,
+    // A colour of GitHub's own (a language's): as it is, or the n-th of a
+    // list a step dimmer in the ink of a one-colour terminal.
+    hue: (c, n = 0) => (steps ? steps[n % steps.length] : c),
+    monochrome: Boolean(L.monochrome),
     mono: type.design === "mono",
-    crt: L.crt ?? null,
+    crt: Boolean(L.crt),
     paper: L.paper ?? null,
     placeholder: L.line ? mix(ink, L.canvas[1], 0.78) : dark ? "#3b4256" : "#d0d7de",
     levels: L.heat,
