@@ -29,7 +29,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
     const ink = `${style ? ` style="${style}"` : ""}${theme.nameGlow ? ` filter="url(#name-glow)"` : ""}`;
     return `
   <text x="${PAD + 2}" y="${y + 24}" class="h-name disp"${ink}>${esc(name.text)}</text>
-  <text x="${PAD + 2}" y="${y + 46}" class="h-sub">${esc(`${r.nameWithOwner} · ${r.defaultBranchRef.name}`)}</text>
+  <text x="${PAD + 2}" y="${y + 46}" class="h-sub">${esc(k.fit(`${r.nameWithOwner} · ${r.defaultBranchRef.name}`, IW - 4, 12.5))}</text>
   <text x="${W - PAD - 2}" y="${y + 22}" class="updated" text-anchor="end">${updated}</text>`;
   };
 

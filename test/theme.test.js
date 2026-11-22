@@ -236,3 +236,16 @@ test("a long profile name stays clear of the date, and a long word of the next l
   const [first] = wrap(words.join(" "), 300, 15, 700, 2, true);
   assert.ok(textWidth(first, 15, 700, true) <= 300, first);
 });
+
+test("a terminal's panel captions and the repository's subtitle keep to their room", () => {
+  const data = fixture("octoscope");
+  const branch = "release/stable-linux-and-macos-and-windows-builds-from-the-long-lived-branch-that-nobody-renamed-yet";
+  const long = { ...data, repo: { ...data.repo, defaultBranchRef: { ...data.repo.defaultBranchRef, name: branch } } };
+  const svg = renderRepo(repoModel(long, { timeZone: "Europe/Rome" }), { theme: theme("phosphor-green") });
+  const caption = svg.match(/>LATEST COMMITS<\/text>\s*<text x="(\d+)"[^>]*class="caption"[^>]*>([^<]*)</);
+  assert.ok(caption, "the Latest commits caption is drawn");
+  assert.match(caption[2], /…$/, "a caption too long for its room is clipped");
+  const sub = svg.match(/class="h-sub">([^<]*)</)[1];
+  assert.match(sub, /…$/);
+  assert.ok(textWidth(sub, 12.5, 400, true) <= 880 - 48, sub);
+});

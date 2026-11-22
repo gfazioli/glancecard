@@ -7,7 +7,7 @@
 - **Phosphor** draws the card on a 1970s–80s monitor: one phosphor's glow on black glass, `phosphor-green` (P1), `phosphor-amber` (P3) and `phosphor-white` (P4), or `phosphor-color`, an 80s colour tube's sixteen colours with its three guns a hair out of line. A bezel, scanlines, a refresh band rolling down the glass, a vignette and its glare; a prompt above the card and a cursor blinking under it, both still for a reader who asks for less motion.
 - A monitor reads the same on a light page, so a tube is its own light side: `theme: phosphor-green` is one file and a plain `<img>`, no `<picture>` needed.
 - **Printout** prints the card off a line printer, on fanfold paper with its tractor holes cut through to the page and the ink struck in dots: `printout-green` (green-bar), `printout-yellow`, `printout-white`, and `printout-color` from a colour ribbon. A family of light looks of its own, every ink and label at 4.5:1 or more on its paper and its bars.
-- Every letter monospaced, and measured so: a long name is set smaller or clipped before it reaches the date. On a one-colour look GitHub's language colours become the ink's shades, the same for a language wherever it appears, and the photograph is drawn in the ink.
+- Every letter monospaced, and measured so: a long name is set smaller or clipped before it reaches the date. On a one-colour look GitHub's language colours become the ink's shades, a language's the same in every panel of its card, and the photograph is drawn in the ink.
 - The website's editor offers both families, and a tube that follows the reader's theme writes one file.
 - Every other look is drawn exactly as it was.
 
