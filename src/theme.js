@@ -450,7 +450,12 @@ export function theme(look) {
   const line = (a, other) => (L.line ? rgba(L.line, a) : other);
   // On a one-colour terminal, GitHub's own colours become the ink's steps.
   // Six, for a card's five languages and Other.
-  const steps = L.monochrome ? [0, 0.2, 0.34, 0.46, 0.56, 0.66].map((w) => mix(ink, L.canvas[1], w)) : null;
+  // The faintest still reads as a mark, at 3:1 on its ground (3.4:1 on paper,
+  // where the struck dots thin the ink), the six spread evenly up to it.
+  const grounds = [L.canvas[1], ...(L.paper?.bar ? [L.paper.bar] : [])];
+  let far = 0.66;
+  while (far > 0.2 && Math.min(...grounds.map((gr) => contrast(mix(ink, L.canvas[1], far), gr))) < (L.paper ? 3.4 : 3)) far -= 0.02;
+  const steps = L.monochrome ? [0, 0.2, 0.4, 0.6, 0.8, 1].map((w) => mix(ink, L.canvas[1], w * far)) : null;
   const named = L.tiles ? Object.fromEntries(TILE_ROLES.map((role, i) => [role, L.tiles[i]])) : { ...CLASSIC[dark ? "dark" : "light"] };
   if (L.tiles) named.sky = L.tiles[1];
   const accent = {
@@ -481,7 +486,7 @@ export function theme(look) {
     // A colour of GitHub's own (a language's): as it is, or the n-th of a
     // list a step dimmer in the ink of a one-colour terminal.
     // On a colour ribbon's paper a pale one (JavaScript's yellow) is darkened to 3:1, as a mark must read.
-    hue: (c, n = 0) => (steps ? steps[n % steps.length] : L.paper ? deepen(c, [L.canvas[1], L.paper.bar ?? L.canvas[1]], 3) : c),
+    hue: (c, n = 0) => (steps ? steps[n % steps.length] : L.paper ? deepen(c, [L.canvas[1], L.paper.bar ?? L.canvas[1]], 3.4) : c),
     monochrome: Boolean(L.monochrome),
     mono: type.design === "mono",
     crt: Boolean(L.crt),
@@ -499,12 +504,12 @@ export function theme(look) {
       high: dark ? shade(0.95) : ink,
       body: shade(0.88),
       // On a printout's paper and bars every label reads at 4.5:1 or more.
-      soft: shade(L.paper ? 0.85 : 0.75),
-      muted: shade(L.paper ? 0.8 : dark ? 0.6 : 0.66),
-      meta: shade(L.paper ? 0.78 : dark ? 0.55 : 0.6),
-      faint: shade(L.paper ? 0.74 : dark ? 0.5 : 0.48),
-      off: shade(L.paper ? 0.72 : 0.45),
-      ghost: shade(L.paper ? 0.72 : dark ? 0.42 : 0.45),
+      soft: shade(L.paper ? 0.88 : 0.75),
+      muted: shade(L.paper ? 0.84 : dark ? 0.6 : 0.66),
+      meta: shade(L.paper ? 0.82 : dark ? 0.55 : 0.6),
+      faint: shade(L.paper ? 0.8 : dark ? 0.5 : 0.48),
+      off: shade(L.paper ? 0.78 : 0.45),
+      ghost: shade(L.paper ? 0.78 : dark ? 0.42 : 0.45),
     },
     accent,
     type,

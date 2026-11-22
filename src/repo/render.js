@@ -56,7 +56,9 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
     ];
     if (m.latestTag) badges.push({ label: m.latestTag, icon: "tag", color: A.cyan, tint: A.cyan });
     let cy = y + 18;
-    const badgeRow = k.flow(lx, cy, leftW, badges, 1);
+    // A terminal's wider letters may need a second row, where one row would drop a badge or a link.
+    const rows = theme.mono ? 2 : 1;
+    const badgeRow = k.flow(lx, cy, leftW, badges, rows);
     parts.push(badgeRow.svg);
     cy += badgeRow.h + 14;
 
@@ -75,7 +77,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
 
     const links = [{ label: `github.com/${r.nameWithOwner}`, icon: "mark-github" }];
     if (r.homepageUrl) links.push({ label: r.homepageUrl.replace(/^https?:\/\//, "").replace(/\/$/, ""), icon: "link" });
-    const linkRow = k.flow(lx, cy, leftW, links.map((l) => ({ ...l, color: theme.link.icon, fill: theme.link.fill })), 1);
+    const linkRow = k.flow(lx, cy, leftW, links.map((l) => ({ ...l, color: theme.link.icon, fill: theme.link.fill })), rows);
     parts.push(linkRow.svg);
     cy += linkRow.h + 18;
 
