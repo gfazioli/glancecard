@@ -113,7 +113,7 @@ export function kit(t) {
     const room = (max - t.type.tracking * Array.from(s).length) / wider;
     let px = size;
     while (px > min && tw(s, px, weight) > room) px -= 0.5;
-    return { text: fitT(s, room, px, weight), style: px === size ? "" : ` style="font-size: ${px}px"` };
+    return { text: fitT(s, room, px, weight), px, style: px === size ? "" : ` style="font-size: ${px}px"` };
   };
 
   // The title's colour goes in style=, not fill=: the stylesheet's `text`
@@ -392,8 +392,10 @@ export function kit(t) {
       ? `<tspan style="fill: ${t.text.strong}">${esc(prompt.user)}@github</tspan>:~$ `
       : `<tspan style="fill: ${t.accent.green}">${esc(prompt.user)}@github</tspan><tspan style="fill: ${t.accent.blue}">:~</tspan>$ `;
     const end = height - PAD - 8;
+    // A long login or repository name is clipped at the glass's edge.
+    const command = fitT(prompt.command, IW - tw(`${prompt.user}@github:~$ `, 12.5), 12.5);
     return {
-      top: `<text x="${PAD}" y="${PAD + 12}" class="prompt">${who}${esc(prompt.command)}</text>`,
+      top: `<text x="${PAD}" y="${PAD + 12}" class="prompt">${who}${esc(command)}</text>`,
       bottom: `<text x="${PAD}" y="${end}" class="prompt">${who}</text>`,
       cursor: `<rect class="cursor" x="${(PAD + tw(`${prompt.user}@github:~$ `, 12.5)).toFixed(1)}" y="${end - 11}" width="7.5" height="14" fill="${t.text.base}" filter="url(#cursor-glow)"/>`,
     };
@@ -486,9 +488,17 @@ ${lines.bottom}</g>`,
     const paper = t.canvas[1];
     const bar = t.paper.bar;
     const edge = 20;
-    const head = prompt
-      ? `<text x="${PAD + 6}" y="${PAD + 12}" class="prompt">${esc(`*** ${prompt.command.toUpperCase()} ***`)}</text><text x="${W - PAD - 6}" y="${PAD + 12}" class="prompt" text-anchor="end">${esc(`${prompt.day}  PAGE 001`)}</text>`
-      : "";
+    let head = "";
+    if (prompt) {
+      // The heading leaves the date and the page their room: it is cut to
+      // the characters that fit, each as wide as the next and 0.4 px apart.
+      const meta = `${prompt.day}  PAGE 001`;
+      const cell = tw("M", 12.5, 600) + 0.4;
+      const fits = Math.floor((IW - 12 - 24) / cell) - Array.from(`*** ***${meta}`).length - 1;
+      const chars = Array.from(prompt.command.toUpperCase());
+      const command = chars.length <= fits ? chars.join("") : `${chars.slice(0, Math.max(1, fits - 1)).join("")}…`;
+      head = `<text x="${PAD + 6}" y="${PAD + 12}" class="prompt">${esc(`*** ${command} ***`)}</text><text x="${W - PAD - 6}" y="${PAD + 12}" class="prompt" text-anchor="end">${esc(meta)}</text>`;
+    }
     const foot = `<text x="${W / 2}" y="${height - PAD - 8}" class="prompt" text-anchor="middle">*** END OF LISTING ***</text>`;
     return {
       css: `
@@ -612,5 +622,5 @@ ${layers.body(body)}${decor.front ? `\n<g clip-path="url(#card)" aria-hidden="tr
     return { svg, h: Math.ceil(items.length / cols) * (h + GAP) - GAP };
   }
 
-  return { t, icon, panel, panelTitle, disp, pill, flow, sparkline, yearChart, growthChart, starsPanel, starsFill, avatar, frame, tileGradients, tiles, textWidth: tw, fit: fitT, wrap: wrapT };
+  return { t, icon, panel, panelTitle, disp, shrink, pill, flow, sparkline, yearChart, growthChart, starsPanel, starsFill, avatar, frame, tileGradients, tiles, textWidth: tw, fit: fitT, wrap: wrapT };
 }

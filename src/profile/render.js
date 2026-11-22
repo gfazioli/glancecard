@@ -104,12 +104,19 @@ export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = 
   ${months}${days}${cells}${legend}` };
   }
 
+  // A language's place in the Languages panel: on a one-colour terminal its
+  // shade, the same on a repository's dot; one not among them is Other's.
+  const shade = (name) => {
+    const i = m.languages.findIndex((l) => l.name === name);
+    return i < 0 ? 5 : i;
+  };
+
   function topRepos(x, y, w, h) {
     const rows = m.topRepos
       .map((r, i) => {
         const ry = y + 80 + i * 21;
         return `
-    <circle cx="${x + 23}" cy="${ry - 4}" r="4.5" fill="${theme.hue(r.primaryLanguage?.color ?? "#6e7681", i)}"/>
+    <circle cx="${x + 23}" cy="${ry - 4}" r="4.5" fill="${theme.hue(r.primaryLanguage?.color ?? "#6e7681", shade(r.primaryLanguage?.name))}"/>
     <text x="${x + 36}" y="${ry}" class="row">${esc(k.fit(r.name, w - 110, 12.5, 500))}</text>
     ${k.icon("star", x + w - 66, ry - 11, A.yellow, 13)}
     <text x="${x + w - 18}" y="${ry}" class="count" text-anchor="end">${full(r.stargazerCount)}</text>`;

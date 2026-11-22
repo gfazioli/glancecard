@@ -192,3 +192,28 @@ test("a terminal look draws a photograph in its own ink, and GitHub's colours in
   assert.notEqual(t.hue("#3178c6", 1), t.hue("#3178c6", 0), "the next language a step dimmer");
   assert.equal(theme("phosphor-color").hue("#3178c6", 0), "#3178c6", "a colour tube keeps GitHub's colours");
 });
+
+test("a terminal's long names stay on the card: the heading set smaller, the prompts cut", () => {
+  const data = fixture("octoscope");
+  const long = { ...data, repo: { ...data.repo, name: "initialization-and-migration-scripts-and-utilities", nameWithOwner: "a-rather-long-owner/initialization-and-migration-scripts-and-utilities" } };
+  const m = repoModel(long, { timeZone: "Europe/Rome" });
+  const tube = renderRepo(m, { theme: theme("phosphor-green") });
+  assert.match(tube, /class="h-name disp" style="fill: #8CFFAA; font-size: \d+(\.5)?px">/, "the name is set smaller beside the date");
+  assert.match(tube, /class="prompt">[^\n]*glancecard repo a-rather-long-owner\/[^<]*…<\/text>/, "the command is cut at the glass");
+  const paper = renderRepo(m, { theme: theme("printout-white") });
+  assert.match(paper, /class="prompt">\*\*\* GLANCECARD REPO [^<]*… \*\*\*<\/text>/, "the heading leaves the date its room");
+  assert.doesNotMatch(renderRepo(repoOf(), { theme: theme("phosphor-green") }), /class="h-name disp" style="[^"]*font-size/, "a name that fits keeps its size");
+});
+
+test("on a one-colour terminal a repository's dot wears its language's shade", () => {
+  const m = profileOf();
+  const svg = renderProfile(m, { theme: theme("phosphor-green") });
+  const t = theme("phosphor-green");
+  const ts = m.languages.findIndex((l) => l.name === "TypeScript");
+  const shadeTS = t.hue("#3178c6", ts);
+  const dots = [...svg.matchAll(/<circle cx="\d+" cy="[\d.]+" r="4.5" fill="(#[0-9A-F]{6})"\/>\s*<text[^>]*class="row">([^<]+)</g)];
+  const tsRepos = m.topRepos.filter((r) => r.primaryLanguage?.name === "TypeScript").map((r) => r.name);
+  assert.ok(tsRepos.length > 1, "the fixture has TypeScript repositories");
+  for (const [, fill, name] of dots) if (tsRepos.includes(name)) assert.equal(fill, shadeTS, name);
+  assert.equal(new Set([0, 1, 2, 3, 4, 5].map((n) => t.hue("#000000", n))).size, 6, "five languages and Other, six shades");
+});
