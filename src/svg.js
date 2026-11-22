@@ -4,7 +4,7 @@
 
 import { decorate } from "./decor.js";
 import { OCTICONS } from "./icons.js";
-import { alpha, display, styles } from "./theme.js";
+import { alpha, display, rgb, styles } from "./theme.js";
 import { compact, esc, fit, full, plural, textWidth, wrap } from "./text.js";
 import { addDays, daysBetween, MONTHS } from "./time.js";
 
@@ -89,7 +89,7 @@ export function kit(t) {
   };
 
   // Widths in the look's letters: a terminal's are monospaced.
-  const tw = (s, size, weight = 400, mono = t.mono) => textWidth(s, size, weight, mono);
+  const tw = (s, size, weight = 400) => textWidth(s, size, weight, t.mono);
   const fitT = (s, max, size, weight = 400, mono = t.mono) => fit(s, max, size, weight, mono);
   const wrapT = (s, max, size, weight, lines) => wrap(s, max, size, weight, lines, t.mono);
 
@@ -135,7 +135,7 @@ export function kit(t) {
     const bg = fill ?? (tint ? alpha(tint, t.chip.tint) : t.chip.fill);
     const line = stroke ?? (tint ? alpha(tint, t.chip.tintStroke) : t.chip.stroke);
     const svg = `
-  <rect x="${x}" y="${y}" width="${w.toFixed(1)}" height="${h}" rx="${t.corner < 14 ? 2 : h / 2}" fill="${bg}" stroke="${line}"/>
+  <rect x="${x}" y="${y}" width="${w.toFixed(1)}" height="${h}" rx="${t.pill ?? h / 2}" fill="${bg}" stroke="${line}"/>
   ${name ? icon(name, x + padX - 1, y + 4, color, 14) : ""}
   <text x="${(x + padX + iconW).toFixed(1)}" y="${y + 15}" class="${value ? "pill-k" : labelClass}">${esc(label)}${
     value ? `<tspan dx="5" class="pill-v">${esc(value)}</tspan>` : ""
@@ -372,28 +372,30 @@ export function kit(t) {
       ? `<clipPath id="${id}"><circle cx="${cx}" cy="${cy}" r="${r}"/></clipPath><image href="${data}" x="${cx - r}" y="${cy - r}" width="${r * 2}" height="${r * 2}" clip-path="url(#${id})" preserveAspectRatio="xMidYMid slice"/>`
       : `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${t.placeholder}"/>`;
     // On a terminal the photograph is drawn in the look's own ink.
-    if (data && (t.crt || t.paper)) return `<g filter="url(#photo)">${face}</g>
-    <circle cx="${cx}" cy="${cy}" r="${r + ringWidth / 2}" fill="none" stroke="${ring}" stroke-width="${ringWidth}"/>`;
-    return `${face}
+    const shown = data && (t.crt || t.paper) ? `<g filter="url(#photo)">${face}</g>` : face;
+    return `${shown}
     <circle cx="${cx}" cy="${cy}" r="${r + ringWidth / 2}" fill="none" stroke="${ring}" stroke-width="${ringWidth}"/>`;
   }
 
   // ─── The terminal looks: a tube, or a sheet off a line printer ───
 
   const BEZEL = 9;
-  const rgbOf = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
   const n3 = (v) => Number(v.toFixed(3));
 
-  /** The prompt a terminal look writes above the card and leaves blinking under it. */
-  function promptLines(height, prompt, colour) {
-    const ps1 = `${prompt.user}@github:~$ `;
-    const who = colour
-      ? `<tspan style="fill: #55FF55">${esc(prompt.user)}@github</tspan><tspan style="fill: #5FA8FF">:~</tspan>$ `
-      : `<tspan style="fill: ${t.text.strong}">${esc(prompt.user)}@github</tspan>:~$ `;
+  /**
+   * The prompt a terminal look writes above the card and again under it, and
+   * the cursor after that one, drawn apart from the glowing body: a blink
+   * inside the bloom would blur the whole card again twice a second.
+   */
+  function promptLines(height, prompt) {
+    const who = t.monochrome
+      ? `<tspan style="fill: ${t.text.strong}">${esc(prompt.user)}@github</tspan>:~$ `
+      : `<tspan style="fill: ${t.accent.green}">${esc(prompt.user)}@github</tspan><tspan style="fill: ${t.accent.blue}">:~</tspan>$ `;
     const end = height - PAD - 8;
     return {
       top: `<text x="${PAD}" y="${PAD + 12}" class="prompt">${who}${esc(prompt.command)}</text>`,
-      bottom: `<text x="${PAD}" y="${end}" class="prompt">${who}</text><rect class="cursor" x="${(PAD + tw(ps1, 12.5)).toFixed(1)}" y="${end - 11}" width="7.5" height="14" fill="${t.text.base}"/>`,
+      bottom: `<text x="${PAD}" y="${end}" class="prompt">${who}</text>`,
+      cursor: `<rect class="cursor" x="${(PAD + tw(`${prompt.user}@github:~$ `, 12.5)).toFixed(1)}" y="${end - 11}" width="7.5" height="14" fill="${t.text.base}" filter="url(#cursor-glow)"/>`,
     };
   }
 
@@ -407,14 +409,14 @@ export function kit(t) {
     const steps = colour ? "0 0.34 0.67 1" : "0 0.25 0.5 0.75 1";
     const posterize = `<feComponentTransfer><feFuncR type="discrete" tableValues="${steps}"/><feFuncG type="discrete" tableValues="${steps}"/><feFuncB type="discrete" tableValues="${steps}"/></feComponentTransfer>`;
     if (colour) return `<filter id="photo" color-interpolation-filters="sRGB">${posterize}</filter>`;
-    const [a, b] = [rgbOf(from), rgbOf(to)];
+    const [a, b] = [from, to].map((c) => rgb(c).map((v) => v / 255));
     const tint = [0, 1, 2].map((c) => [0, 1, 2].map((k) => (k === c ? n3(b[c] - a[c]) : 0)).join(" ") + ` 0 ${n3(a[c])}`).join(" ");
     return `<filter id="photo" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="${grey.repeat(3)}0 0 0 1 0"/>${posterize}<feColorMatrix type="matrix" values="${tint} 0 0 0 1 0"/></filter>`;
   }
 
   /** A 1970s–80s monitor: a bezel, and the card on its glass, glowing, behind scanlines. */
   function tube(height, prompt, lit) {
-    const colour = t.crt.colour;
+    const colour = !t.monochrome;
     const p = t.text.base;
     const [sx, sy, sw, sh] = [BEZEL, BEZEL, W - BEZEL * 2, height - BEZEL * 2];
     const glass = `x="${sx}" y="${sy}" width="${sw}" height="${sh}" rx="14"`;
@@ -430,7 +432,7 @@ export function kit(t) {
     <feBlend in="red-green" in2="blue-off" mode="screen" result="beam"/>`
       : "";
     const beam = colour ? "beam" : "SourceGraphic";
-    const lines = prompt ? promptLines(height, prompt, colour) : { top: "", bottom: "" };
+    const lines = prompt ? promptLines(height, prompt) : { top: "", bottom: "", cursor: "" };
     return {
       css: `
   .prompt { font-size: 12.5px; }
@@ -454,6 +456,7 @@ export function kit(t) {
   <radialGradient id="vignette" cx="0.5" cy="0.5" r="0.72"><stop offset="0.55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.62"/></radialGradient>
   <linearGradient id="glare" x1="0" y1="0" x2="0.5" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.06"/><stop offset="0.5" stop-color="#fff" stop-opacity="0.015"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
   <filter id="edge" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="8"/></filter>
+  <filter id="cursor-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="1.5" result="near"/><feMerge><feMergeNode in="near"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   ${photoFilter(colour, "#000000", p)}`,
       ground: `<g clip-path="url(#card)">
 <rect width="${W}" height="${height}" fill="url(#bezel)"/>
@@ -466,7 +469,7 @@ ${lit}</g>
 ${body}
 ${lines.bottom}</g>`,
       over: `
-<g clip-path="url(#glass)" aria-hidden="true">
+<g clip-path="url(#glass)" aria-hidden="true">${lines.cursor}
 <rect ${glass} fill="url(#scan)"/>
 <rect class="roll" x="${sx}" y="-160" width="${sw}" height="160" fill="url(#roll)"/>
 <rect ${glass} fill="url(#vignette)"/>
@@ -483,8 +486,6 @@ ${lines.bottom}</g>`,
     const paper = t.canvas[1];
     const bar = t.paper.bar;
     const edge = 20;
-    let holes = "";
-    for (let y = 12; y < height; y += 24) holes += `<circle cx="10" cy="${y}" r="3.6" fill="#000"/><circle cx="${W - 10}" cy="${y}" r="3.6" fill="#000"/>`;
     const head = prompt
       ? `<text x="${PAD + 6}" y="${PAD + 12}" class="prompt">${esc(`*** ${prompt.command.toUpperCase()} ***`)}</text><text x="${W - PAD - 6}" y="${PAD + 12}" class="prompt" text-anchor="end">${esc(`${prompt.day}  PAGE 001`)}</text>`
       : "";
@@ -493,7 +494,8 @@ ${lines.bottom}</g>`,
       css: `
   .prompt { font-size: 12.5px; font-weight: 600; letter-spacing: 0.4px; }`,
       defs: `
-  <mask id="holes"><rect width="${W}" height="${height}" fill="#fff"/>${holes}</mask>
+  <pattern id="hole" width="${W}" height="24" patternUnits="userSpaceOnUse"><circle cx="10" cy="12" r="3.6"/><circle cx="${W - 10}" cy="12" r="3.6"/></pattern>
+  <mask id="holes"><rect width="${W}" height="${height}" fill="#fff"/><rect width="${W}" height="${height}" fill="url(#hole)"/></mask>
   ${bar ? `<pattern id="bars" width="${W}" height="48" patternUnits="userSpaceOnUse"><rect width="${W}" height="24" fill="${bar}"/></pattern>` : ""}
   <filter id="ink" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
     <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="1" seed="7" result="noise"/>
@@ -543,6 +545,7 @@ ${foot}</g>`,
   </filter>`
       : "";
     const term = t.crt ? tube(height, prompt, lit) : t.paper ? sheet(height, prompt) : null;
+    const layers = term ?? { css: "", defs: "", body: (b) => b, over: "" };
     const ground = term
       ? term.ground
       : `<g clip-path="url(#card)">
@@ -553,7 +556,7 @@ ${lit}${decor.behind ? `\n<g aria-hidden="true">${decor.behind}</g>` : ""}
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${height}" viewBox="0 0 ${W} ${height}" role="img" aria-labelledby="t d">
 <title id="t">${esc(title)}</title>
 <desc id="d">${esc(desc)}</desc>
-<style>${styles(t)}${term ? term.css : ""}
+<style>${styles(t)}${layers.css}
 </style>
 <defs>
   <clipPath id="card"><rect width="${W}" height="${height}" rx="${t.paper ? 4 : 18}"/></clipPath>
@@ -561,10 +564,10 @@ ${lit}${decor.behind ? `\n<g aria-hidden="true">${decor.behind}</g>` : ""}
     <stop offset="0" stop-color="${t.canvas[0]}"/>
     <stop offset="0.5" stop-color="${t.canvas[1]}"/>
     <stop offset="1" stop-color="${t.canvas[2]}"/>
-  </linearGradient>${glows}${nameGlow}${decor.defs ? `\n  ${decor.defs}` : ""}${term ? term.defs : ""}${defs}
+  </linearGradient>${glows}${nameGlow}${decor.defs ? `\n  ${decor.defs}` : ""}${layers.defs}${defs}
 </defs>
 ${ground}
-${term ? term.body(body) : body}${decor.front ? `\n<g clip-path="url(#card)" aria-hidden="true">${decor.front}</g>` : ""}${term ? term.over : ""}
+${layers.body(body)}${decor.front ? `\n<g clip-path="url(#card)" aria-hidden="true">${decor.front}</g>` : ""}${layers.over}
 </svg>
 `;
   }

@@ -70,6 +70,7 @@
   <radialGradient id="vignette" cx="0.5" cy="0.5" r="0.72"><stop offset="0.55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.62"/></radialGradient>
   <linearGradient id="glare" x1="0" y1="0" x2="0.5" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.06"/><stop offset="0.5" stop-color="#fff" stop-opacity="0.015"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
   <filter id="edge" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="8"/></filter>
+  <filter id="cursor-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="1.5" result="near"/><feMerge><feMergeNode in="near"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   <filter id="photo" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0 0 0 1 0"/><feComponentTransfer><feFuncR type="discrete" tableValues="0 0.25 0.5 0.75 1"/><feFuncG type="discrete" tableValues="0 0.25 0.5 0.75 1"/><feFuncB type="discrete" tableValues="0 0.25 0.5 0.75 1"/></feComponentTransfer><feColorMatrix type="matrix" values="0.2 0 0 0 0 0 1 0 0 0 0 0 0.4 0 0 0 0 0 1 0"/></filter>
   <linearGradient id="hero" x1="0" y1="0" x2="1" y2="1">
     <stop offset="0" stop-color="#082710"/>
@@ -306,8 +307,8 @@
     <text x="484" y="1061" class="row">Other</text>
     <text x="802" y="1061" class="pct" text-anchor="end">12%</text>
     <text x="838" y="1061" class="count" text-anchor="end">7</text>
-<text x="24" y="1100" class="prompt"><tspan style="fill: #8CFFAA">gfazioli@github</tspan>:~$ </text><rect class="cursor" x="169.3" y="1089" width="7.5" height="14" fill="#33FF66"/></g>
-<g clip-path="url(#glass)" aria-hidden="true">
+<text x="24" y="1100" class="prompt"><tspan style="fill: #8CFFAA">gfazioli@github</tspan>:~$ </text></g>
+<g clip-path="url(#glass)" aria-hidden="true"><rect class="cursor" x="169.3" y="1089" width="7.5" height="14" fill="#33FF66" filter="url(#cursor-glow)"/>
 <rect x="9" y="9" width="862" height="1114" rx="14" fill="url(#scan)"/>
 <rect class="roll" x="9" y="-160" width="862" height="160" fill="url(#roll)"/>
 <rect x="9" y="9" width="862" height="1114" rx="14" fill="url(#vignette)"/>

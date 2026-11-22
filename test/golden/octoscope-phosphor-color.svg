@@ -77,6 +77,7 @@
   <radialGradient id="vignette" cx="0.5" cy="0.5" r="0.72"><stop offset="0.55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.62"/></radialGradient>
   <linearGradient id="glare" x1="0" y1="0" x2="0.5" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.06"/><stop offset="0.5" stop-color="#fff" stop-opacity="0.015"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
   <filter id="edge" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="8"/></filter>
+  <filter id="cursor-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="1.5" result="near"/><feMerge><feMergeNode in="near"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   <filter id="photo" color-interpolation-filters="sRGB"><feComponentTransfer><feFuncR type="discrete" tableValues="0 0.34 0.67 1"/><feFuncG type="discrete" tableValues="0 0.34 0.67 1"/><feFuncB type="discrete" tableValues="0 0.34 0.67 1"/></feComponentTransfer></filter>
   <linearGradient id="hero" x1="0" y1="0" x2="1" y2="1">
     <stop offset="0" stop-color="#55FF55" stop-opacity="0.1"/>
@@ -465,8 +466,8 @@
     <rect x="86" y="1810" width="752" height="4" rx="2" fill="rgba(200,200,200,0.16)"/>
     <rect x="86" y="1810" width="4.8" height="4" rx="2" fill="#FFAA33"/>
   <text x="42" y="1849" class="foot">Commits on main, according to GitHub</text>
-<text x="24" y="1885" class="prompt"><tspan style="fill: #55FF55">gfazioli@github</tspan><tspan style="fill: #5FA8FF">:~</tspan>$ </text><rect class="cursor" x="169.3" y="1874" width="7.5" height="14" fill="#C8C8C8"/></g>
-<g clip-path="url(#glass)" aria-hidden="true">
+<text x="24" y="1885" class="prompt"><tspan style="fill: #55FF55">gfazioli@github</tspan><tspan style="fill: #5FA8FF">:~</tspan>$ </text></g>
+<g clip-path="url(#glass)" aria-hidden="true"><rect class="cursor" x="169.3" y="1874" width="7.5" height="14" fill="#C8C8C8" filter="url(#cursor-glow)"/>
 <rect x="9" y="9" width="862" height="1899" rx="14" fill="url(#scan)"/>
 <rect class="roll" x="9" y="-160" width="862" height="160" fill="url(#roll)"/>
 <rect x="9" y="9" width="862" height="1899" rx="14" fill="url(#vignette)"/>
