@@ -236,7 +236,7 @@
   <text x="66" y="905" class="title disp" style="fill: #1E2A24">TOP REPOSITORIES</text>
   <text x="42" y="928" class="headline">Most starred of 69 public repositories</text>
   
-    <circle cx="47" cy="952" r="4.5" fill="#303B35"/>
+    <circle cx="47" cy="952" r="4.5" fill="#2F3A34"/>
     <text x="60" y="956" class="row">react-switch-button</text>
     <g transform="translate(366 945) scale(0.8125)" fill="#1E2A24"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Zm0 2.445L6.615 5.5a.75.75 0 0 1-.564.41l-3.097.45 2.24 2.184a.75.75 0 0 1 .216.664l-.528 3.084 2.769-1.456a.75.75 0 0 1 .698 0l2.77 1.456-.53-3.084a.75.75 0 0 1 .216-.664l2.24-2.183-3.096-.45a.75.75 0 0 1-.564-.41L8 2.694Z"/></g>
     <text x="414" y="956" class="count" text-anchor="end">86</text>
@@ -244,7 +244,7 @@
     <text x="60" y="977" class="row">mantine-split-pane</text>
     <g transform="translate(366 966) scale(0.8125)" fill="#1E2A24"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Zm0 2.445L6.615 5.5a.75.75 0 0 1-.564.41l-3.097.45 2.24 2.184a.75.75 0 0 1 .216.664l-.528 3.084 2.769-1.456a.75.75 0 0 1 .698 0l2.77 1.456-.53-3.084a.75.75 0 0 1 .216-.664l2.24-2.183-3.096-.45a.75.75 0 0 1-.564-.41L8 2.694Z"/></g>
     <text x="414" y="977" class="count" text-anchor="end">78</text>
-    <circle cx="47" cy="994" r="4.5" fill="#767E79"/>
+    <circle cx="47" cy="994" r="4.5" fill="#727A75"/>
     <text x="60" y="998" class="row">octoscope</text>
     <g transform="translate(366 987) scale(0.8125)" fill="#1E2A24"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Zm0 2.445L6.615 5.5a.75.75 0 0 1-.564.41l-3.097.45 2.24 2.184a.75.75 0 0 1 .216.664l-.528 3.084 2.769-1.456a.75.75 0 0 1 .698 0l2.77 1.456-.53-3.084a.75.75 0 0 1 .216-.664l2.24-2.183-3.096-.45a.75.75 0 0 1-.564-.41L8 2.694Z"/></g>
     <text x="414" y="998" class="count" text-anchor="end">69</text>
@@ -266,29 +266,29 @@
   <g transform="translate(466 892) scale(1)" fill="#1E2A24"><path d="m11.28 3.22 4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L13.94 8l-3.72-3.72a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215Zm-6.56 0a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L2.06 8l3.72 3.72a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L.47 8.53a.75.75 0 0 1 0-1.06Z"/></g>
   <text x="490" y="905" class="title disp" style="fill: #1E2A24">LANGUAGES</text>
   <clipPath id="langbar"><rect x="466" y="922" width="372" height="8" rx="4"/></clipPath>
-  <g clip-path="url(#langbar)"><rect x="466" y="922" width="372" height="8" fill="rgba(30,42,36,0.16)"/><rect x="466.00" y="922" width="241.80" height="8" fill="#1E2A24"/><rect x="707.80" y="922" width="43.40" height="8" fill="#303B35"/><rect x="751.20" y="922" width="18.60" height="8" fill="#414C46"/><rect x="769.80" y="922" width="12.40" height="8" fill="#535C57"/><rect x="782.20" y="922" width="12.40" height="8" fill="#656D68"/><rect x="794.60" y="922" width="43.40" height="8" fill="#767E79"/></g>
+  <g clip-path="url(#langbar)"><rect x="466" y="922" width="372" height="8" fill="rgba(30,42,36,0.16)"/><rect x="466.00" y="922" width="241.80" height="8" fill="#1E2A24"/><rect x="707.80" y="922" width="43.40" height="8" fill="#2F3A34"/><rect x="751.20" y="922" width="18.60" height="8" fill="#404A44"/><rect x="769.80" y="922" width="12.40" height="8" fill="#505A54"/><rect x="782.20" y="922" width="12.40" height="8" fill="#616A64"/><rect x="794.60" y="922" width="43.40" height="8" fill="#727A75"/></g>
   
     <circle cx="471" cy="952" r="4.5" fill="#1E2A24"/>
     <text x="484" y="956" class="row">TypeScript</text>
     <text x="802" y="956" class="pct" text-anchor="end">65%</text>
     <text x="838" y="956" class="count" text-anchor="end">39</text>
-    <circle cx="471" cy="973" r="4.5" fill="#303B35"/>
+    <circle cx="471" cy="973" r="4.5" fill="#2F3A34"/>
     <text x="484" y="977" class="row">JavaScript</text>
     <text x="802" y="977" class="pct" text-anchor="end">12%</text>
     <text x="838" y="977" class="count" text-anchor="end">7</text>
-    <circle cx="471" cy="994" r="4.5" fill="#414C46"/>
+    <circle cx="471" cy="994" r="4.5" fill="#404A44"/>
     <text x="484" y="998" class="row">PHP</text>
     <text x="802" y="998" class="pct" text-anchor="end">5%</text>
     <text x="838" y="998" class="count" text-anchor="end">3</text>
-    <circle cx="471" cy="1015" r="4.5" fill="#535C57"/>
+    <circle cx="471" cy="1015" r="4.5" fill="#505A54"/>
     <text x="484" y="1019" class="row">ActionScript</text>
     <text x="802" y="1019" class="pct" text-anchor="end">3%</text>
     <text x="838" y="1019" class="count" text-anchor="end">2</text>
-    <circle cx="471" cy="1036" r="4.5" fill="#656D68"/>
+    <circle cx="471" cy="1036" r="4.5" fill="#616A64"/>
     <text x="484" y="1040" class="row">Objective-C</text>
     <text x="802" y="1040" class="pct" text-anchor="end">3%</text>
     <text x="838" y="1040" class="count" text-anchor="end">2</text>
-    <circle cx="471" cy="1057" r="4.5" fill="#767E79"/>
+    <circle cx="471" cy="1057" r="4.5" fill="#727A75"/>
     <text x="484" y="1061" class="row">Other</text>
     <text x="802" y="1061" class="pct" text-anchor="end">12%</text>
     <text x="838" y="1061" class="count" text-anchor="end">7</text>

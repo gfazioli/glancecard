@@ -344,7 +344,9 @@ function phosphor(p, ground, bright, palette) {
 }
 
 /** Fanfold paper `paper` with its bars `bar`, printed in `ink`; `palette` for a colour ribbon. */
-function printout(paper, bar, ink, palette) {
+function printout(paper, bar, ink, ribbon) {
+  // A ribbon's inks at 6:1 on the paper and its bars, 4.5:1 or more once struck in dots.
+  const palette = ribbon?.map((c) => deepen(c, [paper, bar ?? paper, mix(paper, "#000000", 0.03)], 6));
   return {
     ...TERMINAL,
     isDark: false,
@@ -450,11 +452,14 @@ export function theme(look) {
   const line = (a, other) => (L.line ? rgba(L.line, a) : other);
   // On a one-colour terminal, GitHub's own colours become the ink's steps.
   // Six, for a card's five languages and Other.
-  // The faintest still reads as a mark, at 3:1 on its ground (3.4:1 on paper,
-  // where the struck dots thin the ink), the six spread evenly up to it.
+  // The faintest still reads as a mark, at 3:1 on its ground, the six spread
+  // evenly up to it.
   const grounds = [L.canvas[1], ...(L.paper?.bar ? [L.paper.bar] : [])];
   let far = 0.66;
-  while (far > 0.2 && Math.min(...grounds.map((gr) => contrast(mix(ink, L.canvas[1], far), gr))) < (L.paper ? 3.4 : 3)) far -= 0.02;
+  // On paper, measured as struck (89% of the ink) and on the paper's darker end too.
+  if (L.paper) grounds.push(L.canvas[2]);
+  const struck = (c, gr) => (L.paper ? mix(gr, c, 0.89) : c);
+  while (far > 0.2 && Math.min(...grounds.map((gr) => contrast(struck(mix(ink, L.canvas[1], far), gr), gr))) < 3) far -= 0.02;
   const steps = L.monochrome ? [0, 0.2, 0.4, 0.6, 0.8, 1].map((w) => mix(ink, L.canvas[1], w * far)) : null;
   const named = L.tiles ? Object.fromEntries(TILE_ROLES.map((role, i) => [role, L.tiles[i]])) : { ...CLASSIC[dark ? "dark" : "light"] };
   if (L.tiles) named.sky = L.tiles[1];

@@ -133,7 +133,9 @@ for (const look of PRINTOUTS) {
     const grounds = [t.canvas[1], ...(t.paper.bar ? [t.paper.bar] : []), ...t.header];
     for (const g of grounds) {
       assert.ok(contrast(t.text.base, g) >= 7, `ink on ${g}`);
-      for (const [role, colour] of Object.entries(t.accent)) assert.ok(contrast(colour, g) >= 4.5, `${role} ${colour} on ${g} at ${contrast(colour, g).toFixed(2)}:1`);
+      // As struck: 89% of the ink laid on the paper.
+      const struck = (c) => `#${[1, 3, 5].map((i) => Math.round(parseInt(g.slice(i, i + 2), 16) + (parseInt(c.slice(i, i + 2), 16) - parseInt(g.slice(i, i + 2), 16)) * 0.89).toString(16).padStart(2, "0")).join("")}`;
+      for (const [role, colour] of Object.entries(t.accent)) assert.ok(contrast(struck(colour), g) >= 4.5, `${role} ${colour} struck on ${g} at ${contrast(struck(colour), g).toFixed(2)}:1`);
     }
     for (const level of t.levels.slice(1)) assert.ok(contrast(level, t.levels[0]) >= 1.05, `level ${level}`);
     // Every label, the faintest too, laid over the paper and over a bar,
@@ -160,6 +162,8 @@ test("the terminal looks set every letter monospaced, and measure it so", () => 
   // Pills, tiles and axes are sized with the look's own measure.
   assert.equal(kit(theme("printout-white")).textWidth("Followers", 12, 600), textWidth("Followers", 12, 600, true));
   assert.equal(kit(theme("midnight")).textWidth("Followers", 12, 600), textWidth("Followers", 12, 600));
+  // A symbol the monospaced font lacks falls back to an emoji a full em wide.
+  assert.equal(textWidth("\u2705", 10, 400, true), textWidth("\u4e00", 10, 400, true));
   assert.match(renderProfile(profileOf(), { theme: theme("midnight") }), /text \{ font-family: -apple-system/);
   // A bio as wide as the system font allows is clipped sooner in a monospaced one.
   const long = { ...fixture("profile-gfazioli") };
