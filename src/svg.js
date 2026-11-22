@@ -131,12 +131,14 @@ export function kit(t) {
   };
 
   /** A pill tinted with `tint` (an accent), or neutral. */
-  function pill(x, y, { label, value, icon: name, color = t.text.faint, tint, fill, stroke, labelClass = "pill" }) {
+  function pill(x, y, { label: full, value, icon: name, color = t.text.faint, tint, fill, stroke, labelClass = "pill" }, max = Infinity) {
     const h = 22;
     const padX = 9;
     const iconW = name ? 18 : 0;
-    const labelW = tw(label, 11.5, value ? 400 : 600);
     const valueW = value ? 5 + tw(value, 11.5, 700) : 0;
+    // A pill wider than its row (a long URL in a terminal's letters) is clipped to it.
+    const label = fitT(full, max - padX * 2 - iconW - valueW, 11.5, value ? 400 : 600);
+    const labelW = tw(label, 11.5, value ? 400 : 600);
     const w = padX * 2 + iconW + labelW + valueW;
     const bg = fill ?? (tint ? alpha(tint, t.chip.tint) : t.chip.fill);
     const line = stroke ?? (tint ? alpha(tint, t.chip.tintStroke) : t.chip.stroke);
@@ -155,13 +157,13 @@ export function kit(t) {
     let row = 0;
     const out = [];
     for (const item of items) {
-      const { w } = pill(0, 0, item);
+      const { w } = pill(0, 0, item, maxW);
       if (cx > x && cx + w > x + maxW) {
         if (row + 1 >= rows) break;
         row += 1;
         cx = x;
       }
-      out.push(pill(cx, y + row * rowStep, item).svg);
+      out.push(pill(cx, y + row * rowStep, item, maxW).svg);
       cx += w + 8;
     }
     return { svg: out.join(""), h: (row + 1) * rowStep - (rowStep - 22) };

@@ -120,10 +120,12 @@ export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = 
     const rows = m.topRepos
       .map((r, i) => {
         const ry = y + 80 + i * 21;
+        // The star steps left of a count too wide for its place (11,111 in a terminal's letters).
+        const star = Math.min(x + w - 66, x + w - 18 - k.textWidth(full(r.stargazerCount), 12, 700) - 6 - 13);
         return `
     <circle cx="${x + 23}" cy="${ry - 4}" r="4.5" fill="${theme.hue(r.primaryLanguage?.color ?? "#6e7681", shade(r.primaryLanguage?.name))}"/>
-    <text x="${x + 36}" y="${ry}" class="row">${esc(k.fit(r.name, w - 110, 12.5, 500))}</text>
-    ${k.icon("star", x + w - 66, ry - 11, A.yellow, 13)}
+    <text x="${x + 36}" y="${ry}" class="row">${esc(k.fit(r.name, star - 8 - (x + 36), 12.5, 500))}</text>
+    ${k.icon("star", star, ry - 11, A.yellow, 13)}
     <text x="${x + w - 18}" y="${ry}" class="count" text-anchor="end">${full(r.stargazerCount)}</text>`;
       })
       .join("");
