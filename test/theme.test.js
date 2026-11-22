@@ -6,7 +6,7 @@ import { repoModel } from "../src/repo/model.js";
 import { renderRepo } from "../src/repo/render.js";
 import { contrast, display, inSeason, lightOf, LOOK_NAMES, resolveLook, theme, THEME_NAMES } from "../src/theme.js";
 import { kit } from "../src/svg.js";
-import { textWidth } from "../src/text.js";
+import { textWidth, wrap } from "../src/text.js";
 import { fixture } from "./support/cases.js";
 
 const at = (iso) => ({ now: new Date(iso), timeZone: "Europe/Rome" });
@@ -136,6 +136,15 @@ for (const look of PRINTOUTS) {
       for (const [role, colour] of Object.entries(t.accent)) assert.ok(contrast(colour, g) >= 4.5, `${role} ${colour} on ${g} at ${contrast(colour, g).toFixed(2)}:1`);
     }
     for (const level of t.levels.slice(1)) assert.ok(contrast(level, t.levels[0]) >= 1.05, `level ${level}`);
+    // Every label, the faintest too, laid over the paper and over a bar.
+    const laid = (rgba, under) => {
+      const [r, gr, b, a] = rgba.match(/[\d.]+/g).map(Number);
+      const u = [1, 3, 5].map((i) => parseInt(under.slice(i, i + 2), 16));
+      return `#${u.map((v, i) => Math.round(v + ([r, gr, b][i] - v) * a).toString(16).padStart(2, "0")).join("")}`;
+    };
+    for (const [role, ink] of Object.entries(t.text).filter(([, c]) => c.startsWith("rgba"))) {
+      for (const g of [t.canvas[1], ...(t.paper.bar ? [t.paper.bar] : [])]) assert.ok(contrast(laid(ink, g), g) >= 4.5, `${role} on ${g}`);
+    }
   });
 }
 
@@ -211,9 +220,19 @@ test("on a one-colour terminal a repository's dot wears its language's shade", (
   const t = theme("phosphor-green");
   const ts = m.languages.findIndex((l) => l.name === "TypeScript");
   const shadeTS = t.hue("#3178c6", ts);
-  const dots = [...svg.matchAll(/<circle cx="\d+" cy="[\d.]+" r="4.5" fill="(#[0-9A-F]{6})"\/>\s*<text[^>]*class="row">([^<]+)</g)];
+  const dots = new Map([...svg.matchAll(/<circle cx="\d+" cy="[\d.]+" r="4.5" fill="(#[0-9A-Fa-f]{6})"\/>\s*<text[^>]*class="row">([^<]+)</g)].map(([, fill, name]) => [name, fill]));
   const tsRepos = m.topRepos.filter((r) => r.primaryLanguage?.name === "TypeScript").map((r) => r.name);
   assert.ok(tsRepos.length > 1, "the fixture has TypeScript repositories");
-  for (const [, fill, name] of dots) if (tsRepos.includes(name)) assert.equal(fill, shadeTS, name);
+  for (const name of tsRepos) assert.equal(dots.get(name), shadeTS, name);
   assert.equal(new Set([0, 1, 2, 3, 4, 5].map((n) => t.hue("#000000", n))).size, 6, "five languages and Other, six shades");
+});
+
+test("a long profile name stays clear of the date, and a long word of the next line", () => {
+  const data = fixture("profile-gfazioli");
+  const long = { ...data, user: { ...data.user, name: "International Institute for Applied Systems Analysis", login: "iiasa" } };
+  const svg = renderProfile(profileModel(long, { timeZone: "Europe/Rome" }), { theme: theme("phosphor-green") });
+  assert.match(svg, /<tspan class="name disp" style="fill: #8CFFAA; font-size: \d+(\.5)?px">/);
+  const words = ["https://example.com/docs/initialization-integration-installation/cli", "tools"];
+  const [first] = wrap(words.join(" "), 300, 15, 700, 2, true);
+  assert.ok(textWidth(first, 15, 700, true) <= 300, first);
 });
