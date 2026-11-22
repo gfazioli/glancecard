@@ -449,7 +449,8 @@ export function theme(look) {
   // A terminal look draws its lines in its own ink, where the others draw in white or black.
   const line = (a, other) => (L.line ? rgba(L.line, a) : other);
   // On a one-colour terminal, GitHub's own colours become the ink's steps.
-  const steps = L.monochrome ? [0, 0.24, 0.4, 0.52, 0.62].map((w) => mix(ink, L.canvas[1], w)) : null;
+  // Six, for a card's five languages and Other.
+  const steps = L.monochrome ? [0, 0.2, 0.34, 0.46, 0.56, 0.66].map((w) => mix(ink, L.canvas[1], w)) : null;
   const named = L.tiles ? Object.fromEntries(TILE_ROLES.map((role, i) => [role, L.tiles[i]])) : { ...CLASSIC[dark ? "dark" : "light"] };
   if (L.tiles) named.sky = L.tiles[1];
   const accent = {

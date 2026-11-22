@@ -20,12 +20,18 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
 
   // ─── Header ───
 
-  // The name in the look's ink, with its glow where it has one.
-  const ink = `${theme.nameInk ? ` style="fill: ${theme.nameInk}"` : ""}${theme.nameGlow ? ` filter="url(#name-glow)"` : ""}`;
-  const header = (y) => `
-  <text x="${PAD + 2}" y="${y + 24}" class="h-name disp"${ink}>${esc(k.disp(r.name))}</text>
+  // The name in the look's ink, with its glow where it has one, beside the
+  // date: set smaller before it is clipped, as a terminal's letters run wide.
+  const header = (y) => {
+    const updated = `Updated ${formatDay(m.today)}`;
+    const name = k.shrink(k.disp(r.name), IW - 4 - k.textWidth(updated, 11) - 16, 26, 700, 18);
+    const style = [theme.nameInk && `fill: ${theme.nameInk}`, name.px !== 26 && `font-size: ${name.px}px`].filter(Boolean).join("; ");
+    const ink = `${style ? ` style="${style}"` : ""}${theme.nameGlow ? ` filter="url(#name-glow)"` : ""}`;
+    return `
+  <text x="${PAD + 2}" y="${y + 24}" class="h-name disp"${ink}>${esc(name.text)}</text>
   <text x="${PAD + 2}" y="${y + 46}" class="h-sub">${esc(`${r.nameWithOwner} · ${r.defaultBranchRef.name}`)}</text>
-  <text x="${W - PAD - 2}" y="${y + 22}" class="updated" text-anchor="end">Updated ${formatDay(m.today)}</text>`;
+  <text x="${W - PAD - 2}" y="${y + 22}" class="updated" text-anchor="end">${updated}</text>`;
+  };
 
   // ─── Hero ───
 
