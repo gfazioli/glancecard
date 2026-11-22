@@ -80,7 +80,8 @@ export function wrap(s, max, size, weight, lines, mono = false) {
       continue;
     }
     if (out.length === lines - 1) return [...out, fit([line, ...words.slice(i)].join(" "), max, size, weight, mono)];
-    out.push(line);
+    // A word longer than the line is clipped where it stands, not only on the last line.
+    out.push(fit(line, max, size, weight, mono));
     line = words[i];
   }
   if (line) out.push(fit(line, max, size, weight, mono));

@@ -15,9 +15,6 @@ export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = 
   const A = theme.accent;
   const u = m.user;
 
-  // The name in the look's ink, with its glow where it has one.
-  const ink = `${theme.nameInk ? ` style="fill: ${theme.nameInk}"` : ""}${theme.nameGlow ? ` filter="url(#name-glow)"` : ""}`;
-
   function header(y) {
     const h = 104;
     const cx = PAD + 20 + 36;
@@ -25,15 +22,23 @@ export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = 
     const tx = cx + 56;
     const textW = PAD + IW - 16 - tx;
     const meta = [u.company, u.location, u.websiteUrl?.replace(/^https?:\/\//, "").replace(/\/$/, "")].filter(Boolean).join("  ·  ");
+    // The name in the look's ink, with its glow where it has one, beside the
+    // login and the date: set smaller before it is clipped, as a terminal's
+    // letters run wide.
+    const updated = `Updated ${formatDay(m.today)}`;
+    const room = textW - k.textWidth(updated, 11) - 16 - 8 - k.textWidth(`@${u.login}`, 13);
+    const name = k.shrink(k.disp(u.name || u.login), Math.max(120, room), 20, 700, 14);
+    const style = [theme.nameInk && `fill: ${theme.nameInk}`, name.px !== 20 && `font-size: ${name.px}px`].filter(Boolean).join("; ");
+    const ink = `${style ? ` style="${style}"` : ""}${theme.nameGlow ? ` filter="url(#name-glow)"` : ""}`;
     return {
       h,
       svg: `
   <rect x="${PAD}" y="${y}" width="${IW}" height="${h}" rx="${theme.corner}" fill="url(#hero)" stroke="${theme.headerOutline}"/>
   ${k.avatar("avatar", images[u.avatarUrl], cx, cy, 36, "url(#ring)", 3)}
-  <text x="${tx}" y="${y + 38}"><tspan class="name disp"${ink}>${esc(k.disp(u.name || u.login))}</tspan><tspan dx="8" class="login">@${esc(u.login)}</tspan></text>
+  <text x="${tx}" y="${y + 38}"><tspan class="name disp"${ink}>${esc(name.text)}</tspan><tspan dx="8" class="login">@${esc(u.login)}</tspan></text>
   <text x="${tx}" y="${y + 60}" class="bio">${esc(k.fit((u.bio || "").trim(), textW, 13))}</text>
   <text x="${tx}" y="${y + 84}" class="h-meta">${esc(k.fit(meta, textW, 11.5))}</text>
-  <text x="${PAD + IW - 16}" y="${y + 28}" class="updated" text-anchor="end">Updated ${formatDay(m.today)}</text>`,
+  <text x="${PAD + IW - 16}" y="${y + 28}" class="updated" text-anchor="end">${updated}</text>`,
     };
   }
 
