@@ -59,6 +59,19 @@ and top and bottom bands, never over a figure; `test/theme.test.js` holds the
 content below the top band. The seasonal looks resolve to Midnight out of
 season (`resolveLook`), in the card's time zone.
 
+The terminal looks (since 0.7.0), Phosphor (a CRT tube: bloom, scanlines,
+a rolling refresh band, vignette, glare, a prompt and a blinking cursor,
+drawn by `frame` in `src/svg.js`) and Printout (fanfold paper: bars,
+tractor holes cut by a mask, ink struck in dots), began here and go to
+FinderGit after. Every letter is monospaced, and measured so: the
+renderers measure through the kit (`k.fit`, `k.textWidth`, `k.wrap`),
+never `text.js` directly. The tube's scanlines lie over the figures on
+purpose (user, 2026-11-22: "è l'essenza del tema"), the one exception to
+the rule above. A tube is its own light side (`lightOf`); Printout is a
+family of light looks. A one-colour look draws GitHub's colours (the
+languages) in its ink's steps (`theme.hue`), and a photograph in its ink
+(`#photo`).
+
 The light sides (`<look>-light`, since 0.6.0) are glancecard's own, not
 FinderGit's: the dark nine stay in step with the app, the seven light sides
 do not exist there. Chosen on 2026-10-19 as the middle way between a pure

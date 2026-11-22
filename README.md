@@ -28,6 +28,7 @@ Daily SVG cards for your READMEs, rendered by GitHub Actions in your own reposit
 - **A repository card** for any public repository: status, age and latest tag, description and topics, commits in the last 30 days with a 26-week sparkline, twelve stat tiles, a year of commits with streaks (a chart of daily counts, or GitHub's calendar), the stars over the repository's whole life with the last 30 days, the last year and the best week, the weekly rhythm (day × hour), languages and essentials (README, license, contributing guide, security policy, CI), the latest commits and releases with their cadence, contributors.
 - **A profile card** for any user: followers, stars, repositories, pull requests, issues, commits, a year of contributions as a chart or as GitHub's calendar, the stars of all their public repositories since the first one, the most starred repositories and their languages.
 - **Nine looks**, after the ones of [FinderGit](https://findergit.app)'s Profile Card, for both cards: Midnight, Aurora and Daylight; Upside Down, Hyperspace, Bridge and Nebula; Halloween and Christmas in their season. `dark` and `light` are Midnight and Daylight, a pair of files for a `<picture>` that shows the one matching the reader's GitHub theme, and every other dark look has a **light side** of its own, such as `nebula-light`, for readers on GitHub's light theme.
+- **Eight looks for the terminal's own people**: **Phosphor**, the card on a 1970s–80s monitor (green, amber, white, or an 80s colour tube) behind scanlines, its glass glowing and its cursor blinking, the same on both GitHub themes; and **Printout**, the card off a line printer on fanfold paper (green-bar, yellow, white, or from a colour ribbon). Every letter monospaced.
 - **Refreshed by your own workflow**, on your schedule, with the token GitHub Actions already gives every run. The cards are plain files committed to your repository.
 
 ## Set it up in one paste
@@ -160,7 +161,7 @@ Dependabot also follows a line pinned to a commit SHA with the version as a comm
 | `repos` | | Repositories, as `owner/name`, separated by newlines, commas or spaces. |
 | `profile` | | A login to render a profile card for. |
 | `out-dir` | `glancecard` | Folder the cards are written to, relative to the workspace. |
-| `theme` | `both` | `both` (`dark` and `light`), or looks, comma-separated: `dark`, `light`, `midnight`, `aurora`, `daylight`, `upside-down`, `hyperspace`, `bridge`, `nebula`, `halloween`, `christmas`, and the light sides `aurora-light`, `upside-down-light`, `hyperspace-light`, `bridge-light`, `nebula-light`, `halloween-light`, `christmas-light`. With one theme the file is `<name>.svg`, with several `<name>-<theme>.svg`. See [Looks](#looks). |
+| `theme` | `both` | `both` (`dark` and `light`), or looks, comma-separated: `dark`, `light`, `midnight`, `aurora`, `daylight`, `upside-down`, `hyperspace`, `bridge`, `nebula`, `halloween`, `christmas`, the light sides `aurora-light`, `upside-down-light`, `hyperspace-light`, `bridge-light`, `nebula-light`, `halloween-light`, `christmas-light`, and the terminal looks `phosphor-green`, `phosphor-amber`, `phosphor-white`, `phosphor-color`, `printout-green`, `printout-yellow`, `printout-white`, `printout-color`. With one theme the file is `<name>.svg`, with several `<name>-<theme>.svg`. See [Looks](#looks). |
 | `time-zone` | `UTC` | IANA zone, such as `Europe/Rome`, for the commit calendar and rhythm. |
 | `sections` | `all` | Repository card sections to draw: `hero`, `tiles`, `activity`, `stars`, `rhythm`, `code`, `commits`, `releases`, `contributors`. When one of a side-by-side pair is left out, the other takes the full width. `stars` also draws the profile card's Stars, and leaving it out leaves out both, and the star history they read. |
 | `calendar` | `chart` | How a year is drawn, on both cards: `chart`, a line of daily contributions (profile) or commits (repository) over a value axis, or `grid`, GitHub's calendar of squares. |
@@ -177,7 +178,7 @@ Repository cards are named after the repository (`octoscope-dark.svg`); two repo
 
 ## Looks
 
-Nine looks, after the ones of [FinderGit](https://findergit.app)'s Profile Card: each sets every colour a card draws, and most past the classics a lettering and decorations of their own. They work on both cards. See them all, and switch between them, on the [website](https://gfazioli.github.io/glancecard/#looks).
+Seventeen looks: nine after the ones of [FinderGit](https://findergit.app)'s Profile Card, and eight for the terminal. Each sets every colour a card draws, and most past the classics a lettering and decorations of their own. They work on both cards. See them all, and switch between them, on the [website](https://gfazioli.github.io/glancecard/#looks).
 
 | | | |
 |:-:|:-:|:-:|
@@ -187,7 +188,7 @@ Nine looks, after the ones of [FinderGit](https://findergit.app)'s Profile Card:
 
 ### Light sides
 
-Every dark look but Midnight, whose light side is Daylight, has one of its own: `<look>-light`, for readers on GitHub's light theme. A rule draws it from its dark look, so the two read as one: the same glows, lettering and decorations, on paper, with every accent darkened until it reads at 4.5:1 and the calendar turned around, the darkest the most. The paper is chosen by hand, and so is the ink of decorations that are white in the dark. Pair a look with its light side in a `<picture>`:
+Every dark look but Midnight, whose light side is Daylight, and the Phosphor tubes, which read the same on both themes, has one of its own: `<look>-light`, for readers on GitHub's light theme. A rule draws it from its dark look, so the two read as one: the same glows, lettering and decorations, on paper, with every accent darkened until it reads at 4.5:1 and the calendar turned around, the darkest the most. The paper is chosen by hand, and so is the ink of decorations that are white in the dark. Pair a look with its light side in a `<picture>`:
 
 ```yaml
 theme: nebula, nebula-light
@@ -198,6 +199,21 @@ theme: nebula, nebula-light
 | <img src="https://gfazioli.github.io/glancecard/cards/profile-aurora-light.svg" width="280" alt="Aurora's light side"><br>`aurora-light` | <img src="https://gfazioli.github.io/glancecard/cards/profile-upside-down-light.svg" width="280" alt="Upside Down's light side"><br>`upside-down-light` | <img src="https://gfazioli.github.io/glancecard/cards/profile-hyperspace-light.svg" width="280" alt="Hyperspace's light side"><br>`hyperspace-light` |
 | <img src="https://gfazioli.github.io/glancecard/cards/profile-bridge-light.svg" width="280" alt="Bridge's light side"><br>`bridge-light` | <img src="https://gfazioli.github.io/glancecard/cards/profile-nebula-light.svg" width="280" alt="Nebula's light side"><br>`nebula-light` | <img src="https://gfazioli.github.io/glancecard/cards/profile-halloween-light.svg" width="280" alt="Halloween's light side"><br>`halloween-light` |
 | <img src="https://gfazioli.github.io/glancecard/cards/profile-christmas-light.svg" width="280" alt="Christmas's light side"><br>`christmas-light` | | |
+
+### Terminal looks
+
+For the terminal's own people, every letter monospaced. **Phosphor** draws the card on a 1970s–80s monitor: one phosphor's glow on black glass, green (P1), amber (P3) or white (P4), or an 80s colour tube's sixteen colours with its three guns a hair out of line, behind scanlines, a vignette and the glass's glare, with a prompt above the card and a cursor blinking under it. A monitor reads the same on a light page, so a tube is its own light side: one file, no `<picture>` needed. **Printout** prints the card off a line printer, on fanfold paper with its tractor holes cut through to the page: green-bar, yellow, plain white, or from a colour ribbon.
+
+```yaml
+theme: phosphor-green
+```
+
+| | | | |
+|:-:|:-:|:-:|:-:|
+| <img src="https://gfazioli.github.io/glancecard/cards/profile-phosphor-green.svg" width="280" alt="Phosphor, green"><br>`phosphor-green` | <img src="https://gfazioli.github.io/glancecard/cards/profile-phosphor-amber.svg" width="280" alt="Phosphor, amber"><br>`phosphor-amber` | <img src="https://gfazioli.github.io/glancecard/cards/profile-phosphor-white.svg" width="280" alt="Phosphor, white"><br>`phosphor-white` | <img src="https://gfazioli.github.io/glancecard/cards/profile-phosphor-color.svg" width="280" alt="Phosphor, colour"><br>`phosphor-color` |
+| <img src="https://gfazioli.github.io/glancecard/cards/profile-printout-green.svg" width="280" alt="Printout, green-bar paper"><br>`printout-green` | <img src="https://gfazioli.github.io/glancecard/cards/profile-printout-yellow.svg" width="280" alt="Printout, yellow paper"><br>`printout-yellow` | <img src="https://gfazioli.github.io/glancecard/cards/profile-printout-white.svg" width="280" alt="Printout, white paper"><br>`printout-white` | <img src="https://gfazioli.github.io/glancecard/cards/profile-printout-color.svg" width="280" alt="Printout, colour ribbon"><br>`printout-color` |
+
+The cursor blinks and a refresh band rolls down the tube unless the reader's system asks for less motion.
 
 `halloween` and `christmas` are worn in their season only, from 1 October to 2 November and from 1 December to 6 January in the card's `time-zone`; the rest of the year they are Midnight, their light sides Daylight, and they come back on their own next season. The CLI's `--all-seasons` wears them any day, for a preview.
 

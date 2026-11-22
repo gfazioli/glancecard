@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>glancecard: GitHub cards for your README, updated daily</title>
-    <meta name="description" content="Daily SVG cards of your GitHub profile and repositories for your READMEs, in nine looks. A GitHub Action: no server, no dependencies, free." />
+    <meta name="description" content="Daily SVG cards of your GitHub profile and repositories for your READMEs, in seventeen looks. A GitHub Action: no server, no dependencies, free." />
     <link rel="canonical" href="https://gfazioli.github.io/glancecard/" />
     <meta name="theme-color" content="#090c16" />
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
@@ -12,7 +12,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="glancecard" />
     <meta property="og:title" content="glancecard: your GitHub, at a glance" />
-    <meta property="og:description" content="Daily SVG cards of your GitHub profile and repositories for your READMEs, in nine looks. A GitHub Action: no server, no dependencies, free." />
+    <meta property="og:description" content="Daily SVG cards of your GitHub profile and repositories for your READMEs, in seventeen looks. A GitHub Action: no server, no dependencies, free." />
     <meta property="og:url" content="https://gfazioli.github.io/glancecard/" />
     <meta property="og:image" content="https://gfazioli.github.io/glancecard/og.png" />
     <meta property="og:image:width" content="1200" />
@@ -1459,7 +1459,7 @@
             </div>
             <ul class="facts">
               <li>MIT licensed</li>
-              <li>Nine looks</li>
+              <li>Seventeen looks</li>
               <li>On the <a href="https://github.com/marketplace/actions/glancecard">GitHub Marketplace</a></li>
             </ul>
           </div>
@@ -1497,7 +1497,7 @@
         <div class="wrap">
           <div data-scope>
             <p class="kicker" data-reveal="rise">Make it yours</p>
-            <h2 id="looks-title" data-reveal="rise">Nine looks, and the year and the stars your way</h2>
+            <h2 id="looks-title" data-reveal="rise">Seventeen looks, and the year and the stars your way</h2>
             <p class="section-lead" data-reveal="rise">Pick a look, how the year and the stars are drawn, what the repository card shows, and when the cards refresh. The card is drawn right here, by glancecard itself, from the author's data, and the workflow under it is the one to copy.</p>
           </div>
           <div class="maker" data-reveal="morph">
@@ -1522,6 +1522,10 @@
                     <label class="pick"><input type="radio" name="editor-dark" value="nebula" /><span class="chip"><i style="background: linear-gradient(135deg, #0b0620, #2a1650 55%, #c2255c)"></i>nebula</span></label>
                     <label class="pick"><input type="radio" name="editor-dark" value="halloween" /><span class="chip"><i style="background: linear-gradient(135deg, #0d0612, #3c096c 55%, #e85d04)"></i>halloween</span></label>
                     <label class="pick"><input type="radio" name="editor-dark" value="christmas" /><span class="chip"><i style="background: linear-gradient(135deg, #081c15, #1b4332 55%, #c1121f)"></i>christmas</span></label>
+                    <label class="pick"><input type="radio" name="editor-dark" value="phosphor-green" /><span class="chip"><i style="background: linear-gradient(135deg, #041609, #082710 55%, #33ff66)"></i>phosphor-green</span></label>
+                    <label class="pick"><input type="radio" name="editor-dark" value="phosphor-amber" /><span class="chip"><i style="background: linear-gradient(135deg, #170f01, #281b03 55%, #ffb81c)"></i>phosphor-amber</span></label>
+                    <label class="pick"><input type="radio" name="editor-dark" value="phosphor-white" /><span class="chip"><i style="background: linear-gradient(135deg, #101216, #1f2226 55%, #dce6f2)"></i>phosphor-white</span></label>
+                    <label class="pick"><input type="radio" name="editor-dark" value="phosphor-color" /><span class="chip"><i style="background: linear-gradient(135deg, #0d0d14, #1b1b21 55%, #55ff55)"></i>phosphor-color</span></label>
                   </div>
                 </div>
                 <div class="side" data-side="light">
@@ -1530,7 +1534,7 @@
                     <label class="pick"><input type="radio" name="editor-light" value="own" checked /><span class="chip"><i data-light-swatch style="background: linear-gradient(135deg, #f7f9fd, #dce8ff 55%, #fcc2d7)"></i><span data-light-name>daylight</span></span></label>
                     <label class="pick" data-light-daylight hidden><input type="radio" name="editor-light" value="daylight" /><span class="chip"><i style="background: linear-gradient(135deg, #f7f9fd, #dce8ff 55%, #fcc2d7)"></i>daylight</span></label>
                   </div>
-                  <p class="editor-note">Each dark look has a light side of its own. Daylight, Midnight's, goes with any of them.</p>
+                  <p class="editor-note">Each dark look has a light side of its own. Daylight, Midnight's, goes with any of them. A Phosphor tube reads the same on both.</p>
                 </div>
               </fieldset>
               <fieldset data-editor-when="one" hidden>
@@ -1545,6 +1549,10 @@
                   <label class="pick"><input type="radio" name="editor-look" value="nebula" /><span class="chip"><i style="background: linear-gradient(135deg, #0b0620, #2a1650 55%, #c2255c)"></i>nebula</span></label>
                   <label class="pick"><input type="radio" name="editor-look" value="halloween" /><span class="chip"><i style="background: linear-gradient(135deg, #0d0612, #3c096c 55%, #e85d04)"></i>halloween</span></label>
                   <label class="pick"><input type="radio" name="editor-look" value="christmas" /><span class="chip"><i style="background: linear-gradient(135deg, #081c15, #1b4332 55%, #c1121f)"></i>christmas</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="phosphor-green" /><span class="chip"><i style="background: linear-gradient(135deg, #041609, #082710 55%, #33ff66)"></i>phosphor-green</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="phosphor-amber" /><span class="chip"><i style="background: linear-gradient(135deg, #170f01, #281b03 55%, #ffb81c)"></i>phosphor-amber</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="phosphor-white" /><span class="chip"><i style="background: linear-gradient(135deg, #101216, #1f2226 55%, #dce6f2)"></i>phosphor-white</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="phosphor-color" /><span class="chip"><i style="background: linear-gradient(135deg, #0d0d14, #1b1b21 55%, #55ff55)"></i>phosphor-color</span></label>
                 </div>
                 <p class="side-head"><span>Light</span></p>
                 <div class="chips">
@@ -1556,6 +1564,10 @@
                   <label class="pick"><input type="radio" name="editor-look" value="nebula-light" /><span class="chip"><i style="background: linear-gradient(135deg, #f9f2fb, #f3eeff 55%, #7d52fa)"></i>nebula-light</span></label>
                   <label class="pick"><input type="radio" name="editor-look" value="halloween-light" /><span class="chip"><i style="background: linear-gradient(135deg, #fbf4e6, #ffe2c0 55%, #bc5404)"></i>halloween-light</span></label>
                   <label class="pick"><input type="radio" name="editor-look" value="christmas-light" /><span class="chip"><i style="background: linear-gradient(135deg, #eef5f1, #e3f3ec 55%, #347e5c)"></i>christmas-light</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="printout-green" /><span class="chip"><i style="background: linear-gradient(135deg, #fbfcf8, #e9f4e5 55%, #1e2a24)"></i>printout-green</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="printout-yellow" /><span class="chip"><i style="background: linear-gradient(135deg, #fff8da, #faeebb 55%, #2a2112)"></i>printout-yellow</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="printout-white" /><span class="chip"><i style="background: linear-gradient(135deg, #fcfcfa, #f2f2f0 55%, #1c1f24)"></i>printout-white</span></label>
+                  <label class="pick"><input type="radio" name="editor-look" value="printout-color" /><span class="chip"><i style="background: linear-gradient(135deg, #fcfcfa, #f2f5fa 55%, #22682a)"></i>printout-color</span></label>
                 </div>
               </fieldset>
               <fieldset>
