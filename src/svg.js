@@ -118,11 +118,17 @@ export function kit(t) {
 
   // The title's colour goes in style=, not fill=: the stylesheet's `text`
   // rule outranks a presentation attribute and would paint every title grey.
-  const panelTitle = (x, y, name, color, title, right) => `
+  // The caption on the right gets what the title leaves it: a terminal's
+  // wide letters would run it into the title.
+  const panelTitle = (x, y, name, color, title, right) => {
+    const shown = disp(title);
+    const room = right ? right.x - (x + 42) - tw(shown, 14, 700) - t.type.tracking * Array.from(shown).length - 16 : 0;
+    return `
   ${icon(name, x + 18, y + 16, color)}
-  <text x="${x + 42}" y="${y + 29}" class="title disp" style="fill: ${color}">${esc(disp(title))}</text>${
-    right ? `\n  <text x="${right.x}" y="${y + 29}" class="caption" text-anchor="end">${esc(right.text)}</text>` : ""
+  <text x="${x + 42}" y="${y + 29}" class="title disp" style="fill: ${color}">${esc(shown)}</text>${
+    right ? `\n  <text x="${right.x}" y="${y + 29}" class="caption" text-anchor="end">${esc(fitT(right.text, room, 12, 600))}</text>` : ""
   }`;
+  };
 
   /** A pill tinted with `tint` (an accent), or neutral. */
   function pill(x, y, { label, value, icon: name, color = t.text.faint, tint, fill, stroke, labelClass = "pill" }) {
@@ -509,7 +515,7 @@ ${lines.bottom}</g>`,
   ${bar ? `<pattern id="bars" width="${W}" height="48" patternUnits="userSpaceOnUse"><rect width="${W}" height="24" fill="${bar}"/></pattern>` : ""}
   <filter id="ink" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
     <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="1" seed="7" result="noise"/>
-    <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.6 1.9" result="dots"/>
+    <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1.4 1.8" result="dots"/>
     <feComposite in="SourceGraphic" in2="dots" operator="in" result="struck"/>
     <feGaussianBlur in="struck" stdDeviation="0.25"/>
   </filter>
