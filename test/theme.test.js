@@ -281,11 +281,13 @@ test("a tube moves for under five seconds, once, and a ribbon's pale language re
 
 test("a terminal's hero wraps rather than drop a badge or a link, and its faintest mark still reads", () => {
   const m = repoOf();
+  m.latestTag = "v1.2.3-beta.1+build.123456";
+  m.repo = { ...m.repo, homepageUrl: "https://gfazioli.github.io/octoscope/guide" };
   const midnight = renderRepo(m, { theme: theme("midnight") });
   const tube = renderRepo(m, { theme: theme("phosphor-green") });
-  for (const text of [m.latestTag, m.repo.homepageUrl.replace(/^https?:\/\//, "").replace(/\/$/, "")]) {
-    assert.ok(midnight.includes(`>${text}<`), `Midnight shows ${text}`);
-    assert.ok(tube.includes(`>${text}<`), `Phosphor shows ${text}`);
+  for (const text of [m.latestTag, "gfazioli.github.io/octoscope/guide"]) {
+    assert.ok(midnight.includes(`class="pill">${text}<`), `Midnight's hero shows ${text}`);
+    assert.ok(tube.includes(`class="pill">${text}<`), `Phosphor's hero shows ${text}`);
   }
   for (const look of [...TUBES, ...PRINTOUTS]) {
     const t = theme(look);
