@@ -254,8 +254,10 @@ test("a terminal's long URL pill keeps to its column, and a five-digit count to 
   const data = fixture("octoscope");
   const nameWithOwner = `an-organization-with-a-long-name/${"initialization-integration-installation-".repeat(2)}cli`;
   const repo = renderRepo(repoModel({ ...data, repo: { ...data.repo, nameWithOwner } }, { timeZone: "Europe/Rome" }), { theme: theme("phosphor-green") });
-  const pills = [...repo.matchAll(/<rect x="([\d.]+)" y="[\d.]+" width="([\d.]+)" height="22"/g)].map(([, x, w]) => Number(x) + Number(w));
-  assert.ok(Math.max(...pills) <= 880 - 24, `a pill ends at ${Math.max(...pills)}`);
+  // The GitHub link's pill, in the hero's left column (the sparkline starts at x=560).
+  const link = repo.match(/<rect x="([\d.]+)" y="[\d.]+" width="([\d.]+)" height="22"[^>]*\/>\s*<g transform="[^"]*"[^>]*>(?:<path[^>]*\/>)+<\/g>\s*<text[^>]*>github\.com\//);
+  assert.ok(link, "the GitHub link's pill is drawn");
+  assert.ok(Number(link[1]) + Number(link[2]) <= 560, `the link's pill ends at ${Number(link[1]) + Number(link[2])}`);
   const p = fixture("profile-gfazioli");
   const m = profileModel(p, { timeZone: "Europe/Rome" });
   m.topRepos[0] = { ...m.topRepos[0], stargazerCount: 11111 };
@@ -263,4 +265,14 @@ test("a terminal's long URL pill keeps to its column, and a five-digit count to 
   const row = svg.match(/<g transform="translate\(([\d.]+) [\d.]+\) scale\(0\.8125\)" fill="#33FF66">[\s\S]*?<text x="(\d+)"[^>]*class="count" text-anchor="end">11,111</);
   assert.ok(row, "the star and its count are drawn");
   assert.ok(Number(row[1]) + 13 <= Number(row[2]) - textWidth("11,111", 12, 700, true), `star at ${row[1]}`);
+});
+
+test("a tube moves for under five seconds, once, and a ribbon's pale language reads on its paper", () => {
+  const svg = renderProfile(profileOf(), { theme: theme("phosphor-amber") });
+  assert.match(svg, /\.roll \{ animation: roll 4\.5s linear 1; \}/);
+  assert.match(svg, /\.cursor \{ animation: blink 1\.06s steps\(1\) 4; \}/);
+  assert.doesNotMatch(svg, /infinite/);
+  const t = theme("printout-color");
+  for (const g of [t.canvas[1], t.paper.bar]) assert.ok(contrast(t.hue("#f1e05a", 1), g) >= 3, `JavaScript's yellow on ${g}`);
+  assert.equal(theme("midnight").hue("#f1e05a", 1), "#f1e05a", "a classic look keeps GitHub's colour");
 });

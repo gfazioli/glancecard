@@ -480,7 +480,8 @@ export function theme(look) {
     pill: L.pill ?? null,
     // A colour of GitHub's own (a language's): as it is, or the n-th of a
     // list a step dimmer in the ink of a one-colour terminal.
-    hue: (c, n = 0) => (steps ? steps[n % steps.length] : c),
+    // On a colour ribbon's paper a pale one (JavaScript's yellow) is darkened to 3:1, as a mark must read.
+    hue: (c, n = 0) => (steps ? steps[n % steps.length] : L.paper ? deepen(c, [L.canvas[1], L.paper.bar ?? L.canvas[1]], 3) : c),
     monochrome: Boolean(L.monochrome),
     mono: type.design === "mono",
     crt: Boolean(L.crt),
