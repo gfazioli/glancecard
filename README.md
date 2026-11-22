@@ -186,6 +186,11 @@ Seventeen looks: nine after the ones of [FinderGit](https://findergit.app)'s Pro
 | <img src="https://gfazioli.github.io/glancecard/cards/profile-upside-down.svg" width="280" alt="Upside Down"><br>`upside-down` | <img src="https://gfazioli.github.io/glancecard/cards/profile-hyperspace.svg" width="280" alt="Hyperspace"><br>`hyperspace` | <img src="https://gfazioli.github.io/glancecard/cards/profile-bridge.svg" width="280" alt="Bridge"><br>`bridge` |
 | <img src="https://gfazioli.github.io/glancecard/cards/profile-nebula.svg" width="280" alt="Nebula"><br>`nebula` | <img src="https://gfazioli.github.io/glancecard/cards/profile-halloween.svg" width="280" alt="Halloween"><br>`halloween` | <img src="https://gfazioli.github.io/glancecard/cards/profile-christmas.svg" width="280" alt="Christmas"><br>`christmas` |
 
+| | | | |
+|:-:|:-:|:-:|:-:|
+| <img src="https://gfazioli.github.io/glancecard/cards/profile-phosphor-green.svg" width="205" alt="Phosphor, green"><br>`phosphor-green` | <img src="https://gfazioli.github.io/glancecard/cards/profile-phosphor-amber.svg" width="205" alt="Phosphor, amber"><br>`phosphor-amber` | <img src="https://gfazioli.github.io/glancecard/cards/profile-phosphor-white.svg" width="205" alt="Phosphor, white"><br>`phosphor-white` | <img src="https://gfazioli.github.io/glancecard/cards/profile-phosphor-color.svg" width="205" alt="Phosphor, colour"><br>`phosphor-color` |
+| <img src="https://gfazioli.github.io/glancecard/cards/profile-printout-green.svg" width="205" alt="Printout, green-bar paper"><br>`printout-green` | <img src="https://gfazioli.github.io/glancecard/cards/profile-printout-yellow.svg" width="205" alt="Printout, yellow paper"><br>`printout-yellow` | <img src="https://gfazioli.github.io/glancecard/cards/profile-printout-white.svg" width="205" alt="Printout, white paper"><br>`printout-white` | <img src="https://gfazioli.github.io/glancecard/cards/profile-printout-color.svg" width="205" alt="Printout, colour ribbon"><br>`printout-color` |
+
 ### Light sides
 
 Every dark look but Midnight, whose light side is Daylight, and the Phosphor tubes, which read the same on both themes, has one of its own: `<look>-light`, for readers on GitHub's light theme. A rule draws it from its dark look, so the two read as one: the same glows, lettering and decorations, on paper, with every accent darkened until it reads at 4.5:1 and the calendar turned around, the darkest the most. The paper is chosen by hand, and so is the ink of decorations that are white in the dark. Pair a look with its light side in a `<picture>`:
@@ -207,11 +212,6 @@ For the terminal's own people, every letter monospaced. **Phosphor** draws the c
 ```yaml
 theme: phosphor-green
 ```
-
-| | | | |
-|:-:|:-:|:-:|:-:|
-| <img src="https://gfazioli.github.io/glancecard/cards/profile-phosphor-green.svg" width="280" alt="Phosphor, green"><br>`phosphor-green` | <img src="https://gfazioli.github.io/glancecard/cards/profile-phosphor-amber.svg" width="280" alt="Phosphor, amber"><br>`phosphor-amber` | <img src="https://gfazioli.github.io/glancecard/cards/profile-phosphor-white.svg" width="280" alt="Phosphor, white"><br>`phosphor-white` | <img src="https://gfazioli.github.io/glancecard/cards/profile-phosphor-color.svg" width="280" alt="Phosphor, colour"><br>`phosphor-color` |
-| <img src="https://gfazioli.github.io/glancecard/cards/profile-printout-green.svg" width="280" alt="Printout, green-bar paper"><br>`printout-green` | <img src="https://gfazioli.github.io/glancecard/cards/profile-printout-yellow.svg" width="280" alt="Printout, yellow paper"><br>`printout-yellow` | <img src="https://gfazioli.github.io/glancecard/cards/profile-printout-white.svg" width="280" alt="Printout, white paper"><br>`printout-white` | <img src="https://gfazioli.github.io/glancecard/cards/profile-printout-color.svg" width="280" alt="Printout, colour ribbon"><br>`printout-color` |
 
 As the card loads, a refresh band rolls once down the tube and the cursor blinks four times, under five seconds, then both hold still; neither moves for a reader whose system asks for less motion.
 
