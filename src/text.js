@@ -53,7 +53,8 @@ export function textWidth(s, size, weight = 400, mono = false) {
   let units = 0;
   for (const ch of String(s)) {
     const c = ch.codePointAt(0);
-    if (mono) units += c < 0x2e80 ? 60 : 100;
+    // A symbol a monospaced font lacks (✅, ★) falls back to an emoji a full em wide.
+    if (mono) units += c < 0x2190 || (c >= 0x2c00 && c < 0x2e80) ? 60 : 100;
     else units += c >= 32 && c < 127 ? table[c - 32] : (EXTRA[ch] ?? (c < 0x2e80 ? 66 : 100));
   }
   return (units * size * SLACK) / 100;
