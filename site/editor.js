@@ -17,15 +17,18 @@
 
 /** The light sides of the dark looks but Midnight, whose light side is Daylight (src/theme.js LIGHT_SIDES). */
 const SIDES = ["aurora-light", "upside-down-light", "hyperspace-light", "bridge-light", "nebula-light", "halloween-light", "christmas-light"];
+/** The terminal looks (src/theme.js): the Phosphor tubes, each its own light side, and the Printout papers. */
+export const TUBES = ["phosphor-green", "phosphor-amber", "phosphor-white", "phosphor-color"];
+const PRINTOUTS = ["printout-green", "printout-yellow", "printout-white", "printout-color"];
 /** The theme names, in the order the action lists them (src/theme.js THEME_NAMES). */
-export const THEME_ORDER = ["dark", "light", "midnight", "aurora", "daylight", "upside-down", "hyperspace", "bridge", "nebula", "halloween", "christmas", ...SIDES];
-/** The looks by name (src/theme.js LOOK_NAMES): FinderGit's nine, then the light sides. */
-export const LOOKS = ["midnight", "aurora", "daylight", "upside-down", "hyperspace", "bridge", "nebula", "halloween", "christmas", ...SIDES];
+export const THEME_ORDER = ["dark", "light", "midnight", "aurora", "daylight", "upside-down", "hyperspace", "bridge", "nebula", "halloween", "christmas", ...SIDES, ...TUBES, ...PRINTOUTS];
+/** The looks by name (src/theme.js LOOK_NAMES): FinderGit's nine, the light sides, then the terminal's. */
+export const LOOKS = ["midnight", "aurora", "daylight", "upside-down", "hyperspace", "bridge", "nebula", "halloween", "christmas", ...SIDES, ...TUBES, ...PRINTOUTS];
 export const LIGHT = "daylight";
-export const LIGHT_LOOKS = [LIGHT, ...SIDES];
+export const LIGHT_LOOKS = [LIGHT, ...SIDES, ...PRINTOUTS];
 export const DARK_LOOKS = LOOKS.filter((l) => !LIGHT_LOOKS.includes(l));
-/** A dark look's light side (src/theme.js lightOf), a light look itself. */
-export const lightOf = (look) => (LIGHT_LOOKS.includes(look) ? look : look === "midnight" ? LIGHT : `${look}-light`);
+/** A dark look's light side (src/theme.js lightOf), a light look or a tube itself. */
+export const lightOf = (look) => (LIGHT_LOOKS.includes(look) || TUBES.includes(look) ? look : look === "midnight" ? LIGHT : `${look}-light`);
 /** The light sides' chips, from each one's paper, header and accent (held to src/theme.js by a test). */
 export const LIGHT_SWATCHES = {
   daylight: "linear-gradient(135deg, #f7f9fd, #dce8ff 55%, #fcc2d7)",
@@ -36,6 +39,17 @@ export const LIGHT_SWATCHES = {
   "nebula-light": "linear-gradient(135deg, #f9f2fb, #f3eeff 55%, #7d52fa)",
   "halloween-light": "linear-gradient(135deg, #fbf4e6, #ffe2c0 55%, #bc5404)",
   "christmas-light": "linear-gradient(135deg, #eef5f1, #e3f3ec 55%, #347e5c)",
+  "printout-green": "linear-gradient(135deg, #fbfcf8, #e9f4e5 55%, #1e2a24)",
+  "printout-yellow": "linear-gradient(135deg, #fff8da, #faeebb 55%, #2a2112)",
+  "printout-white": "linear-gradient(135deg, #fcfcfa, #f2f2f0 55%, #1c1f24)",
+  "printout-color": "linear-gradient(135deg, #fcfcfa, #f2f5fa 55%, #22682a)",
+};
+/** A tube's chip, the swatch its own light side shows. */
+export const TUBE_SWATCHES = {
+  "phosphor-green": "linear-gradient(135deg, #041609, #082710 55%, #33ff66)",
+  "phosphor-amber": "linear-gradient(135deg, #170f01, #281b03 55%, #ffb81c)",
+  "phosphor-white": "linear-gradient(135deg, #101216, #1f2226 55%, #dce6f2)",
+  "phosphor-color": "linear-gradient(135deg, #0d0d14, #1b1b21 55%, #55ff55)",
 };
 /** When a seasonal look is worn, its light side with it (src/theme.js inSeason); out of it, Midnight, or Daylight for a light side. */
 export const SEASONS = { halloween: "from 1 October to 2 November", christmas: "from 1 December to 6 January" };
@@ -154,10 +168,16 @@ export function plan({ mode = DEFAULT.mode, dark = DEFAULT.dark, light = DEFAULT
     if (!DARK_LOOKS.includes(dark)) throw new Error(`editor: no dark look "${dark}"`);
     if (light !== "own" && light !== LIGHT) throw new Error(`editor: no light side "${light}"`);
     const side = light === "own" ? lightOf(dark) : LIGHT;
-    value = side === LIGHT ? (dark === "midnight" ? "both" : `${dark}, light`) : `${dark}, ${side}`;
-    embed = { picture: true, dark: dark === "midnight" ? "dark" : dark, light: side === LIGHT ? "light" : side };
     worn = dark;
-    paired = side !== LIGHT;
+    if (side === dark) {
+      // A tube reads the same on both themes: one file, no <picture>.
+      value = dark;
+      embed = { picture: false, look: dark };
+    } else {
+      value = side === LIGHT ? (dark === "midnight" ? "both" : `${dark}, light`) : `${dark}, ${side}`;
+      embed = { picture: true, dark: dark === "midnight" ? "dark" : dark, light: side === LIGHT ? "light" : side };
+      paired = side !== LIGHT;
+    }
   }
   return {
     theme: value === "both" ? null : value,
@@ -462,7 +482,7 @@ function wire(doc) {
     // Midnight's own is Daylight, so it offers one.
     const darkLook = value("editor-dark") ?? DEFAULT.dark;
     if (ownName) ownName.textContent = lightOf(darkLook);
-    if (ownSwatch) ownSwatch.style.background = LIGHT_SWATCHES[lightOf(darkLook)];
+    if (ownSwatch) ownSwatch.style.background = LIGHT_SWATCHES[lightOf(darkLook)] ?? TUBE_SWATCHES[darkLook];
     if (daylightPick) daylightPick.hidden = darkLook === "midnight";
     if (darkLook === "midnight") pick("editor-light", "own");
     panel.querySelectorAll("[data-editor-when]").forEach((group) => {

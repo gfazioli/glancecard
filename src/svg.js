@@ -452,7 +452,7 @@ export function kit(t) {
   <pattern id="scan" width="8" height="3" patternUnits="userSpaceOnUse"><rect width="8" height="3" fill="url(#scanline)"/></pattern>
   <linearGradient id="roll" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${p}" stop-opacity="0"/><stop offset="0.6" stop-color="${p}" stop-opacity="0.06"/><stop offset="1" stop-color="${p}" stop-opacity="0"/></linearGradient>
   <radialGradient id="vignette" cx="0.5" cy="0.5" r="0.72"><stop offset="0.55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.62"/></radialGradient>
-  <linearGradient id="glare" x1="0" y1="0" x2="0.5" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.1"/><stop offset="0.5" stop-color="#fff" stop-opacity="0.025"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <linearGradient id="glare" x1="0" y1="0" x2="0.5" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.06"/><stop offset="0.5" stop-color="#fff" stop-opacity="0.015"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
   <filter id="edge" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="8"/></filter>
   ${photoFilter(colour, "#000000", p)}`,
       ground: `<g clip-path="url(#card)">

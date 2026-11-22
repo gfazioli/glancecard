@@ -22,7 +22,10 @@ Options:
                        hyperspace, bridge, nebula, halloween, christmas, and
                        each dark look's light side: aurora-light, upside-down-light,
                        hyperspace-light, bridge-light, nebula-light,
-                       halloween-light, christmas-light
+                       halloween-light, christmas-light; and the terminal's:
+                       phosphor-green, phosphor-amber, phosphor-white,
+                       phosphor-color, printout-green, printout-yellow,
+                       printout-white, printout-color
   --all-seasons        wear Halloween and Christmas out of their season
   --time-zone <zone>   IANA zone for commit days and hours (default: this machine's)
   --sections <list>    repository card sections, comma-separated (default: all):

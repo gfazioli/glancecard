@@ -5,18 +5,25 @@ import { renderProfile } from "../src/profile/render.js";
 import { repoModel } from "../src/repo/model.js";
 import { renderRepo } from "../src/repo/render.js";
 import { contrast, display, inSeason, lightOf, LOOK_NAMES, resolveLook, theme, THEME_NAMES } from "../src/theme.js";
+import { kit } from "../src/svg.js";
+import { textWidth } from "../src/text.js";
 import { fixture } from "./support/cases.js";
 
 const at = (iso) => ({ now: new Date(iso), timeZone: "Europe/Rome" });
 
 const LIGHT_SIDES = ["aurora-light", "upside-down-light", "hyperspace-light", "bridge-light", "nebula-light", "halloween-light", "christmas-light"];
+const TUBES = ["phosphor-green", "phosphor-amber", "phosphor-white", "phosphor-color"];
+const PRINTOUTS = ["printout-green", "printout-yellow", "printout-white", "printout-color"];
 
-test("the nine looks, dark and light as Midnight and Daylight, and every other dark look's light side", () => {
-  assert.deepEqual(LOOK_NAMES, ["midnight", "aurora", "daylight", "upside-down", "hyperspace", "bridge", "nebula", "halloween", "christmas", ...LIGHT_SIDES]);
+test("the nine looks, dark and light as Midnight and Daylight, every other dark look's light side, and the terminal's eight", () => {
+  assert.deepEqual(LOOK_NAMES, ["midnight", "aurora", "daylight", "upside-down", "hyperspace", "bridge", "nebula", "halloween", "christmas", ...LIGHT_SIDES, ...TUBES, ...PRINTOUTS]);
   assert.deepEqual(
     LOOK_NAMES.filter((l) => !theme(l).isDark),
-    ["daylight", ...LIGHT_SIDES],
+    ["daylight", ...LIGHT_SIDES, ...PRINTOUTS],
   );
+  // A tube is the same on a light page: its own light side.
+  for (const tube of TUBES) assert.equal(lightOf(tube), tube);
+  for (const paper of PRINTOUTS) assert.equal(lightOf(paper), paper);
   assert.equal(lightOf("midnight"), "daylight");
   assert.equal(lightOf("nebula"), "nebula-light");
   assert.equal(lightOf("daylight"), "daylight");
@@ -114,3 +121,74 @@ for (const look of LOOK_NAMES) {
     });
   }
 }
+
+// ─── The terminal looks ───
+
+const profileOf = () => profileModel(fixture("profile-gfazioli"), { timeZone: "Europe/Rome" });
+const repoOf = () => repoModel(fixture("octoscope"), { timeZone: "Europe/Rome" });
+
+for (const look of PRINTOUTS) {
+  test(`${look} reads on its paper, its bars and its header`, () => {
+    const t = theme(look);
+    const grounds = [t.canvas[1], ...(t.paper.bar ? [t.paper.bar] : []), ...t.header];
+    for (const g of grounds) {
+      assert.ok(contrast(t.text.base, g) >= 7, `ink on ${g}`);
+      for (const [role, colour] of Object.entries(t.accent)) assert.ok(contrast(colour, g) >= 4.5, `${role} ${colour} on ${g} at ${contrast(colour, g).toFixed(2)}:1`);
+    }
+    for (const level of t.levels.slice(1)) assert.ok(contrast(level, t.levels[0]) >= 1.05, `level ${level}`);
+  });
+}
+
+test("the terminal looks set every letter monospaced, and measure it so", () => {
+  for (const look of [...TUBES, ...PRINTOUTS]) {
+    const t = theme(look);
+    assert.ok(t.mono, look);
+    assert.match(renderProfile(profileOf(), { theme: t }), /text \{ font-family: ui-monospace/, look);
+  }
+  assert.ok(!theme("midnight").mono);
+  // Pills, tiles and axes are sized with the look's own measure.
+  assert.equal(kit(theme("printout-white")).textWidth("Followers", 12, 600), textWidth("Followers", 12, 600, true));
+  assert.equal(kit(theme("midnight")).textWidth("Followers", 12, 600), textWidth("Followers", 12, 600));
+  assert.match(renderProfile(profileOf(), { theme: theme("midnight") }), /text \{ font-family: -apple-system/);
+  // A bio as wide as the system font allows is clipped sooner in a monospaced one.
+  const long = { ...fixture("profile-gfazioli") };
+  long.user = { ...long.user, bio: "Building tools for developers who live in the terminal, one release at a time, with care and coffee" };
+  const m = profileModel(long, { timeZone: "Europe/Rome" });
+  const bio = (look) => renderProfile(m, { theme: theme(look) }).match(/class="bio">([^<]*)</)[1];
+  assert.ok(bio("phosphor-green").length < bio("midnight").length, `${bio("phosphor-green")} | ${bio("midnight")}`);
+});
+
+test("a tube glows behind scanlines, writes its prompt and blinks its cursor, still for a reader who asks", () => {
+  const svg = renderProfile(profileOf(), { theme: theme("phosphor-green") });
+  assert.match(svg, /<g filter="url\(#bloom\)">/);
+  assert.match(svg, /<rect [^>]*fill="url\(#scan\)"\/>/);
+  assert.match(svg, /<rect [^>]*fill="url\(#vignette\)"\/>/);
+  assert.match(svg, /class="prompt"><tspan[^>]*>gfazioli@github<\/tspan>:~\$ glancecard profile gfazioli<\/text>/);
+  assert.match(svg, /<rect class="cursor" /);
+  assert.match(svg, /@media \(prefers-reduced-motion: reduce\) \{ \.roll, \.cursor \{ animation: none; \} \}/);
+  assert.doesNotMatch(svg, /<feOffset in="red"/, "a one-colour tube has one gun");
+  const colour = renderRepo(repoOf(), { theme: theme("phosphor-color") });
+  assert.match(colour, /<feOffset in="red" dx="0.6"/, "a colour tube's guns never quite meet");
+  assert.match(colour, /class="prompt">[^\n]*glancecard repo gfazioli\/octoscope<\/text>/);
+});
+
+test("a printout is struck in dots on paper with its tractor holes cut through", () => {
+  const svg = renderRepo(repoOf(), { theme: theme("printout-green") });
+  assert.match(svg, /<g clip-path="url\(#card\)" mask="url\(#holes\)">/);
+  assert.match(svg, /<g filter="url\(#ink\)">/);
+  assert.match(svg, /\*\*\* GLANCECARD REPO GFAZIOLI\/OCTOSCOPE \*\*\*/);
+  assert.match(svg, /\*\*\* END OF LISTING \*\*\*/);
+  assert.doesNotMatch(svg, /filter="url\(#bloom\)"|class="cursor"/, "paper does not glow, nor blink");
+  assert.doesNotMatch(renderProfile(profileOf(), { theme: theme("printout-white") }), /pattern id="bars"/, "plain white paper has no bars");
+});
+
+test("a terminal look draws a photograph in its own ink, and GitHub's colours in its steps", () => {
+  const m = profileOf();
+  const images = { [m.user.avatarUrl]: "data:image/png;base64,iVBORw0KGgo=" };
+  assert.match(renderProfile(m, { theme: theme("phosphor-amber"), images }), /<g filter="url\(#photo\)"><clipPath id="avatar">/);
+  assert.doesNotMatch(renderProfile(m, { theme: theme("midnight"), images }), /url\(#photo\)/);
+  const t = theme("phosphor-green");
+  assert.equal(t.hue("#3178c6", 0), "#33FF66", "TypeScript's blue is the phosphor");
+  assert.notEqual(t.hue("#3178c6", 1), t.hue("#3178c6", 0), "the next language a step dimmer");
+  assert.equal(theme("phosphor-color").hue("#3178c6", 0), "#3178c6", "a colour tube keeps GitHub's colours");
+});

@@ -34,6 +34,10 @@ export const CASES = [
   { name: "profile-gfazioli-halloween-light", fixture: "profile-gfazioli", theme: "halloween-light" },
   { name: "profile-gfazioli-nebula-light-grid", fixture: "profile-gfazioli", theme: "nebula-light", calendar: "grid" },
   { name: "octoscope-christmas-light", fixture: "octoscope", theme: "christmas-light", allSeasons: true },
+  { name: "profile-gfazioli-phosphor-green", fixture: "profile-gfazioli", theme: "phosphor-green" },
+  { name: "octoscope-phosphor-color", fixture: "octoscope", theme: "phosphor-color" },
+  { name: "profile-gfazioli-printout-green-grid", fixture: "profile-gfazioli", theme: "printout-green", calendar: "grid" },
+  { name: "octoscope-printout-color", fixture: "octoscope", theme: "printout-color" },
 ];
 
 export function renderCase(c) {

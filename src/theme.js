@@ -1,6 +1,7 @@
 // The looks, after the nine of FinderGit's Profile Card
-// (https://findergit.app): a look sets every colour a card draws, and most
-// past the classics a typeface and decorations (src/decor.js). `dark` and
+// (https://findergit.app), and the terminal's eight: a look sets every
+// colour a card draws, and most past the classics a typeface and
+// decorations (src/decor.js), a terminal's its tube or its paper (src/svg.js). `dark` and
 // `light` are Midnight and Daylight under the names a <picture> pair uses.
 // Every other dark look has a light side of its own, `<look>-light`.
 // Accents are 6-digit hex so a tint can append an alpha.
@@ -296,13 +297,16 @@ for (const [look, hand] of Object.entries(LIGHT_SIDES)) LOOKS[`${look}-light`] =
 
 // ─── The terminal looks ───
 //
-// For the terminal's own people: the card as a 1970s–80s terminal shows it.
-// Phosphor is the tube: one phosphor's glow on black glass (P1 green, P3
-// amber, P4 white) or an 80s colour monitor's sixteen colours, every letter
-// monospaced, behind scanlines, a vignette and a glare (src/svg.js draws
-// the tube, `crt`). Its light side is Printout: the same card off a line
-// printer, on fanfold paper with tractor holes, green-bar, plain white,
-// canary yellow, or from a colour ribbon (`paper`).
+// For the terminal's own people: the card as a 1970s–80s terminal shows it,
+// every letter monospaced. Phosphor is the tube: one phosphor's glow on
+// black glass (P1 green, P3 amber, P4 white) or an 80s colour monitor's
+// sixteen colours, behind scanlines, a vignette and a glare (src/svg.js
+// draws the tube, `crt`). A monitor reads on a light page as on a dark one,
+// so a Phosphor look is its own light side (user, 2026-11-22: "il CRT anche
+// su GitHub chiaro, tenendo Printout come tema a sé"). Printout is a look of
+// its own: the card off a line printer, on fanfold paper with tractor
+// holes, green-bar, canary yellow, plain white, or from a colour ribbon
+// (`paper`).
 
 const rgba = (hex, a) => `rgba(${rgb(hex).join(",")},${a})`;
 const MONO = { design: "mono", uppercase: true, tracking: 0.4 };
@@ -373,17 +377,17 @@ Object.assign(LOOKS, {
   "phosphor-amber": phosphor("#FFB81C", "#0B0600", "#FFD47A"),
   "phosphor-white": phosphor("#DCE6F2", "#05070A", "#FFFFFF"),
   "phosphor-color": phosphor("#C8C8C8", "#03030A", "#FFFFFF", SIXTEEN),
-  "phosphor-green-light": printout("#FBFCF8", "#DDEFD9", "#1E2A24"),
-  "phosphor-amber-light": printout("#FFF8DA", "#F7E8A6", "#2A2112"),
-  "phosphor-white-light": printout("#FCFCFA", null, "#1C1F24"),
-  "phosphor-color-light": printout("#FCFCFA", "#EBF1FA", "#1C1F24", RIBBON),
+  "printout-green": printout("#FBFCF8", "#DDEFD9", "#1E2A24"),
+  "printout-yellow": printout("#FFF8DA", "#F7E8A6", "#2A2112"),
+  "printout-white": printout("#FCFCFA", null, "#1C1F24"),
+  "printout-color": printout("#FCFCFA", "#EBF1FA", "#1C1F24", RIBBON),
 });
 
-/** Every look's name: FinderGit's nine in its order, then the light sides. */
+/** Every look's name: FinderGit's nine in its order, the light sides, then the terminal's eight. */
 export const LOOK_NAMES = Object.keys(LOOKS);
 
-/** The light side of a dark look, the look itself for a light one. */
-export const lightOf = (look) => (LOOKS[look].isDark === false ? look : look === "midnight" ? "daylight" : `${look}-light`);
+/** The light side of a dark look, the look itself for a light one and for a tube. */
+export const lightOf = (look) => (LOOKS[look].isDark === false || LOOKS[look].crt ? look : look === "midnight" ? "daylight" : `${look}-light`);
 
 /** What a theme input may name: the looks, and `dark` and `light`. */
 export const ALIASES = { dark: "midnight", light: "daylight" };
@@ -484,7 +488,7 @@ export function theme(look) {
     header: L.header,
     headerOutline: L.headerOutline ?? (dark ? white(0.16) : "rgba(0,0,0,0.06)"),
     avatarRing: L.avatarRing,
-    repoHero: { from: [accent.contributions, dark ? 0.26 : 0.1], to: [accent.languages, dark ? 0.08 : 0.04], stroke: alpha(accent.contributions, dark ? 0.25 : 0.3) },
+    repoHero: { from: [accent.contributions, L.line ? (dark ? 0.1 : 0.06) : dark ? 0.26 : 0.1], to: [accent.languages, L.line ? 0.02 : dark ? 0.08 : 0.04], stroke: alpha(accent.contributions, dark ? 0.25 : 0.3) },
     spark: dark ? 0.32 : 0.22,
     text: {
       base: ink,
