@@ -136,9 +136,11 @@ for (const look of PRINTOUTS) {
       for (const [role, colour] of Object.entries(t.accent)) assert.ok(contrast(colour, g) >= 4.5, `${role} ${colour} on ${g} at ${contrast(colour, g).toFixed(2)}:1`);
     }
     for (const level of t.levels.slice(1)) assert.ok(contrast(level, t.levels[0]) >= 1.05, `level ${level}`);
-    // Every label, the faintest too, laid over the paper and over a bar.
+    // Every label, the faintest too, laid over the paper and over a bar,
+    // where the struck dots leave 89% of the ink.
     const laid = (rgba, under) => {
-      const [r, gr, b, a] = rgba.match(/[\d.]+/g).map(Number);
+      const [r, gr, b, a0] = rgba.match(/[\d.]+/g).map(Number);
+      const a = a0 * 0.89;
       const u = [1, 3, 5].map((i) => parseInt(under.slice(i, i + 2), 16));
       return `#${u.map((v, i) => Math.round(v + ([r, gr, b][i] - v) * a).toString(16).padStart(2, "0")).join("")}`;
     };
@@ -273,6 +275,22 @@ test("a tube moves for under five seconds, once, and a ribbon's pale language re
   assert.match(svg, /\.cursor \{ animation: blink 1\.06s steps\(1\) 4; \}/);
   assert.doesNotMatch(svg, /infinite/);
   const t = theme("printout-color");
-  for (const g of [t.canvas[1], t.paper.bar]) assert.ok(contrast(t.hue("#f1e05a", 1), g) >= 3, `JavaScript's yellow on ${g}`);
+  for (const g of [t.canvas[1], t.paper.bar]) assert.ok(contrast(t.hue("#f1e05a", 1), g) >= 3.4, `JavaScript's yellow on ${g}`);
   assert.equal(theme("midnight").hue("#f1e05a", 1), "#f1e05a", "a classic look keeps GitHub's colour");
+});
+
+test("a terminal's hero wraps rather than drop a badge or a link, and its faintest mark still reads", () => {
+  const m = repoOf();
+  const midnight = renderRepo(m, { theme: theme("midnight") });
+  const tube = renderRepo(m, { theme: theme("phosphor-green") });
+  for (const text of [m.latestTag, m.repo.homepageUrl.replace(/^https?:\/\//, "").replace(/\/$/, "")]) {
+    assert.ok(midnight.includes(`>${text}<`), `Midnight shows ${text}`);
+    assert.ok(tube.includes(`>${text}<`), `Phosphor shows ${text}`);
+  }
+  for (const look of [...TUBES, ...PRINTOUTS]) {
+    const t = theme(look);
+    if (!t.monochrome) continue;
+    const grounds = [t.canvas[1], ...(t.paper?.bar ? [t.paper.bar] : [])];
+    for (const g of grounds) assert.ok(contrast(t.hue("#000000", 5), g) >= 3, `${look}'s Other on ${g}`);
+  }
 });
