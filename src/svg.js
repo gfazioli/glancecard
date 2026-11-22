@@ -446,7 +446,7 @@ export function kit(t) {
     return {
       css: `
   .prompt { font-size: 12.5px; }
-  /* Under five seconds, once (WCAG 2.2.2): a card in an <img> cannot be paused. */
+  /* Under five seconds, once (WCAG 2.2.2): a card shown as an image cannot be paused. */
   .roll { animation: roll 4.5s linear 1; }
   .cursor { animation: blink 1.06s steps(1) 4; }
   @keyframes roll { to { transform: translateY(${height + 160}px); } }

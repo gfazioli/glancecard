@@ -39,7 +39,7 @@
   .foot { font-size: 11px; fill: rgba(51,255,102,0.42); }
   .panel { fill: rgba(51,255,102,0.035); stroke: rgba(51,255,102,0.4); }
   .prompt { font-size: 12.5px; }
-  /* Under five seconds, once (WCAG 2.2.2): a card in an <img> cannot be paused. */
+  /* Under five seconds, once (WCAG 2.2.2): a card shown as an image cannot be paused. */
   .roll { animation: roll 4.5s linear 1; }
   .cursor { animation: blink 1.06s steps(1) 4; }
   @keyframes roll { to { transform: translateY(1292px); } }

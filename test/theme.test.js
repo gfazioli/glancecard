@@ -296,3 +296,12 @@ test("a terminal's hero wraps rather than drop a badge or a link, and its fainte
     for (const g of grounds) assert.ok(contrast(t.hue("#000000", 5), g) >= 3, `${look}'s Other on ${g}`);
   }
 });
+
+test("every look's stylesheet is plain CSS: no markup an XML parser would read as a tag", () => {
+  for (const look of LOOK_NAMES) {
+    for (const svg of [renderProfile(profileOf(), { theme: theme(look) }), renderRepo(repoOf(), { theme: theme(look) })]) {
+      const css = svg.match(/<style>([\s\S]*?)<\/style>/)[1];
+      assert.doesNotMatch(css, /[<>&]/, look);
+    }
+  }
+});
