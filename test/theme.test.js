@@ -249,3 +249,18 @@ test("a terminal's panel captions and the repository's subtitle keep to their ro
   assert.match(sub, /…$/);
   assert.ok(textWidth(sub, 12.5, 400, true) <= 880 - 48, sub);
 });
+
+test("a terminal's long URL pill keeps to its column, and a five-digit count to its star", () => {
+  const data = fixture("octoscope");
+  const nameWithOwner = `an-organization-with-a-long-name/${"initialization-integration-installation-".repeat(2)}cli`;
+  const repo = renderRepo(repoModel({ ...data, repo: { ...data.repo, nameWithOwner } }, { timeZone: "Europe/Rome" }), { theme: theme("phosphor-green") });
+  const pills = [...repo.matchAll(/<rect x="([\d.]+)" y="[\d.]+" width="([\d.]+)" height="22"/g)].map(([, x, w]) => Number(x) + Number(w));
+  assert.ok(Math.max(...pills) <= 880 - 24, `a pill ends at ${Math.max(...pills)}`);
+  const p = fixture("profile-gfazioli");
+  const m = profileModel(p, { timeZone: "Europe/Rome" });
+  m.topRepos[0] = { ...m.topRepos[0], stargazerCount: 11111 };
+  const svg = renderProfile(m, { theme: theme("phosphor-green") });
+  const row = svg.match(/<g transform="translate\(([\d.]+) [\d.]+\) scale\(0\.8125\)" fill="#33FF66">[\s\S]*?<text x="(\d+)"[^>]*class="count" text-anchor="end">11,111</);
+  assert.ok(row, "the star and its count are drawn");
+  assert.ok(Number(row[1]) + 13 <= Number(row[2]) - textWidth("11,111", 12, 700, true), `star at ${row[1]}`);
+});

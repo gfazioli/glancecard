@@ -372,7 +372,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
   ${k.panel(x, y, IW, h)}
   ${k.panelTitle(x, y, "people", A.orange, "Contributors", { x: x + IW - 18, text: plural(m.contributorCount, "contributor") })}
   ${rows}${empty}
-  <text x="${x + 18}" y="${y + h - 14}" class="foot">Commits on ${esc(r.defaultBranchRef.name)}, according to GitHub${more}</text>`,
+  <text x="${x + 18}" y="${y + h - 14}" class="foot">Commits on ${esc(k.fit(r.defaultBranchRef.name, IW - 36 - k.textWidth(`Commits on , according to GitHub${more}`, 11), 11))}, according to GitHub${more}</text>`,
     };
   }
 
