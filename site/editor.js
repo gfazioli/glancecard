@@ -29,7 +29,7 @@ export const LIGHT_LOOKS = [LIGHT, ...SIDES, ...PRINTOUTS];
 export const DARK_LOOKS = LOOKS.filter((l) => !LIGHT_LOOKS.includes(l));
 /** A dark look's light side (src/theme.js lightOf), a light look or a tube itself. */
 export const lightOf = (look) => (LIGHT_LOOKS.includes(look) || TUBES.includes(look) ? look : look === "midnight" ? LIGHT : `${look}-light`);
-/** The light sides' chips, from each one's paper, header and accent (held to src/theme.js by a test). */
+/** The chips of every look a light side can be, the light ones and the tubes, their own, from each one's paper, header and accent (held to src/theme.js by a test). */
 export const LIGHT_SWATCHES = {
   daylight: "linear-gradient(135deg, #f7f9fd, #dce8ff 55%, #fcc2d7)",
   "aurora-light": "linear-gradient(135deg, #eef8f5, #e6fbf5 55%, #158260)",
@@ -43,9 +43,6 @@ export const LIGHT_SWATCHES = {
   "printout-yellow": "linear-gradient(135deg, #fff8da, #faeebb 55%, #2a2112)",
   "printout-white": "linear-gradient(135deg, #fcfcfa, #f2f2f0 55%, #1c1f24)",
   "printout-color": "linear-gradient(135deg, #fcfcfa, #f2f5fa 55%, #22682a)",
-};
-/** A tube's chip, the swatch its own light side shows. */
-export const TUBE_SWATCHES = {
   "phosphor-green": "linear-gradient(135deg, #041609, #082710 55%, #33ff66)",
   "phosphor-amber": "linear-gradient(135deg, #170f01, #281b03 55%, #ffb81c)",
   "phosphor-white": "linear-gradient(135deg, #101216, #1f2226 55%, #dce6f2)",
@@ -170,7 +167,7 @@ export function plan({ mode = DEFAULT.mode, dark = DEFAULT.dark, light = DEFAULT
     const side = light === "own" ? lightOf(dark) : LIGHT;
     worn = dark;
     if (side === dark) {
-      // A tube reads the same on both themes: one file, no <picture>.
+      // A look that is its own light side (a tube) is one file, no <picture>.
       value = dark;
       embed = { picture: false, look: dark };
     } else {
@@ -482,7 +479,7 @@ function wire(doc) {
     // Midnight's own is Daylight, so it offers one.
     const darkLook = value("editor-dark") ?? DEFAULT.dark;
     if (ownName) ownName.textContent = lightOf(darkLook);
-    if (ownSwatch) ownSwatch.style.background = LIGHT_SWATCHES[lightOf(darkLook)] ?? TUBE_SWATCHES[darkLook];
+    if (ownSwatch) ownSwatch.style.background = LIGHT_SWATCHES[lightOf(darkLook)];
     if (daylightPick) daylightPick.hidden = darkLook === "midnight";
     if (darkLook === "midnight") pick("editor-light", "own");
     panel.querySelectorAll("[data-editor-when]").forEach((group) => {

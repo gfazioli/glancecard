@@ -48,8 +48,8 @@ test("the editor knows the looks, and reads themes and names files as the action
   assert.equal(LIGHT, "daylight");
   assert.deepEqual(DARK_LOOKS, LOOK_NAMES.filter((l) => theme(l).isDark));
   for (const look of LOOKS) assert.equal(lightOf(look), themeLightOf(look), look);
-  // A light side's chip is its paper, its header and its accent.
-  for (const look of LIGHT_LOOKS.filter((l) => l !== LIGHT)) {
+  // A light side's chip, a tube's too, is its paper, its header and its accent.
+  for (const look of [...LIGHT_LOOKS, ...Object.keys(LIGHT_SWATCHES)].filter((l, i, all) => l !== LIGHT && all.indexOf(l) === i)) {
     const t = theme(look);
     assert.equal(LIGHT_SWATCHES[look], `linear-gradient(135deg, ${t.canvas[0]}, ${t.header[0]} 55%, ${t.accent.contributions})`.toLowerCase(), look);
   }
