@@ -33,7 +33,7 @@ export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = 
     return {
       h,
       svg: `
-  <rect x="${PAD}" y="${y}" width="${IW}" height="${h}" rx="${theme.corner}" fill="url(#hero)" stroke="${theme.headerOutline}"/>
+  ${k.box(PAD, y, IW, h, theme.corner, "url(#hero)", theme.headerOutline)}
   ${k.avatar("avatar", images[u.avatarUrl], cx, cy, 36, "url(#ring)", 3)}
   <text x="${tx}" y="${y + 38}"><tspan class="name disp"${ink}>${esc(name.text)}</tspan><tspan dx="8" class="login">@${esc(u.login)}</tspan></text>
   <text x="${tx}" y="${y + 60}" class="bio">${esc(k.fit((u.bio || "").trim(), textW, 13))}</text>
@@ -59,7 +59,7 @@ export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = 
     const h = 214;
     const head = `
   ${k.panel(PAD, y, IW, h)}
-  ${k.panelTitle(PAD, y, "flame", A.contributions, "Contributions")}
+  ${k.panelTitle(PAD, y, IW, "flame", A.contributions, "Contributions")}
   <text x="${PAD + 18}" y="${y + 52}" class="headline">${full(m.calendar.totalContributions)} contributions in the last year</text>`;
     if (calendar === "chart") return { h, svg: `${head}${k.yearChart(m.days, PAD + 18, y + 76, IW - 36, h - 76 - 38, A.contributions)}` };
 
@@ -131,7 +131,7 @@ export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = 
       .join("");
     return `
   ${k.panel(x, y, w, h)}
-  ${k.panelTitle(x, y, "star", A.yellow, "Top repositories")}
+  ${k.panelTitle(x, y, w, "star", A.yellow, "Top repositories")}
   <text x="${x + 18}" y="${y + 52}" class="headline">Most starred of ${plural(m.repoCount, "public repository", "public repositories")}</text>
   ${rows}`;
   }
@@ -162,7 +162,7 @@ export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = 
       .join("");
     return `
   ${k.panel(x, y, w, h)}
-  ${k.panelTitle(x, y, "code", A.languages, "Languages")}
+  ${k.panelTitle(x, y, w, "code", A.languages, "Languages")}
   <clipPath id="langbar"><rect x="${barX}" y="${barY}" width="${barW}" height="8" rx="4"/></clipPath>
   <g clip-path="url(#langbar)"><rect x="${barX}" y="${barY}" width="${barW}" height="8" fill="${theme.track}"/>${segments}</g>
   ${rows}`;
@@ -205,8 +205,8 @@ export function renderProfile(m, { theme = THEMES.dark, images = {}, calendar = 
     <stop offset="1" stop-color="${theme.avatarRing[1]}"/>
   </linearGradient>
   <linearGradient id="spark" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0" stop-color="${A.contributions}" stop-opacity="${theme.spark}"/>
-    <stop offset="1" stop-color="${A.contributions}" stop-opacity="0"/>
+    <stop offset="0" stop-color="${theme.area ?? A.contributions}" stop-opacity="${theme.spark}"/>
+    <stop offset="1" stop-color="${theme.area ?? A.contributions}" stop-opacity="0"/>
   </linearGradient>${stars ? k.starsFill(m.starHistory, starsChart) : ""}${k.tileGradients(tileItems.map((t) => t.color))}`;
 
   return k.frame({ height: y, title: `${name}'s GitHub activity`, desc, defs, body: parts.join("\n"), contentTop, ledge: contentTop, prompt: { user: u.login, command: `glancecard profile ${u.login}`, day: m.today } });

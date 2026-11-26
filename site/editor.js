@@ -20,16 +20,18 @@ const SIDES = ["aurora-light", "upside-down-light", "hyperspace-light", "bridge-
 /** The terminal looks (src/theme.js): the Phosphor tubes, each its own light side, and the Printout papers. */
 export const TUBES = ["phosphor-green", "phosphor-amber", "phosphor-white", "phosphor-color"];
 const PRINTOUTS = ["printout-green", "printout-yellow", "printout-white", "printout-color"];
+/** The Workbench (src/theme.js): a screen, its own light side as a tube is. */
+const BENCH = ["workbench"];
 /** The theme names, in the order the action lists them (src/theme.js THEME_NAMES). */
-export const THEME_ORDER = ["dark", "light", "midnight", "aurora", "daylight", "upside-down", "hyperspace", "bridge", "nebula", "halloween", "christmas", ...SIDES, ...TUBES, ...PRINTOUTS];
-/** The looks by name (src/theme.js LOOK_NAMES): FinderGit's nine, the light sides, then the terminal's. */
-export const LOOKS = ["midnight", "aurora", "daylight", "upside-down", "hyperspace", "bridge", "nebula", "halloween", "christmas", ...SIDES, ...TUBES, ...PRINTOUTS];
+export const THEME_ORDER = ["dark", "light", "midnight", "aurora", "daylight", "upside-down", "hyperspace", "bridge", "nebula", "halloween", "christmas", ...SIDES, ...TUBES, ...PRINTOUTS, ...BENCH];
+/** The looks by name (src/theme.js LOOK_NAMES): FinderGit's nine, the light sides, the terminal's, then the Workbench. */
+export const LOOKS = ["midnight", "aurora", "daylight", "upside-down", "hyperspace", "bridge", "nebula", "halloween", "christmas", ...SIDES, ...TUBES, ...PRINTOUTS, ...BENCH];
 export const LIGHT = "daylight";
 export const LIGHT_LOOKS = [LIGHT, ...SIDES, ...PRINTOUTS];
 export const DARK_LOOKS = LOOKS.filter((l) => !LIGHT_LOOKS.includes(l));
-/** A dark look's light side (src/theme.js lightOf), a light look or a tube itself. */
-export const lightOf = (look) => (LIGHT_LOOKS.includes(look) || TUBES.includes(look) ? look : look === "midnight" ? LIGHT : `${look}-light`);
-/** The chips of every look a light side can be, the light ones and the tubes, their own, from each one's paper, header and accent (held to src/theme.js by a test). */
+/** A dark look's light side (src/theme.js lightOf), a light look, a tube or the Workbench itself. */
+export const lightOf = (look) => (LIGHT_LOOKS.includes(look) || TUBES.includes(look) || BENCH.includes(look) ? look : look === "midnight" ? LIGHT : `${look}-light`);
+/** The chips of every look a light side can be, the light ones, the tubes and the Workbench, their own, from each one's paper, header and accent (held to src/theme.js by a test). */
 export const LIGHT_SWATCHES = {
   daylight: "linear-gradient(135deg, #f7f9fd, #dce8ff 55%, #fcc2d7)",
   "aurora-light": "linear-gradient(135deg, #eef8f5, #e6fbf5 55%, #158260)",
@@ -47,6 +49,7 @@ export const LIGHT_SWATCHES = {
   "phosphor-amber": "linear-gradient(135deg, #170f01, #281b03 55%, #ffb81c)",
   "phosphor-white": "linear-gradient(135deg, #101216, #1f2226 55%, #dce6f2)",
   "phosphor-color": "linear-gradient(135deg, #0d0d14, #1b1b21 55%, #55ff55)",
+  workbench: "linear-gradient(135deg, #0055aa, #0055aa 55%, #ff8800)",
 };
 /** When a seasonal look is worn, its light side with it (src/theme.js inSeason); out of it, Midnight, or Daylight for a light side. */
 export const SEASONS = { halloween: "from 1 October to 2 November", christmas: "from 1 December to 6 January" };

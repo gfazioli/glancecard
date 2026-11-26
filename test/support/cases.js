@@ -38,6 +38,8 @@ export const CASES = [
   { name: "octoscope-phosphor-color", fixture: "octoscope", theme: "phosphor-color" },
   { name: "profile-gfazioli-printout-green-grid", fixture: "profile-gfazioli", theme: "printout-green", calendar: "grid" },
   { name: "octoscope-printout-color", fixture: "octoscope", theme: "printout-color" },
+  { name: "octoscope-workbench", fixture: "octoscope", theme: "workbench" },
+  { name: "profile-gfazioli-workbench-grid", fixture: "profile-gfazioli", theme: "workbench", calendar: "grid" },
 ];
 
 export function renderCase(c) {

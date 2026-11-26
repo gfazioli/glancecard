@@ -93,7 +93,46 @@ export function kit(t) {
   const fitT = (s, max, size, weight = 400, mono = t.mono) => fit(s, max, size, weight, mono);
   const wrapT = (s, max, size, weight, lines) => wrap(s, max, size, weight, lines, t.mono);
 
-  const panel = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${t.corner}" class="panel"/>`;
+  // ─── The Workbench's chrome: windows and bevels in its four colours ───
+  //
+  // Its pixels are square: frames, bevels and stripes are drawn with crisp
+  // edges in the inks the screen's stylesheet names (`screen`: `px`, `hi`,
+  // `lo`), and the gadgets are drawn once in its defs and placed by `use`.
+
+  const B = t.bench;
+  const BAR = 24;
+  const SHADOW = 6;
+  const r1 = (v) => Number(v.toFixed(1));
+
+  /**
+   * A box raised from the screen (pressed into it with `pressed`): white
+   * light on top and left, black shade under and right. Its face is the
+   * blue it sits on.
+   */
+  const bevel = (x, y, w, h, pressed = false) => {
+    const [x0, y0, x1, y1] = [x, y, x + w, y + h].map(r1);
+    const [lit, shade] = pressed ? ["lo", "hi"] : ["hi", "lo"];
+    return `<path class="${lit}" d="M${r1(x0 + 1)} ${y1}V${r1(y0 + 1)}H${x1}"/><path class="${shade}" d="M${r1(x1 - 1)} ${r1(y0 + 2)}V${r1(y1 - 1)}H${r1(x0 + 2)}"/>`;
+  };
+
+  /** A window: its hard shadow, its frame, and with `bar` its orange title bar. */
+  const pane = (x, y, w, h, bar, fill = B.blue) =>
+    `<g class="px"><rect x="${x + SHADOW}" y="${y + SHADOW}" width="${w}" height="${h}" fill="${B.black}"/><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}" stroke="${B.black}" stroke-width="2"/>${
+      bar ? `<rect x="${x + 1}" y="${y + 1}" width="${w - 2}" height="${BAR - 1}" fill="${B.orange}"/><path class="lo" d="M${x} ${y + BAR}H${x + w}"/>` : ""
+    }</g>`;
+
+  /** The depth gadget, two windows stacked, on `ground`; 22 × 24, as a title bar is tall. */
+  const depthGadget = (ground) =>
+    `<g stroke="${B.black}" stroke-width="2" shape-rendering="crispEdges"><rect y="3" width="22" height="18" fill="${ground}"/><rect x="4" y="6" width="9" height="7" fill="${ground}"/><rect x="9" y="11" width="9" height="7" fill="${B.white}"/></g>`;
+
+  /** The drag bar's four pinstripes, from `x0` to `x1`. */
+  const pinstripes = (x0, x1, y) => (x1 - x0 < 8 ? "" : `<path class="lo" d="${[6, 10, 14, 18].map((dy) => `M${r1(x0)} ${y + dy}H${r1(x1)}`).join("")}"/>`);
+
+  const panel = (x, y, w, h) => (B ? pane(x, y, w, h, true) : `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${t.corner}" class="panel"/>`);
+
+  /** The hero's box (`fill`, `stroke`): on the Workbench a window with no title bar. */
+  const box = (x, y, w, h, rx, fill, stroke) =>
+    B ? pane(x, y, w, h, false, fill) : `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="${fill}" stroke="${stroke}"/>`;
 
   /** Display text in the look's lettering. */
   const disp = (s) => display(t, s);
@@ -120,8 +159,9 @@ export function kit(t) {
   // rule outranks a presentation attribute and would paint every title grey.
   // The caption on the right gets what the title leaves it: a terminal's
   // wide letters would run it into the title.
-  const panelTitle = (x, y, name, color, title, right) => {
+  const panelTitle = (x, y, w, name, color, title, right) => {
     const shown = disp(title);
+    if (B) return windowTitle(x, y, w, shown, right);
     const room = right ? right.x - (x + 42) - tw(shown, 14, 700) - t.type.tracking * Array.from(shown).length - 16 : 0;
     return `
   ${icon(name, x + 18, y + 16, color)}
@@ -130,7 +170,26 @@ export function kit(t) {
   }`;
   };
 
-  /** A pill tinted with `tint` (an accent), or neutral. */
+  /**
+   * A window's title bar, in black on its orange: the close gadget, the
+   * title, the drag bar's pinstripes, the caption and the depth gadget. The
+   * caption leaves the drag bar 24 px at least.
+   */
+  function windowTitle(x, y, w, shown, right) {
+    const tx = x + 32;
+    const titleEnd = tx + tw(shown, 14, 700) + t.type.tracking * Array.from(shown).length;
+    const depthX = x + w - 28;
+    const capX = depthX - 8;
+    const caption = right ? fitT(right.text, capX - titleEnd - 40, 12, 600) : "";
+    const dragEnd = right ? capX - tw(caption, 12, 600) - 8 : depthX - 6;
+    return `
+  <use href="#gadget-close" x="${x + 4}" y="${y}"/>
+  <text x="${tx}" y="${y + 17}" class="title disp bar">${esc(shown)}</text>
+  ${pinstripes(titleEnd + 8, dragEnd, y)}${right ? `\n  <text x="${capX}" y="${y + 17}" class="caption bar" text-anchor="end">${esc(caption)}</text>` : ""}
+  <use href="#gadget-depth" x="${depthX}" y="${y}"/>`;
+  }
+
+  /** A pill tinted with `tint` (an accent), or neutral: on the Workbench raised, or pressed in when it is off. */
   function pill(x, y, { label: full, value, icon: name, color = t.text.faint, tint, fill, stroke, labelClass = "pill" }, max = Infinity) {
     const h = 22;
     const padX = 9;
@@ -143,7 +202,7 @@ export function kit(t) {
     const bg = fill ?? (tint ? alpha(tint, t.chip.tint) : t.chip.fill);
     const line = stroke ?? (tint ? alpha(tint, t.chip.tintStroke) : t.chip.stroke);
     const svg = `
-  <rect x="${x}" y="${y}" width="${w.toFixed(1)}" height="${h}" rx="${t.pill ?? h / 2}" fill="${bg}" stroke="${line}"/>
+  ${B ? bevel(x, y, w, h, labelClass === "pill-off") : `<rect x="${x}" y="${y}" width="${w.toFixed(1)}" height="${h}" rx="${t.pill ?? h / 2}" fill="${bg}" stroke="${line}"/>`}
   ${name ? icon(name, x + padX - 1, y + 4, color, 14) : ""}
   <text x="${(x + padX + iconW).toFixed(1)}" y="${y + 15}" class="${value ? "pill-k" : labelClass}">${esc(label)}${
     value ? `<tspan dx="5" class="pill-v">${esc(value)}</tspan>` : ""
@@ -348,7 +407,7 @@ export function kit(t) {
     const month = (day) => `${MONTHS[Number(day.slice(5, 7)) - 1]} ${day.slice(0, 4)}`;
     const head = (h) => `
   ${panel(PAD, y, IW, h)}
-  ${panelTitle(PAD, y, "star", A.yellow, "Stars", { x: PAD + IW - 18, text: `${plural(count, "star")}${s?.first ? ` since ${month(s.first)}` : ""}` })}`;
+  ${panelTitle(PAD, y, IW, "star", A.yellow, "Stars", { x: PAD + IW - 18, text: `${plural(count, "star")}${s?.first ? ` since ${month(s.first)}` : ""}` })}`;
     if (!s?.total) {
       const h = 96;
       return { h, svg: `${head(h)}
@@ -369,8 +428,8 @@ export function kit(t) {
     s?.total && chart !== "bars"
       ? `
   <linearGradient id="stars-fill" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0" stop-color="${t.accent.yellow}" stop-opacity="${t.spark}"/>
-    <stop offset="1" stop-color="${t.accent.yellow}" stop-opacity="0"/>
+    <stop offset="0" stop-color="${t.area ?? t.accent.yellow}" stop-opacity="${t.spark}"/>
+    <stop offset="1" stop-color="${t.area ?? t.accent.yellow}" stop-opacity="0"/>
   </linearGradient>`
       : "";
 
@@ -380,7 +439,7 @@ export function kit(t) {
       ? `<clipPath id="${id}"><circle cx="${cx}" cy="${cy}" r="${r}"/></clipPath><image href="${data}" x="${cx - r}" y="${cy - r}" width="${r * 2}" height="${r * 2}" clip-path="url(#${id})" preserveAspectRatio="xMidYMid slice"/>`
       : `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${t.placeholder}"/>`;
     // On a terminal the photograph is drawn in the look's own ink.
-    const shown = data && (t.crt || t.paper) ? `<g filter="url(#photo)">${face}</g>` : face;
+    const shown = data && (t.crt || t.paper || B) ? `<g filter="url(#photo)">${face}</g>` : face;
     return `${shown}
     <circle cx="${cx}" cy="${cy}" r="${r + ringWidth / 2}" fill="none" stroke="${ring}" stroke-width="${ringWidth}"/>`;
   }
@@ -409,19 +468,76 @@ export function kit(t) {
     };
   }
 
+  // A photograph's filters: its light as grey, and a table for each channel.
+  const GREY = `<feColorMatrix type="matrix" values="${"0.2126 0.7152 0.0722 0 0 ".repeat(3)}0 0 0 1 0"/>`;
+  const transfer = (r, g = r, b = r) =>
+    `<feComponentTransfer><feFuncR type="discrete" tableValues="${r}"/><feFuncG type="discrete" tableValues="${g}"/><feFuncB type="discrete" tableValues="${b}"/></feComponentTransfer>`;
+  const photo = (steps) => `<filter id="photo" color-interpolation-filters="sRGB">${steps}</filter>`;
+
   /**
    * A photograph in the look's own ink: grey, in five levels, tinted with
    * the phosphor; on paper, from the ink to the paper. A colour tube keeps
    * its colours, four levels a channel.
    */
   function photoFilter(colour, from, to) {
-    const grey = "0.2126 0.7152 0.0722 0 0 ";
-    const steps = colour ? "0 0.34 0.67 1" : "0 0.25 0.5 0.75 1";
-    const posterize = `<feComponentTransfer><feFuncR type="discrete" tableValues="${steps}"/><feFuncG type="discrete" tableValues="${steps}"/><feFuncB type="discrete" tableValues="${steps}"/></feComponentTransfer>`;
-    if (colour) return `<filter id="photo" color-interpolation-filters="sRGB">${posterize}</filter>`;
+    const posterize = transfer(colour ? "0 0.34 0.67 1" : "0 0.25 0.5 0.75 1");
+    if (colour) return photo(posterize);
     const [a, b] = [from, to].map((c) => rgb(c).map((v) => v / 255));
     const tint = [0, 1, 2].map((c) => [0, 1, 2].map((k) => (k === c ? n3(b[c] - a[c]) : 0)).join(" ") + ` 0 ${n3(a[c])}`).join(" ");
-    return `<filter id="photo" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="${grey.repeat(3)}0 0 0 1 0"/>${posterize}<feColorMatrix type="matrix" values="${tint} 0 0 0 1 0"/></filter>`;
+    return photo(`${GREY}${posterize}<feColorMatrix type="matrix" values="${tint} 0 0 0 1 0"/>`);
+  }
+
+  /** A photograph in the Workbench's four colours, by its light: black, blue, orange, white. */
+  function benchPhoto() {
+    const four = [B.black, B.blue, B.orange, B.white].map(rgb);
+    return photo(GREY + transfer(...[0, 1, 2].map((c) => four.map((v) => n3(v[c] / 255)).join(" "))));
+  }
+
+  // Copper bars, as the demos ran them down the screen: each lit from a dark
+  // edge to white in its middle.
+  const COPPER = [
+    ["#5C1A00", "#FF9F43"],
+    ["#4A0A55", "#FF6EC7"],
+    ["#05265E", "#6EE7FF"],
+    ["#0B4A16", "#9BFF7A"],
+  ];
+
+  /**
+   * A Workbench screen: its blue, the white screen bar along the top with
+   * the program's title and the depth gadget, and copper bars on black
+   * along the bottom.
+   */
+  function screen(height, prompt) {
+    const bar = 22;
+    const strip = height - 30;
+    const title = prompt ? `<text x="10" y="16" class="prompt">${esc(fitT(prompt.command, W - 10 - 44, 12.5))}</text>` : "";
+    const gradients = COPPER.map(
+      ([edge, lit], i) =>
+        `\n  <linearGradient id="copper-${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${edge}"/><stop offset="0.3" stop-color="${lit}"/><stop offset="0.5" stop-color="#FFFFFF"/><stop offset="0.7" stop-color="${lit}"/><stop offset="1" stop-color="${edge}"/></linearGradient>`,
+    );
+    const coppers = COPPER.map((_, i) => `<rect y="${strip + 2 + i * 7}" width="${W}" height="6" fill="url(#copper-${i})"/>`);
+    return {
+      css: `
+  .prompt { font-size: 12.5px; fill: ${B.blue}; }
+  .px { shape-rendering: crispEdges; }
+  .hi, .lo { fill: none; stroke-width: 2px; shape-rendering: crispEdges; }
+  .hi { stroke: ${B.white}; }
+  .lo { stroke: ${B.black}; }
+  .bar { fill: ${B.black}; }`,
+      defs: `${gradients.join("")}
+  <g id="gadget-close" stroke="${B.black}" stroke-width="2" shape-rendering="crispEdges"><rect y="3" width="20" height="18" fill="${B.orange}"/><rect x="6" y="8" width="8" height="8" fill="${B.white}"/></g>
+  <g id="gadget-depth">${depthGadget(B.orange)}</g>
+  ${benchPhoto()}`,
+      ground: `<g clip-path="url(#card)">
+<rect width="${W}" height="${height}" fill="url(#bg)"/>
+<g aria-hidden="true">
+<g class="px"><rect width="${W}" height="${bar}" fill="${B.white}"/><rect y="${bar}" width="${W}" height="2" fill="${B.black}"/><rect y="${strip}" width="${W}" height="30" fill="${B.black}"/></g>
+<g transform="translate(${W - 30} -2)">${depthGadget(B.white)}</g>
+${coppers.join("")}
+</g>
+${title}
+</g>`,
+    };
   }
 
   /** A 1970s–80s monitor: a bezel, and the card on its glass, glowing, behind scanlines. */
@@ -563,8 +679,8 @@ ${foot}</g>`,
     <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>`
       : "";
-    const term = t.crt ? tube(height, prompt, lit) : t.paper ? sheet(height, prompt) : null;
-    const layers = term ?? { css: "", defs: "", body: (b) => b, over: "" };
+    const term = t.crt ? tube(height, prompt, lit) : t.paper ? sheet(height, prompt) : B ? screen(height, prompt) : null;
+    const layers = { css: "", defs: "", body: (b) => b, over: "", ...term };
     const ground = term
       ? term.ground
       : `<g clip-path="url(#card)">
@@ -578,7 +694,7 @@ ${lit}${decor.behind ? `\n<g aria-hidden="true">${decor.behind}</g>` : ""}
 <style>${styles(t)}${layers.css}
 </style>
 <defs>
-  <clipPath id="card"><rect width="${W}" height="${height}" rx="${t.paper ? 4 : 18}"/></clipPath>
+  <clipPath id="card"><rect width="${W}" height="${height}" rx="${t.paper || B ? 4 : 18}"/></clipPath>
   <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
     <stop offset="0" stop-color="${t.canvas[0]}"/>
     <stop offset="0.5" stop-color="${t.canvas[1]}"/>
@@ -591,9 +707,9 @@ ${layers.body(body)}${decor.front ? `\n<g clip-path="url(#card)" aria-hidden="tr
 `;
   }
 
-  /** Diagonal gradients for stat tiles, one per accent. */
+  /** Diagonal gradients for stat tiles, one per accent; the Workbench's are bevelled instead. */
   const tileGradients = (colors) =>
-    colors
+    B ? "" : colors
       .map(
         (c, i) => `
   <linearGradient id="tile-${i}" x1="0" y1="0" x2="1" y2="1">
@@ -620,7 +736,7 @@ ${layers.body(body)}${decor.front ? `\n<g clip-path="url(#card)" aria-hidden="tr
         const label = shrink(disp(item.label), room, 12, 600, 9.5);
         return `
   <g>
-    <rect x="${x}" y="${ty}" width="${w.toFixed(1)}" height="${h}" rx="${t.corner}" fill="url(#tile-${i})" stroke="${alpha(item.color, t.tile.stroke)}"/>
+    ${B ? bevel(Number(x), ty, w, h) : `<rect x="${x}" y="${ty}" width="${w.toFixed(1)}" height="${h}" rx="${t.corner}" fill="url(#tile-${i})" stroke="${alpha(item.color, t.tile.stroke)}"/>`}
     ${icon(item.icon, Number(tx), ty + 14, item.color)}
     <text x="${tx}" y="${ty + 60}" class="value disp"${value.style}>${esc(value.text)}${item.unit ? `<tspan dx="4" class="unit">${item.unit}</tspan>` : ""}</text>
     <text x="${tx}" y="${ty + 78}" class="label disp"${label.style}>${esc(label.text)}</text>
@@ -631,5 +747,5 @@ ${layers.body(body)}${decor.front ? `\n<g clip-path="url(#card)" aria-hidden="tr
     return { svg, h: Math.ceil(items.length / cols) * (h + GAP) - GAP };
   }
 
-  return { t, icon, panel, panelTitle, disp, shrink, pill, flow, sparkline, yearChart, growthChart, starsPanel, starsFill, avatar, frame, tileGradients, tiles, textWidth: tw, fit: fitT, wrap: wrapT };
+  return { t, icon, panel, box, panelTitle, disp, shrink, pill, flow, sparkline, yearChart, growthChart, starsPanel, starsFill, avatar, frame, tileGradients, tiles, textWidth: tw, fit: fitT, wrap: wrapT };
 }

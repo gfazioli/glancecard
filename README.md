@@ -161,7 +161,7 @@ Dependabot also follows a line pinned to a commit SHA with the version as a comm
 | `repos` | | Repositories, as `owner/name`, separated by newlines, commas or spaces. |
 | `profile` | | A login to render a profile card for. |
 | `out-dir` | `glancecard` | Folder the cards are written to, relative to the workspace. |
-| `theme` | `both` | `both` (`dark` and `light`), or looks, comma-separated: `dark`, `light`, `midnight`, `aurora`, `daylight`, `upside-down`, `hyperspace`, `bridge`, `nebula`, `halloween`, `christmas`, the light sides `aurora-light`, `upside-down-light`, `hyperspace-light`, `bridge-light`, `nebula-light`, `halloween-light`, `christmas-light`, and the terminal looks `phosphor-green`, `phosphor-amber`, `phosphor-white`, `phosphor-color`, `printout-green`, `printout-yellow`, `printout-white`, `printout-color`. With one theme the file is `<name>.svg`, with several `<name>-<theme>.svg`. See [Looks](#looks). |
+| `theme` | `both` | `both` (`dark` and `light`), or looks, comma-separated: `dark`, `light`, `midnight`, `aurora`, `daylight`, `upside-down`, `hyperspace`, `bridge`, `nebula`, `halloween`, `christmas`, the light sides `aurora-light`, `upside-down-light`, `hyperspace-light`, `bridge-light`, `nebula-light`, `halloween-light`, `christmas-light`, and the terminal looks `phosphor-green`, `phosphor-amber`, `phosphor-white`, `phosphor-color`, `printout-green`, `printout-yellow`, `printout-white`, `printout-color`, and the Workbench, `workbench`. With one theme the file is `<name>.svg`, with several `<name>-<theme>.svg`. See [Looks](#looks). |
 | `time-zone` | `UTC` | IANA zone, such as `Europe/Rome`, for the commit calendar and rhythm. |
 | `sections` | `all` | Repository card sections to draw: `hero`, `tiles`, `activity`, `stars`, `rhythm`, `code`, `commits`, `releases`, `contributors`. When one of a side-by-side pair is left out, the other takes the full width. `stars` also draws the profile card's Stars, and leaving it out leaves out both, and the star history they read. |
 | `calendar` | `chart` | How a year is drawn, on both cards: `chart`, a line of daily contributions (profile) or commits (repository) over a value axis, or `grid`, GitHub's calendar of squares. |
@@ -178,7 +178,7 @@ Repository cards are named after the repository (`octoscope-dark.svg`); two repo
 
 ## Looks
 
-Seventeen looks: nine after the ones of [FinderGit](https://findergit.app)'s Profile Card, and eight for the terminal. Each sets every colour a card draws, and most past the classics a lettering and decorations of their own. They work on both cards. See them all, and switch between them, on the [website](https://gfazioli.github.io/glancecard/#looks).
+Eighteen looks: nine after the ones of [FinderGit](https://findergit.app)'s Profile Card, eight for the terminal, and a Workbench screen. Each sets every colour a card draws, and most past the classics a lettering and decorations of their own. They work on both cards. See them all, and switch between them, on the [website](https://gfazioli.github.io/glancecard/#looks).
 
 | | | |
 |:-:|:-:|:-:|
@@ -190,10 +190,11 @@ Seventeen looks: nine after the ones of [FinderGit](https://findergit.app)'s Pro
 |:-:|:-:|:-:|:-:|
 | <img src="https://gfazioli.github.io/glancecard/cards/profile-phosphor-green.svg" width="205" alt="Phosphor, green"><br>`phosphor-green` | <img src="https://gfazioli.github.io/glancecard/cards/profile-phosphor-amber.svg" width="205" alt="Phosphor, amber"><br>`phosphor-amber` | <img src="https://gfazioli.github.io/glancecard/cards/profile-phosphor-white.svg" width="205" alt="Phosphor, white"><br>`phosphor-white` | <img src="https://gfazioli.github.io/glancecard/cards/profile-phosphor-color.svg" width="205" alt="Phosphor, colour"><br>`phosphor-color` |
 | <img src="https://gfazioli.github.io/glancecard/cards/profile-printout-green.svg" width="205" alt="Printout, green-bar paper"><br>`printout-green` | <img src="https://gfazioli.github.io/glancecard/cards/profile-printout-yellow.svg" width="205" alt="Printout, yellow paper"><br>`printout-yellow` | <img src="https://gfazioli.github.io/glancecard/cards/profile-printout-white.svg" width="205" alt="Printout, white paper"><br>`printout-white` | <img src="https://gfazioli.github.io/glancecard/cards/profile-printout-color.svg" width="205" alt="Printout, colour ribbon"><br>`printout-color` |
+| <img src="https://gfazioli.github.io/glancecard/cards/profile-workbench.svg" width="205" alt="Workbench, a 16-bit desktop in four colours"><br>`workbench` | | | |
 
 ### Light sides
 
-Every dark look but Midnight, whose light side is Daylight, and the Phosphor tubes, which read the same on both themes, has one of its own: `<look>-light`, for readers on GitHub's light theme. A rule draws it from its dark look, so the two read as one: the same glows, lettering and decorations, on paper, with every accent darkened until it reads at 4.5:1 and the calendar turned around, the darkest the most. The paper is chosen by hand, and so is the ink of decorations that are white in the dark. Pair a look with its light side in a `<picture>`:
+Every dark look but Midnight, whose light side is Daylight, and the Phosphor tubes and the Workbench, which read the same on both themes, has one of its own: `<look>-light`, for readers on GitHub's light theme. A rule draws it from its dark look, so the two read as one: the same glows, lettering and decorations, on paper, with every accent darkened until it reads at 4.5:1 and the calendar turned around, the darkest the most. The paper is chosen by hand, and so is the ink of decorations that are white in the dark. Pair a look with its light side in a `<picture>`:
 
 ```yaml
 theme: nebula, nebula-light
@@ -214,6 +215,14 @@ theme: phosphor-green
 ```
 
 As the card loads, a refresh band rolls once down the tube and the cursor blinks four times, under five seconds, then both hold still; neither moves for a reader whose system asks for less motion.
+
+### Workbench
+
+For the 16-bit home computer's people: the card as a Workbench screen of the late 1980s showed it, in its four colours, blue, white, black and orange. A white screen bar runs along the top; every panel is a window with an orange title bar, its close and depth gadgets and a pinstriped drag bar, a black frame and a hard shadow; the figures and pills are bevelled, a missing essential pressed in; photographs come out in the four colours, and copper bars run along the bottom. Every letter is monospaced. Like a tube, a screen reads the same on a light page: one file, no `<picture>` needed, and nothing moves.
+
+```yaml
+theme: workbench
+```
 
 `halloween` and `christmas` are worn in their season only, from 1 October to 2 November and from 1 December to 6 January in the card's `time-zone`; the rest of the year they are Midnight, their light sides Daylight, and they come back on their own next season. The CLI's `--all-seasons` wears them any day, for a preview.
 

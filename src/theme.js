@@ -1,5 +1,5 @@
 // The looks, after the nine of FinderGit's Profile Card
-// (https://findergit.app), and the terminal's eight: a look sets every
+// (https://findergit.app), the terminal's eight and the Workbench: a look sets every
 // colour a card draws, and most past the classics a typeface and
 // decorations (src/decor.js), a terminal's its tube or its paper (src/svg.js). `dark` and
 // `light` are Midnight and Daylight under the names a <picture> pair uses.
@@ -198,7 +198,7 @@ const mix = (a, b, t) => hexOf(rgb(a).map((v, i) => v + (rgb(b)[i] - v) * t));
 /** `hex` as an rgba() at alpha `a`. */
 const rgba = (hex, a) => `rgba(${rgb(hex).join(",")},${a})`;
 /** An rgba() fill laid over the opaque `under`. */
-function over(fill, under) {
+export function over(fill, under) {
   const [r, g, b, a] = fill.match(/[\d.]+/g).map(Number);
   return hexOf(rgb(under).map((v, i) => v + ([r, g, b][i] - v) * a));
 }
@@ -384,10 +384,57 @@ Object.assign(LOOKS, {
   "printout-color": printout("#FCFCFA", "#EBF1FA", "#1C1F24", RIBBON),
 });
 
-/** Every look's name: FinderGit's nine in its order, the light sides, then the terminal's eight. */
+// ─── The Workbench look ───
+//
+// For the 16-bit home computer's people: the card as a Workbench screen of
+// 1985–1990 showed it, in its four colours, blue, white, black and orange.
+// A white screen bar with its depth gadget on top, each panel a window (an
+// orange title bar with its close and depth gadgets and a pinstriped drag
+// bar, a black frame, a hard shadow), the figures and pills bevelled, a
+// photograph in the four colours, copper bars along the bottom, and every
+// letter monospaced (src/svg.js draws it, `screen` and the kit's chrome).
+// GitHub's colours are the screen's: a language's blue would vanish on it.
+// A screen reads the same on a light page: it is its own light side.
+
+const BENCH = { blue: "#0055AA", white: "#FFFFFF", black: "#000022", orange: "#FF8800" };
+
+LOOKS.workbench = {
+  family: "workbench",
+  type: { design: "mono" },
+  topBand: 28,
+  bottomBand: 36,
+  corner: 0,
+  cell: 0,
+  pill: 0,
+  canvas: Array(3).fill(BENCH.blue),
+  glows: [],
+  header: Array(2).fill(BENCH.blue),
+  // The hero is a window as flat as the screen.
+  repoHero: { from: [BENCH.blue, 1], to: [BENCH.blue, 1], stroke: BENCH.black },
+  headerOutline: BENCH.black,
+  avatarRing: [BENCH.white, BENCH.orange],
+  // From the screen's own deep blue, through a paler one, to orange.
+  heat: ["#003A78", "#4F82BD", "#9DBDE2", "#FFC380", BENCH.orange],
+  tiles: Array(10).fill(BENCH.orange),
+  accent: BENCH.orange,
+  secondAccent: BENCH.white,
+  ink: BENCH.white,
+  area: BENCH.white,
+  fade: false,
+  surface: BENCH.blue,
+  line: BENCH.white,
+  // White laid on the blue reads at 4.5:1 from 72% up.
+  tiers: { soft: 0.9, muted: 0.84, meta: 0.8, faint: 0.78, off: 0.74, ghost: 0.76 },
+  // The languages: the four colours, then the two the screen mixes from them.
+  hues: [BENCH.orange, BENCH.white, BENCH.black, "#99BBDD", "#FFC380", "#D3DAE6"],
+  ownLight: true,
+  bench: BENCH,
+};
+
+/** Every look's name: FinderGit's nine in its order, the light sides, the terminal's eight, then the Workbench. */
 export const LOOK_NAMES = Object.keys(LOOKS);
 
-/** The light side of a dark look, the look itself for a light one and for a tube. */
+/** The light side of a dark look, the look itself for a light one, a tube and the Workbench. */
 export const lightOf = (look) => (LOOKS[look].isDark === false || LOOKS[look].ownLight ? look : look === "midnight" ? "daylight" : `${look}-light`);
 
 /** What a theme input may name: the looks, and `dark` and `light`. */
@@ -470,6 +517,8 @@ export function theme(look) {
     languages: L.secondAccent ?? (dark ? "#38D9A9" : "#0CA678"),
   };
   const type = { design: "default", width: "standard", uppercase: false, tracking: 0, ...L.type };
+  // A label's ink: the look's own step where it sets one, else the paper's or the ground's.
+  const tier = (role, otherwise) => shade(L.tiers?.[role] ?? otherwise);
   return {
     name: look,
     family: L.family,
@@ -491,30 +540,37 @@ export function theme(look) {
     // A colour of GitHub's own (a language's): as it is, or the n-th of a
     // list a step dimmer in the ink of a one-colour terminal.
     // On a colour ribbon's paper a pale one (JavaScript's yellow) is darkened to 3:1, as a mark must read.
-    hue: (c, n = 0) => (steps ? steps[n % steps.length] : L.paper ? deepen(c, [L.canvas[1], L.paper.bar ?? L.canvas[1]], 3.4) : c),
+    hue: (c, n = 0) => (steps ? steps[n % steps.length] : L.hues ? L.hues[n % L.hues.length] : L.paper ? deepen(c, [L.canvas[1], L.paper.bar ?? L.canvas[1]], 3.4) : c),
     monochrome: Boolean(L.monochrome),
     mono: type.design === "mono",
     crt: Boolean(L.crt),
     paper: L.paper ?? null,
+    bench: L.bench ?? null,
     placeholder: L.line ? mix(ink, L.canvas[1], 0.78) : dark ? "#3b4256" : "#d0d7de",
     levels: L.heat,
     header: L.header,
     headerOutline: L.headerOutline ?? (dark ? white(0.16) : "rgba(0,0,0,0.06)"),
     avatarRing: L.avatarRing,
-    repoHero: { from: [accent.contributions, L.line ? (dark ? 0.1 : 0.06) : dark ? 0.26 : 0.1], to: [accent.languages, L.line ? 0.02 : dark ? 0.08 : 0.04], stroke: alpha(accent.contributions, dark ? 0.25 : 0.3) },
+    repoHero: L.repoHero ?? { from: [accent.contributions, L.line ? (dark ? 0.1 : 0.06) : dark ? 0.26 : 0.1], to: [accent.languages, L.line ? 0.02 : dark ? 0.08 : 0.04], stroke: alpha(accent.contributions, dark ? 0.25 : 0.3) },
     spark: dark ? 0.32 : 0.22,
+    // The colour under a chart's line, where it is not the line's own: on the
+    // Workbench's blue an orange one would be brown.
+    area: L.area ?? null,
+    // Whether a mark fades with its count (the rhythm's dots), or keeps its colour whole.
+    fade: L.fade ?? true,
     text: {
       base: ink,
       strong: L.inkStrong ?? (dark ? "#ffffff" : ink),
       high: dark ? shade(0.95) : ink,
       body: shade(0.88),
-      // On a printout's paper and bars every label reads at 4.5:1 or more.
-      soft: shade(L.paper ? 0.88 : 0.75),
-      muted: shade(L.paper ? 0.84 : dark ? 0.6 : 0.66),
-      meta: shade(L.paper ? 0.82 : dark ? 0.55 : 0.6),
-      faint: shade(L.paper ? 0.8 : dark ? 0.5 : 0.48),
-      off: shade(L.paper ? 0.78 : 0.45),
-      ghost: shade(L.paper ? 0.78 : dark ? 0.42 : 0.45),
+      // On a printout's paper and bars, and on a look's own ground where it
+      // sets them, every label reads at 4.5:1 or more.
+      soft: tier("soft", L.paper ? 0.88 : 0.75),
+      muted: tier("muted", L.paper ? 0.84 : dark ? 0.6 : 0.66),
+      meta: tier("meta", L.paper ? 0.82 : dark ? 0.55 : 0.6),
+      faint: tier("faint", L.paper ? 0.8 : dark ? 0.5 : 0.48),
+      off: tier("off", L.paper ? 0.78 : 0.45),
+      ghost: tier("ghost", L.paper ? 0.78 : dark ? 0.42 : 0.45),
     },
     accent,
     type,

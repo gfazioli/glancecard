@@ -4,7 +4,7 @@ import { profileModel } from "../src/profile/model.js";
 import { renderProfile } from "../src/profile/render.js";
 import { repoModel } from "../src/repo/model.js";
 import { renderRepo } from "../src/repo/render.js";
-import { contrast, display, inSeason, lightOf, LOOK_NAMES, resolveLook, theme, THEME_NAMES } from "../src/theme.js";
+import { contrast, display, inSeason, lightOf, LOOK_NAMES, over, resolveLook, theme, THEME_NAMES } from "../src/theme.js";
 import { kit } from "../src/svg.js";
 import { textWidth, wrap } from "../src/text.js";
 import { fixture } from "./support/cases.js";
@@ -15,8 +15,8 @@ const LIGHT_SIDES = ["aurora-light", "upside-down-light", "hyperspace-light", "b
 const TUBES = ["phosphor-green", "phosphor-amber", "phosphor-white", "phosphor-color"];
 const PRINTOUTS = ["printout-green", "printout-yellow", "printout-white", "printout-color"];
 
-test("the nine looks, dark and light as Midnight and Daylight, every other dark look's light side, and the terminal's eight", () => {
-  assert.deepEqual(LOOK_NAMES, ["midnight", "aurora", "daylight", "upside-down", "hyperspace", "bridge", "nebula", "halloween", "christmas", ...LIGHT_SIDES, ...TUBES, ...PRINTOUTS]);
+test("the nine looks, dark and light as Midnight and Daylight, every other dark look's light side, the terminal's eight and the Workbench", () => {
+  assert.deepEqual(LOOK_NAMES, ["midnight", "aurora", "daylight", "upside-down", "hyperspace", "bridge", "nebula", "halloween", "christmas", ...LIGHT_SIDES, ...TUBES, ...PRINTOUTS, "workbench"]);
   assert.deepEqual(
     LOOK_NAMES.filter((l) => !theme(l).isDark),
     ["daylight", ...LIGHT_SIDES, ...PRINTOUTS],
@@ -24,6 +24,8 @@ test("the nine looks, dark and light as Midnight and Daylight, every other dark 
   // A tube is the same on a light page: its own light side.
   for (const tube of TUBES) assert.equal(lightOf(tube), tube);
   for (const paper of PRINTOUTS) assert.equal(lightOf(paper), paper);
+  // So is a Workbench screen.
+  assert.equal(lightOf("workbench"), "workbench");
   assert.equal(lightOf("midnight"), "daylight");
   assert.equal(lightOf("nebula"), "nebula-light");
   assert.equal(lightOf("daylight"), "daylight");
@@ -201,6 +203,7 @@ test("a terminal look draws a photograph in its own ink, and GitHub's colours in
   const m = profileOf();
   const images = { [m.user.avatarUrl]: "data:image/png;base64,iVBORw0KGgo=" };
   assert.match(renderProfile(m, { theme: theme("phosphor-amber"), images }), /<g filter="url\(#photo\)"><clipPath id="avatar">/);
+  assert.match(renderProfile(m, { theme: theme("workbench"), images }), /<g filter="url\(#photo\)"><clipPath id="avatar">/);
   assert.doesNotMatch(renderProfile(m, { theme: theme("midnight"), images }), /url\(#photo\)/);
   const t = theme("phosphor-green");
   assert.equal(t.hue("#3178c6", 0), "#33FF66", "TypeScript's blue is the phosphor");
@@ -308,4 +311,69 @@ test("every look's stylesheet is plain CSS: no markup an XML parser would read a
       assert.doesNotMatch(css, /[<>&]/, look);
     }
   }
+});
+
+// ─── The Workbench ───
+
+test("the Workbench reads on its blue, and its title bars on their orange", () => {
+  const t = theme("workbench");
+  const { blue, white, black, orange } = t.bench;
+  assert.equal(t.canvas[1], blue);
+  assert.ok(t.mono, "every letter monospaced");
+  for (const [role, ink] of Object.entries(t.text)) {
+    const c = ink.startsWith("rgba") ? over(ink, blue) : ink;
+    assert.ok(contrast(c, blue) >= 4.5, `${role} at ${contrast(c, blue).toFixed(2)}:1`);
+  }
+  // Icons, lines and the chart's marks: 3:1 on the blue.
+  for (const [role, colour] of Object.entries(t.accent)) assert.ok(contrast(colour, blue) >= 3, `${role} ${colour}`);
+  // A window's title and caption are black on its orange bar.
+  assert.ok(contrast(black, orange) >= 4.5);
+  assert.ok(contrast(white, blue) >= 7);
+  // The languages: six, each its own, every one but black a mark at 3:1 (black is the frames' colour).
+  const hues = [0, 1, 2, 3, 4, 5].map((n) => t.hue("#3178c6", n));
+  assert.equal(new Set(hues).size, 6);
+  for (const h of hues.filter((h) => h !== black)) assert.ok(contrast(h, blue) >= 3, `language ${h}`);
+  for (const level of t.levels.slice(1)) assert.ok(contrast(level, t.levels[0]) >= 1.05, `level ${level}`);
+});
+
+test("a Workbench screen draws its bar, its windows and its copper bars, and holds still", () => {
+  const repo = renderRepo(repoOf(), { theme: theme("workbench") });
+  // The screen bar, white, with the program's title in the screen's blue.
+  assert.match(repo, /<rect width="880" height="22" fill="#FFFFFF"\/>/);
+  assert.match(repo, /\.prompt \{ font-size: 12\.5px; fill: #0055AA; \}/);
+  assert.match(repo, /class="prompt">glancecard repo gfazioli\/octoscope<\/text>/);
+  // Every panel a window: its shadow, its orange title bar, the title in black between the close gadget and the drag bar.
+  assert.match(repo, /\.bar \{ fill: #000022; \}/);
+  const titles = [...repo.matchAll(/class="title disp bar">([^<]+)</g)].map((m) => m[1]);
+  assert.deepEqual(titles, ["Activity", "Stars", "Rhythm", "Code", "Latest commits", "Releases", "Contributors"]);
+  assert.equal([...repo.matchAll(/height="23" fill="#FF8800"\/>/g)].length, titles.length, "a title bar for every window");
+  for (const gadget of ["close", "depth"]) {
+    assert.equal([...repo.matchAll(new RegExp(`<use href="#gadget-${gadget}" `, "g"))].length, titles.length, `a ${gadget} gadget on every title bar`);
+    assert.match(repo, new RegExp(`<g id="gadget-${gadget}"`), `the ${gadget} gadget is drawn once`);
+  }
+  assert.match(repo, />Latest commits<\/text>\s*<path class="lo" d="(M[\d.]+ \d+H[\d.]+){4}"\/>/, "the drag bar's four pinstripes");
+  assert.match(repo, /class="caption bar" text-anchor="end">633 commits on main</);
+  // Raised tiles and pills, no gradient behind them, nothing that moves.
+  assert.doesNotMatch(repo, /url\(#tile-\d+\)|<linearGradient id="tile-/);
+  assert.match(repo, /<linearGradient id="copper-3"/);
+  assert.doesNotMatch(repo, /animation|filter="url\(#bloom\)"/);
+  assert.doesNotMatch(repo, /class="panel"/, "a window draws its own body");
+  // A missing essential is pressed in: black on top, white under.
+  const m = repoOf();
+  m.essentials = m.essentials.map((e) => (e.label === "Contributing" ? { ...e, ok: false } : e));
+  assert.match(renderRepo(m, { theme: theme("workbench") }), /<path class="lo" d="[^"]*"\/><path class="hi" d="[^"]*"\/>\s*<g transform="[^"]*"[^>]*>(<path[^>]*\/>)+<\/g>\s*<text[^>]*class="pill-off">Contributing</);
+  assert.match(repo, /<path class="hi" d="[^"]*"\/><path class="lo" d="[^"]*"\/>\s*<g transform="[^"]*"[^>]*>(<path[^>]*\/>)+<\/g>\s*<text[^>]*class="pill">README</, "a present one is raised");
+});
+
+test("a window's long caption keeps to its title bar, and leaves the drag bar its stripes", () => {
+  const data = fixture("octoscope");
+  const branch = "release/stable-linux-and-macos-and-windows-builds-from-the-long-lived-branch";
+  const long = { ...data, repo: { ...data.repo, defaultBranchRef: { ...data.repo.defaultBranchRef, name: branch } } };
+  const svg = renderRepo(repoModel(long, { timeZone: "Europe/Rome" }), { theme: theme("workbench") });
+  const bar = svg.match(/>Latest commits<\/text>\s*<path class="lo" d="M([\d.]+) \d+H([\d.]+)[^"]*"\/>\s*<text x="(\d+)"[^>]*class="caption bar"[^>]*>([^<]*)</);
+  assert.ok(bar, "the Latest commits bar is drawn");
+  const [, x0, x1, capX, caption] = bar;
+  assert.match(caption, /…$/, "the caption is clipped");
+  assert.ok(Number(x1) - Number(x0) >= 24, `the drag bar keeps ${Number(x1) - Number(x0)} px`);
+  assert.ok(Number(x1) + 8 <= Number(capX) - textWidth(caption, 12, 600, true) + 0.5, "the stripes end before the caption");
 });

@@ -72,6 +72,19 @@ family of light looks. A one-colour look draws GitHub's colours (the
 languages) in its ink's steps (`theme.hue`), and a photograph in its ink
 (`#photo`).
 
+The Workbench (since 0.8.0, for Floppeek's launch, user, 2026-11-26: "crea
+un tema Amiga in glancecard") is a 16-bit desktop in Workbench 1.3's four
+colours, the palette and window chrome of Floppeek's own site and preview
+(`MacOS/Floppeek/docs/site.css`): a screen bar, every panel a window
+(`panel` draws it and keeps its width for `panelTitle`'s title bar), bevelled
+tiles and pills, the photograph mapped onto the four colours, copper bars in
+the bottom band. Its name is generic like `bridge`'s; the README says what it
+evokes without the brand. GitHub's colours vanish on its blue, so it names
+its own six languages' colours (`hues`), and its text tiers (`tiers`) sit at
+72% white and up, where white reads at 4.5:1 on the blue. It is its own
+light side, like a tube, and nothing on it moves. It began here; FinderGit
+does not have it.
+
 The light sides (`<look>-light`, since 0.6.0) are glancecard's own, not
 FinderGit's: the dark nine stay in step with the app, the seven light sides
 do not exist there. Chosen on 2026-10-19 as the middle way between a pure
