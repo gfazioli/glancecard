@@ -423,10 +423,11 @@ LOOKS.workbench = {
   fade: false,
   surface: BENCH.blue,
   line: BENCH.white,
-  // White laid on the blue reads at 4.5:1 from 72% up.
-  tiers: { soft: 0.9, muted: 0.84, meta: 0.8, faint: 0.78, off: 0.74, ghost: 0.76 },
-  // The languages: the four colours, then the two the screen mixes from them.
-  hues: [BENCH.orange, BENCH.white, BENCH.black, "#99BBDD", "#FFC380", "#D3DAE6"],
+  // White laid on the blue reads at 4.5:1 from 72% up, and as an icon at 3:1 from 60%.
+  tiers: { soft: 0.9, muted: 0.84, meta: 0.8, faint: 0.78, off: 0.74, ghost: 0.76, offIcon: 0.6 },
+  // The languages: orange and white, the copper bars' cyan, green and
+  // yellow, each its own hue, and Other in black, the frames' colour.
+  hues: [BENCH.orange, BENCH.white, "#6EE7FF", "#9BFF7A", "#FFE066", BENCH.black],
   ownLight: true,
   bench: BENCH,
 };
@@ -530,7 +531,7 @@ export function theme(look) {
     tile: L.line ? { from: dark ? 0.12 : 0.06, to: dark ? 0.04 : 0.02, stroke: dark ? 0.5 : 0.6 } : { from: dark ? 0.3 : 0.17, to: dark ? 0.11 : 0.05, stroke: dark ? 0.3 : 0.26 },
     chip: { fill: line(dark ? 0.06 : 0.04, dark ? white(0.06) : "rgba(0,0,0,0.045)"), stroke: line(0.35, dark ? white(0.08) : "rgba(0,0,0,0.08)"), tint: dark ? 0.15 : 0.1, tintStroke: dark ? 0.2 : 0.24 },
     link: { fill: line(0.05, dark ? white(0.05) : white(0.7)), icon: shade(0.7) },
-    off: { fill: line(0.02, dark ? white(0.03) : "rgba(0,0,0,0.02)"), icon: shade(0.4) },
+    off: { fill: line(0.02, dark ? white(0.03) : "rgba(0,0,0,0.02)"), icon: tier("offIcon", 0.4) },
     track: line(0.16, dark ? white(0.08) : "rgba(0,0,0,0.08)"),
     dot: line(0.25, dark ? white(0.16) : "rgba(0,0,0,0.18)"),
     ring: line(0.3, dark ? white(0.18) : "rgba(0,0,0,0.14)"),

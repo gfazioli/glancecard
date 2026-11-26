@@ -102,7 +102,8 @@ export function kit(t) {
   const B = t.bench;
   const BAR = 24;
   const SHADOW = 6;
-  const r1 = (v) => Number(v.toFixed(1));
+  // On whole pixels, so a 2 px line stays 2 px with crisp edges.
+  const snap = Math.round;
 
   /**
    * A box raised from the screen (pressed into it with `pressed`): white
@@ -110,9 +111,9 @@ export function kit(t) {
    * blue it sits on.
    */
   const bevel = (x, y, w, h, pressed = false) => {
-    const [x0, y0, x1, y1] = [x, y, x + w, y + h].map(r1);
+    const [x0, y0, x1, y1] = [x, y, x + w, y + h].map(snap);
     const [lit, shade] = pressed ? ["lo", "hi"] : ["hi", "lo"];
-    return `<path class="${lit}" d="M${r1(x0 + 1)} ${y1}V${r1(y0 + 1)}H${x1}"/><path class="${shade}" d="M${r1(x1 - 1)} ${r1(y0 + 2)}V${r1(y1 - 1)}H${r1(x0 + 2)}"/>`;
+    return `<path class="${lit}" d="M${x0 + 1} ${y1}V${y0 + 1}H${x1}"/><path class="${shade}" d="M${x1 - 1} ${y0 + 2}V${y1 - 1}H${x0 + 2}"/>`;
   };
 
   /** A window: its hard shadow, its frame, and with `bar` its orange title bar. */
@@ -126,7 +127,7 @@ export function kit(t) {
     `<g stroke="${B.black}" stroke-width="2" shape-rendering="crispEdges"><rect y="3" width="22" height="18" fill="${ground}"/><rect x="4" y="6" width="9" height="7" fill="${ground}"/><rect x="9" y="11" width="9" height="7" fill="${B.white}"/></g>`;
 
   /** The drag bar's four pinstripes, from `x0` to `x1`. */
-  const pinstripes = (x0, x1, y) => (x1 - x0 < 8 ? "" : `<path class="lo" d="${[6, 10, 14, 18].map((dy) => `M${r1(x0)} ${y + dy}H${r1(x1)}`).join("")}"/>`);
+  const pinstripes = (x0, x1, y) => (x1 - x0 < 8 ? "" : `<path class="lo" d="${[6, 10, 14, 18].map((dy) => `M${snap(x0)} ${y + dy}H${snap(x1)}`).join("")}"/>`);
 
   const panel = (x, y, w, h) => (B ? pane(x, y, w, h, true) : `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${t.corner}" class="panel"/>`);
 
@@ -504,8 +505,9 @@ export function kit(t) {
 
   /**
    * A Workbench screen: its blue, the white screen bar along the top with
-   * the program's title and the depth gadget, and copper bars on black
-   * along the bottom.
+   * the program's title and the depth gadget, copper bars on black along
+   * the bottom, and a black edge all round, which a white bar on a white
+   * page would otherwise lack.
    */
   function screen(height, prompt) {
     const bar = 22;
@@ -534,6 +536,7 @@ export function kit(t) {
 <g class="px"><rect width="${W}" height="${bar}" fill="${B.white}"/><rect y="${bar}" width="${W}" height="2" fill="${B.black}"/><rect y="${strip}" width="${W}" height="30" fill="${B.black}"/></g>
 <g transform="translate(${W - 30} -2)">${depthGadget(B.white)}</g>
 ${coppers.join("")}
+<rect class="px" x="1" y="1" width="${W - 2}" height="${height - 2}" rx="3" fill="none" stroke="${B.black}" stroke-width="2"/>
 </g>
 ${title}
 </g>`,
