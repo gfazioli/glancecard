@@ -329,10 +329,13 @@ test("the Workbench reads on its blue, and its title bars on their orange", () =
   // A window's title and caption are black on its orange bar.
   assert.ok(contrast(black, orange) >= 4.5);
   assert.ok(contrast(white, blue) >= 7);
-  // The languages: six, each its own, every one but black a mark at 3:1 (black is the frames' colour).
+  // The languages: six, each its own, every one but Other's black a mark at 3:1 (black is the frames' colour).
   const hues = [0, 1, 2, 3, 4, 5].map((n) => t.hue("#3178c6", n));
   assert.equal(new Set(hues).size, 6);
   for (const h of hues.filter((h) => h !== black)) assert.ok(contrast(h, blue) >= 3, `language ${h}`);
+  assert.equal(hues[5], black, "Other is black");
+  // A missing essential's icon still reads as a mark.
+  assert.ok(contrast(over(t.off.icon, blue), blue) >= 3, `off icon at ${contrast(over(t.off.icon, blue), blue).toFixed(2)}:1`);
   for (const level of t.levels.slice(1)) assert.ok(contrast(level, t.levels[0]) >= 1.05, `level ${level}`);
 });
 

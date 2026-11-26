@@ -29,6 +29,7 @@ Daily SVG cards for your READMEs, rendered by GitHub Actions in your own reposit
 - **A profile card** for any user: followers, stars, repositories, pull requests, issues, commits, a year of contributions as a chart or as GitHub's calendar, the stars of all their public repositories since the first one, the most starred repositories and their languages.
 - **Nine looks**, after the ones of [FinderGit](https://findergit.app)'s Profile Card, for both cards: Midnight, Aurora and Daylight; Upside Down, Hyperspace, Bridge and Nebula; Halloween and Christmas in their season. `dark` and `light` are Midnight and Daylight, a pair of files for a `<picture>` that shows the one matching the reader's GitHub theme, and every other dark look has a **light side** of its own, such as `nebula-light`, for readers on GitHub's light theme.
 - **Eight looks for the terminal's own people**: **Phosphor**, the card on a 1970s–80s monitor (green, amber, white, or an 80s colour tube) behind scanlines, its glass glowing and its cursor blinking, the same on both GitHub themes; and **Printout**, the card off a line printer on fanfold paper (green-bar, yellow, white, or from a colour ribbon). Every letter monospaced.
+- **A Workbench for the 16-bit desktop's people**: the card as a late-1980s Workbench screen in its four colours, every panel a window with its gadgets and a pinstriped title bar, copper bars along the bottom, the same on both GitHub themes.
 - **Refreshed by your own workflow**, on your schedule, with the token GitHub Actions already gives every run. The cards are plain files committed to your repository.
 
 ## Set it up in one paste
@@ -216,6 +217,8 @@ theme: phosphor-green
 
 As the card loads, a refresh band rolls once down the tube and the cursor blinks four times, under five seconds, then both hold still; neither moves for a reader whose system asks for less motion.
 
+`halloween` and `christmas` are worn in their season only, from 1 October to 2 November and from 1 December to 6 January in the card's `time-zone`; the rest of the year they are Midnight, their light sides Daylight, and they come back on their own next season. The CLI's `--all-seasons` wears them any day, for a preview.
+
 ### Workbench
 
 For the 16-bit home computer's people: the card as a Workbench screen of the late 1980s showed it, in its four colours, blue, white, black and orange. A white screen bar runs along the top; every panel is a window with an orange title bar, its close and depth gadgets and a pinstriped drag bar, a black frame and a hard shadow; the figures and pills are bevelled, a missing essential pressed in; photographs come out in the four colours, and copper bars run along the bottom. Every letter is monospaced. Like a tube, a screen reads the same on a light page: one file, no `<picture>` needed, and nothing moves.
@@ -223,8 +226,6 @@ For the 16-bit home computer's people: the card as a Workbench screen of the lat
 ```yaml
 theme: workbench
 ```
-
-`halloween` and `christmas` are worn in their season only, from 1 October to 2 November and from 1 December to 6 January in the card's `time-zone`; the rest of the year they are Midnight, their light sides Daylight, and they come back on their own next season. The CLI's `--all-seasons` wears them any day, for a preview.
 
 ## Preview from a terminal
 
