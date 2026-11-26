@@ -76,9 +76,11 @@ The Workbench (since 0.8.0, for Floppeek's launch, user, 2026-11-26: "crea
 un tema Amiga in glancecard") is a 16-bit desktop in Workbench 1.3's four
 colours, the palette and window chrome of Floppeek's own site and preview
 (`MacOS/Floppeek/docs/site.css`): a screen bar, every panel a window
-(`panel` draws it and keeps its width for `panelTitle`'s title bar), bevelled
-tiles and pills, the photograph mapped onto the four colours, copper bars in
-the bottom band. Its name is generic like `bridge`'s; the README says what it
+(`panel` draws it, `panelTitle` its title bar, which is why it is given the
+panel's width), bevelled tiles and pills, the photograph mapped onto the four
+colours, copper bars in the bottom band. The chrome is drawn in the classes
+the screen's stylesheet names (`px`, `hi`, `lo`, `bar`) and its gadgets are
+placed by `<use>`, which keeps the card lighter than Midnight's. Its name is generic like `bridge`'s; the README says what it
 evokes without the brand. GitHub's colours vanish on its blue, so it names
 its own six languages' colours (`hues`), and its text tiers (`tiers`) sit at
 72% white and up, where white reads at 4.5:1 on the blue. It is its own
