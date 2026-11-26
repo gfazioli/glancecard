@@ -425,9 +425,9 @@ LOOKS.workbench = {
   line: BENCH.white,
   // White laid on the blue reads at 4.5:1 from 72% up, and as an icon at 3:1 from 60%.
   tiers: { soft: 0.9, muted: 0.84, meta: 0.8, faint: 0.78, off: 0.74, ghost: 0.76, offIcon: 0.6 },
-  // The languages: orange and white, the copper bars' cyan, green and
-  // yellow, each its own hue, and Other in black, the frames' colour.
-  hues: [BENCH.orange, BENCH.white, "#6EE7FF", "#9BFF7A", "#FFE066", BENCH.black],
+  // The languages: orange and white, then the copper bars' cyan, green,
+  // yellow and pink, each its own hue and a mark at 3:1 on the blue.
+  hues: [BENCH.orange, BENCH.white, "#6EE7FF", "#9BFF7A", "#FFE066", "#FF8FD8"],
   ownLight: true,
   bench: BENCH,
 };
