@@ -153,7 +153,7 @@ after(() => rmSync(out, { recursive: true, force: true }));
 
 test("the build makes every card the page shows, at its real size", async () => {
   const { cards } = await build(out, { fixtures: true });
-  assert.equal(cards.length, 49);
+  assert.equal(cards.length, 51);
   const built = readFileSync(path.join(out, "index.html"), "utf8");
   for (const [, tag, name] of built.matchAll(/(<img\b[^>]*\bdata-card="([^"]+)"[^>]*>)/g)) {
     const svg = readFileSync(path.join(out, "cards", `${name}.svg`), "utf8");

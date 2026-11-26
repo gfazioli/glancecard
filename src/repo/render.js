@@ -88,7 +88,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
     return {
       h,
       svg: `
-  <rect x="${x}" y="${y}" width="${IW}" height="${h}" rx="${theme.corner + 2}" fill="url(#hero)" stroke="${theme.repoHero.stroke}"/>
+  ${k.box(x, y, IW, h, theme.corner + 2, "url(#hero)", theme.repoHero.stroke)}
   ${parts.join("")}
   <text x="${rx}" y="${y + 50}" class="big disp">${big}</text>
   <text x="${(rx + bigW + 8).toFixed(1)}" y="${y + 50}" class="big-cap">commits in 30 days</text>
@@ -134,7 +134,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
     const count = m.capped ? `${full(m.yearCommits)}+ commits` : plural(m.yearCommits, "commit");
     const head = (h) => `
   ${k.panel(x, y, IW, h)}
-  ${k.panelTitle(x, y, "apps", A.contributions, "Activity", { x: x + IW - 18, text: `${count} in the last year` })}
+  ${k.panelTitle(x, y, IW, "apps", A.contributions, "Activity", { x: x + IW - 18, text: `${count} in the last year` })}
   ${chips.svg}`;
     const capped = (cx, h) => (m.capped ? `<text x="${cx}" y="${y + h - 16}" class="foot">Only the latest ${full(m.yearCommits)} commits are drawn</text>` : "");
 
@@ -213,7 +213,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
             const cy = gy + d * rowStep;
             if (n === 0) return `<circle cx="${cx}" cy="${cy}" r="1.2" fill="${theme.dot}"/>`;
             const q = n / max;
-            return `<circle cx="${cx}" cy="${cy}" r="${(2 + Math.sqrt(q) * 5.2).toFixed(2)}" fill="${A.rose}" fill-opacity="${(0.5 + 0.5 * q).toFixed(2)}"/>`;
+            return `<circle cx="${cx}" cy="${cy}" r="${(2 + Math.sqrt(q) * 5.2).toFixed(2)}" fill="${A.rose}"${theme.fade ? ` fill-opacity="${(0.5 + 0.5 * q).toFixed(2)}"` : ""}/>`;
           }),
         )
         .join("");
@@ -236,7 +236,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
       );
       return `
   ${k.panel(x, y, w, h)}
-  ${k.panelTitle(x, y, "clock", A.rose, "Rhythm")}
+  ${k.panelTitle(x, y, w, "clock", A.rose, "Rhythm")}
   ${chips.svg}
   ${rows}${dots}${hours}`;
     };
@@ -283,7 +283,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
       const none = m.languages.length ? "" : `<text x="${barX}" y="${y + 86}" class="excerpt">No languages detected.</text>`;
       return `
   ${k.panel(x, y, w, h)}
-  ${k.panelTitle(x, y, "code", A.languages, "Code", { x: x + w - 18, text: plural(m.files, "file") })}
+  ${k.panelTitle(x, y, w, "code", A.languages, "Code", { x: x + w - 18, text: plural(m.files, "file") })}
   <clipPath id="langbar"><rect x="${barX}" y="${barY}" width="${barW}" height="10" rx="5"/></clipPath>
   <g clip-path="url(#langbar)"><rect x="${barX}" y="${barY}" width="${barW}" height="10" fill="${theme.track}"/>${segments}</g>
   ${rows}${none}
@@ -308,7 +308,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
         .join("");
       return `
   ${k.panel(x, y, w, h)}
-  ${k.panelTitle(x, y, "history", A.indigo, "Latest commits", { x: x + w - 18, text: `${plural(m.totalCommits, "commit")} on ${r.defaultBranchRef.name}` })}
+  ${k.panelTitle(x, y, w, "history", A.indigo, "Latest commits", { x: x + w - 18, text: `${plural(m.totalCommits, "commit")} on ${r.defaultBranchRef.name}` })}
   ${rows}`;
     };
     // Rows sit 46 px apart and the last one needs 36 px below its baseline.
@@ -339,7 +339,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
       const chip = m.cadence ? k.flow(x + 18, y + 44, w - 36, [{ label: "Cadence", value: m.cadence, icon: "stopwatch", color: A.sky }]).svg : "";
       return `
   ${k.panel(x, y, w, h)}
-  ${k.panelTitle(x, y, "package", A.sky, "Releases", { x: x + w - 18, text: plural(m.releaseCount, "release") })}
+  ${k.panelTitle(x, y, w, "package", A.sky, "Releases", { x: x + w - 18, text: plural(m.releaseCount, "release") })}
   ${chip}${line}${rows}${empty}`;
     };
     return { need: top - y + (Math.max(1, list.length) - 1) * 46 + 36, draw };
@@ -372,7 +372,7 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
       h,
       svg: `
   ${k.panel(x, y, IW, h)}
-  ${k.panelTitle(x, y, "people", A.orange, "Contributors", { x: x + IW - 18, text: plural(m.contributorCount, "contributor") })}
+  ${k.panelTitle(x, y, IW, "people", A.orange, "Contributors", { x: x + IW - 18, text: plural(m.contributorCount, "contributor") })}
   ${rows}${empty}
   <text x="${x + 18}" y="${y + h - 14}" class="foot">Commits on ${esc(k.fit(r.defaultBranchRef.name, IW - 36 - k.textWidth(`Commits on , according to GitHub${more}`, 11), 11))}, according to GitHub${more}</text>`,
     };
@@ -418,8 +418,8 @@ export function renderRepo(m, { theme = THEMES.dark, sections = REPO_SECTIONS, i
     <stop offset="1" stop-color="${theme.repoHero.to[0]}" stop-opacity="${theme.repoHero.to[1]}"/>
   </linearGradient>
   <linearGradient id="spark" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0" stop-color="${A.contributions}" stop-opacity="${theme.spark}"/>
-    <stop offset="1" stop-color="${A.contributions}" stop-opacity="0"/>
+    <stop offset="0" stop-color="${theme.area ?? A.contributions}" stop-opacity="${theme.spark}"/>
+    <stop offset="1" stop-color="${theme.area ?? A.contributions}" stop-opacity="0"/>
   </linearGradient>${on.has("stars") ? k.starsFill(m.stars, starsChart) : ""}${k.tileGradients(tileItems.map((t) => t.color))}`;
 
   return k.frame({ height, title: `${r.nameWithOwner} at a glance`, desc, defs, body: parts.join("\n"), contentTop, ledge: contentTop + 68, prompt: { user: r.nameWithOwner.split("/")[0], command: `glancecard repo ${r.nameWithOwner}`, day: m.today } });

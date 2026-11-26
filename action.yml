@@ -17,7 +17,7 @@ inputs:
     required: false
     default: glancecard
   theme:
-    description: both (dark and light), or looks, comma-separated — dark, light, midnight, aurora, daylight, upside-down, hyperspace, bridge, nebula, halloween, christmas, the light sides aurora-light, upside-down-light, hyperspace-light, bridge-light, nebula-light, halloween-light, christmas-light, and the terminal looks phosphor-green, phosphor-amber, phosphor-white, phosphor-color, printout-green, printout-yellow, printout-white, printout-color. Several themes write <name>-<theme>.svg.
+    description: both (dark and light), or looks, comma-separated — dark, light, midnight, aurora, daylight, upside-down, hyperspace, bridge, nebula, halloween, christmas, the light sides aurora-light, upside-down-light, hyperspace-light, bridge-light, nebula-light, halloween-light, christmas-light, and the terminal looks phosphor-green, phosphor-amber, phosphor-white, phosphor-color, printout-green, printout-yellow, printout-white, printout-color, and the Workbench, workbench. Several themes write <name>-<theme>.svg.
     required: false
     default: both
   time-zone:
