@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.0 — 2026-11-26
+
+**A look for the 16-bit desktop's people.**
+
+- **Workbench** draws the card as a Workbench screen of the late 1980s, in its four colours, blue, white, black and orange: `theme: workbench`. A white screen bar along the top; every panel a window with an orange title bar, its close and depth gadgets and a pinstriped drag bar, a black frame and a hard shadow; the figures and pills bevelled, a missing essential pressed in; copper bars along the bottom.
+- Every letter monospaced, and measured so. GitHub's language colours would vanish on the blue, so the languages wear the screen's own six; the photograph comes out in the four colours, and every label reads at 4.5:1 or more on the blue.
+- A screen reads the same on a light page, so it is its own light side: one file and a plain `<img>`, no `<picture>` needed. Nothing on it moves.
+- The website's editor offers it on both sides, and a card that follows the reader's theme writes one file.
+- Every other look is drawn exactly as it was.
+
 ## 0.7.0 — 2026-11-22
 
 **Eight looks for the terminal's own people.**

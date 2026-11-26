@@ -1654,7 +1654,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
-      - uses: gfazioli/glancecard@v0.7.0
+      - uses: gfazioli/glancecard@v0.8.0
         with:
           profile: your-login
           repos: |
@@ -1688,7 +1688,7 @@ jobs:
               <span class="n">1</span>
               <h3>Add the workflow</h3>
               <p>One file in <code>.github/workflows/</code>, naming your login and your repositories.</p>
-              <pre><code>- uses: gfazioli/glancecard@v0.7.0
+              <pre><code>- uses: gfazioli/glancecard@v0.8.0
   with:
     profile: your-login
     repos: |
@@ -1756,7 +1756,7 @@ Use the gh CLI; if it is missing or not signed in, stop and tell me how to fix i
        timeout-minutes: 10
        steps:
          - uses: actions/checkout@v7
-         - uses: gfazioli/glancecard@v0.7.0
+         - uses: gfazioli/glancecard@v0.8.0
            with:
              profile: &lt;login&gt;
              repos: |
