@@ -8,7 +8,8 @@
 // still given. A week is named by its Sunday at 00:00 UTC, but its `days` are
 // counted in Pacific time.
 
-import { readFile, rename, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
+import { replaceFile } from "./files.js";
 
 const HOUR = 3600 * 1000;
 const KEPT_DAYS = 30;
@@ -99,9 +100,7 @@ export function starStore({ file = null, now = new Date() } = {}) {
         .filter((full) => at - Date.parse(entries[full].at) < KEPT_DAYS * 24 * HOUR)
         .sort()
         .map((full) => `  ${JSON.stringify(full)}: ${JSON.stringify(entries[full])}`);
-      const tmp = `${file}.tmp-${process.pid}`;
-      await writeFile(tmp, `{\n "repos": {\n${lines.join(",\n")}\n }\n}\n`);
-      await rename(tmp, file);
+      await replaceFile(file, `{\n "repos": {\n${lines.join(",\n")}\n }\n}\n`);
       return file;
     },
   };

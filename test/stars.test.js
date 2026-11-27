@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { after, test } from "node:test";
@@ -118,6 +118,26 @@ test("the store is one repository a line, forgets what no run read for 30 days, 
   const c = client([[week("2026-10-11", 1)]]);
   assert.equal((await broken.history(c, "o/a", 1)).length, 1);
   assert.equal(c.calls.length, 1);
+});
+
+// A host that runs several stores in one process, the Raycast extension among them, saves
+// them at once: a temporary file named by the pid alone was one file, and the second rename
+// found it gone (ENOENT).
+test("stores saving the same file at once in one process all succeed", async () => {
+  const file = path.join(dir, "together.json");
+  const stores = [1, 2, 3].map(() => starStore({ file, now: new Date("2026-10-18T00:00:00Z") }));
+  await Promise.all(stores.map((s, i) => s.history(client([[week("2026-10-11", i + 1)]]), `o/r${i}`, i + 1)));
+  const saved = await Promise.allSettled(stores.map((s) => s.save()));
+  assert.deepEqual(
+    saved.map((r) => r.status),
+    ["fulfilled", "fulfilled", "fulfilled"],
+  );
+  assert.ok(JSON.parse(readFileSync(file, "utf8")).repos, "the file is whole");
+  assert.deepEqual(
+    readdirSync(dir).filter((f) => f.includes(".tmp-")),
+    [],
+    "no temporary file is left behind",
+  );
 });
 
 test("histories merge week by week, and any missing one makes the whole missing", () => {
