@@ -46,8 +46,20 @@ test("the setup entry writes a workflow from the README's block", async () => {
 
 test("the package publishes the library's files", () => {
   const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
-  for (const target of [pkg.exports["."].default, pkg.exports["."].types, pkg.exports["./setup"].default, pkg.exports["./setup"].types]) {
+  const targets = [".", "./setup"].flatMap((entry) => ["import", "require"].flatMap((c) => Object.values(pkg.exports[entry][c])));
+  assert.equal(targets.length, 8);
+  for (const target of targets) {
     const file = target.replace(/^\.\//, "");
     assert.ok(pkg.files.some((f) => file === f || file.startsWith(`${f}/`)), `${file} is in files`);
+  }
+});
+
+// A CommonJS TypeScript project (a Raycast extension is one) resolves the `require` condition,
+// and TypeScript refuses an ES module's .d.ts there (TS1479): the .d.cts are the same
+// declarations in a file it accepts. They are copies, and must stay copies.
+test("the CommonJS declarations are the ES ones, byte for byte", () => {
+  for (const name of ["index", "setup"]) {
+    const read = (ext) => readFileSync(new URL(`../types/${name}.${ext}`, import.meta.url), "utf8");
+    assert.equal(read("d.cts"), read("d.ts"), `types/${name}.d.cts is a copy of types/${name}.d.ts`);
   }
 });
