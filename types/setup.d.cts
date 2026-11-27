@@ -77,3 +77,18 @@ export function workflow(yaml: string, plan: Plan): string;
 export function embed(snippet: string, plan: Plan): string;
 /** The README's one-paste prompt, for the plan. */
 export function prompt(text: string, plan: Plan): string;
+
+// What the website's editor shows beside the choice.
+
+/** The look a card shows on `side` for a choice. */
+export function previewLook(choice: Pick<Choice, "mode" | "dark" | "light" | "look">, side?: "dark" | "light"): string;
+/** The file the Action writes for that card and side. */
+export function previewFile(plan: Plan, card: "profile" | "repo", side?: "dark" | "light"): string;
+/** A `sections` input line as a list; all of them for none. */
+export function sectionsOf(line: string | null): string[];
+/** The alt text of the card shown for a choice. */
+export function previewAlt(choice: { card: "profile" | "repo"; look: string; calendar?: string; stars?: string; sections?: string[] }): string;
+/** When a seasonal look is worn and what the card wears out of season; empty for any other look. */
+export function seasonHint(look: string, paired?: boolean): string;
+/** The refresh in words, in the zone and in UTC. */
+export function refreshNote(refresh: { often?: "day" | "week"; utcHour: number; zone: string; date?: Date }): string;

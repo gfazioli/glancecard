@@ -238,7 +238,7 @@ The token is read from `GITHUB_TOKEN`, then `GH_TOKEN`, then `gh auth token`. `-
 
 ## As a library
 
-The same steps the Action takes, one at a time, for a program that shows the cards itself: `npm install glancecard`, no dependencies, types included.
+The same steps the Action takes, one at a time, for a program that shows the cards itself: `npm install glancecard`, no dependencies, types included. It is an ES module; `require` loads it on Node 20.19 and later.
 
 ```js
 import { createClient, fetchRepo, repoModel, renderRepo, theme } from "glancecard";
