@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.0 — 2026-11-27
+
+**glancecard on npm, as a CLI and as a library.**
+
+- `npx glancecard repo owner/name` and `npx glancecard profile login` preview the cards from a terminal, no `github:` prefix needed.
+- `npm install glancecard` gives a program the Action's own steps, one at a time: read a card's data from GitHub, turn it into what the card draws, draw it in any look. `glancecard/setup` is the website's setup editor without its page: the workflow, the README embed and the one-paste prompt for a choice. Types included.
+- A host that runs several renders in one process can no longer lose one to another: the cards and the star histories are written through a temporary file named for each write, where the process id alone gave two writes one file, and the second failed.
+- Every card is drawn exactly as it was.
+
 ## 0.8.0 — 2026-11-26
 
 **A look for the 16-bit desktop's people.**
