@@ -17,6 +17,15 @@ even `@actions/core`: the runner protocol is `INPUT_*` variables,
   keeps it in `<out-dir>/.stars.json` between runs, so a daily run reads the
   newest page of each repository only.
 - `src/run.js` — what the CLI (`src/cli.js`) and the Action share.
+- `src/index.js` — the library entry (`import … from "glancecard"`), with its
+  types in `types/index.d.ts`; `glancecard/setup` is `site/editor.js`, typed
+  in `types/setup.d.ts`. A name exported and not declared, or declared and
+  not exported, fails `test/library.test.js`. Since 0.9.0 the Raycast
+  extension (`~/Lavoro/GitHub/Raycast/glancecard`) imports both: changing
+  what they export, or the README blocks `site/editor.js` rewrites, is a
+  change for it too.
+- `src/files.js` — `replaceFile`, how every file is written: a temporary
+  file named for that write, renamed over the target.
 - `test/fixtures/` — recorded API data; `test/golden/` — the cards they must
   render to, byte for byte.
 
@@ -33,6 +42,11 @@ even `@actions/core`: the runner protocol is `INPUT_*` variables,
   headline numbers, so a regex over the whole SVG can pass on the summary
   while the panel is wrong. Anchor on the class (`class="caption" …>`), and
   validate an assertion by breaking what it protects.
+- **A temporary file is named for its write, not for the process.** A host
+  that runs several renders in one Node process (Raycast runs every
+  extension's commands in one) gave two saves of `.stars.json` the same
+  `.tmp-<pid>`, and the second rename failed with ENOENT. Write through
+  `replaceFile`.
 - **Dates are local days.** GitHub returns UTC and drops the author's offset;
   every day and hour goes through `clock(timeZone)`.
 - **The star history counts its days in Pacific time.**
@@ -152,7 +166,10 @@ instrument (Lighthouse, the crawler check, the cost at rest and of a scroll).
 
 Pinned tags only (`v0.1.0`, `v0.2.0`, …), no moving `v0` tag: users pin a version or a
 SHA and Dependabot moves them. `package.json` `version` and `CHANGELOG.md`
-change in the release PR.
+change in the release PR. Since 0.9.0 each release is also published to npm
+from the tagged commit (`npm publish`, by hand, from a clean checkout of the
+tag: `npm pack --dry-run` lists what goes), so `npx glancecard` and the
+library follow the Action.
 
 CI's action job and the Pages build both read the author's profile, whose
 star histories take ~430 requests from a cold `.stars.json`, and the

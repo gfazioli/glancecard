@@ -230,11 +230,25 @@ theme: workbench
 ## Preview from a terminal
 
 ```sh
-npx github:gfazioli/glancecard repo your-login/your-repo --out cards
-npx github:gfazioli/glancecard profile your-login --out cards
+npx glancecard repo your-login/your-repo --out cards
+npx glancecard profile your-login --out cards
 ```
 
 The token is read from `GITHUB_TOKEN`, then `GH_TOKEN`, then `gh auth token`. `--help` lists the options; they mirror the inputs above, and the time zone defaults to your machine's.
+
+## As a library
+
+The same steps the Action takes, one at a time, for a program that shows the cards itself: `npm install glancecard`, no dependencies, types included.
+
+```js
+import { createClient, fetchRepo, repoModel, renderRepo, theme } from "glancecard";
+
+const client = createClient({ token: process.env.GITHUB_TOKEN });
+const data = await fetchRepo(client, "your-login/your-repo", { timeZone: "Europe/Rome" });
+const svg = renderRepo(repoModel(data, { timeZone: "Europe/Rome" }), { theme: theme("nebula") });
+```
+
+`fetchProfile`, `profileModel` and `renderProfile` do the same for a profile; `starStore` keeps the star histories between reads, as `.stars.json` does for the Action. `glancecard/setup` is the website's setup editor without its page: `plan` turns a choice of looks, sections and schedule into the inputs, and `workflow`, `embed` and `prompt` rewrite this README's own blocks for it.
 
 ## Questions
 
