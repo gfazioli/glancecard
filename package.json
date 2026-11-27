@@ -7,12 +7,24 @@
   "types": "./types/index.d.ts",
   "exports": {
     ".": {
-      "types": "./types/index.d.ts",
-      "default": "./src/index.js"
+      "import": {
+        "types": "./types/index.d.ts",
+        "default": "./src/index.js"
+      },
+      "require": {
+        "types": "./types/index.d.cts",
+        "default": "./src/index.js"
+      }
     },
     "./setup": {
-      "types": "./types/setup.d.ts",
-      "default": "./site/editor.js"
+      "import": {
+        "types": "./types/setup.d.ts",
+        "default": "./site/editor.js"
+      },
+      "require": {
+        "types": "./types/setup.d.cts",
+        "default": "./site/editor.js"
+      }
     },
     "./package.json": "./package.json"
   },
