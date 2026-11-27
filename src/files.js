@@ -18,12 +18,14 @@ const writing = new Map();
 export function replaceFile(file, text) {
   const key = path.resolve(file);
   const write = (writing.get(key) ?? Promise.resolve()).then(async () => {
-    const tmp = `${file}.tmp-${process.pid}-${randomUUID()}`;
+    // The resolved path, as the queue knows it: a process.chdir between the call and the write moves nothing.
+    const tmp = `${key}.tmp-${process.pid}-${randomUUID()}`;
     try {
       await writeFile(tmp, text);
-      await rename(tmp, file);
+      await rename(tmp, key);
     } catch (error) {
-      await rm(tmp, { force: true });
+      // The write's own error is the one to report, whatever the clean-up meets.
+      await rm(tmp, { force: true }).catch(() => {});
       throw error;
     }
   });
