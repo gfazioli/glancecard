@@ -3,11 +3,26 @@
   "version": "0.8.0",
   "description": "Your GitHub profile and repositories, at a glance: daily SVG cards for your READMEs, rendered by GitHub Actions.",
   "type": "module",
+  "main": "./src/index.js",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./setup": {
+      "types": "./types/setup.d.ts",
+      "default": "./site/editor.js"
+    },
+    "./package.json": "./package.json"
+  },
   "bin": {
     "glancecard": "src/cli.js"
   },
   "files": [
     "src",
+    "types",
+    "site/editor.js",
     "action.yml"
   ],
   "engines": {
@@ -25,7 +40,9 @@
     "github-stats",
     "profile-readme",
     "repository",
-    "dashboard"
+    "dashboard",
+    "svg-cards",
+    "library"
   ],
   "author": "Giovambattista Fazioli",
   "license": "MIT",
