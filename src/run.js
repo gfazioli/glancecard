@@ -1,8 +1,9 @@
 // What the CLI and the Action share: reading options, rendering every card,
 // writing the files.
 
-import { mkdir, rename, writeFile } from "node:fs/promises";
+import { mkdir } from "node:fs/promises";
 import path from "node:path";
+import { replaceFile } from "./files.js";
 import { loadImages } from "./github.js";
 import { fetchProfile } from "./profile/fetch.js";
 import { profileModel } from "./profile/model.js";
@@ -117,9 +118,7 @@ export async function renderCards({
   // leaves a truncated card behind.
   const write = async (name, svg) => {
     const file = path.join(outDir, name);
-    const tmp = `${file}.tmp-${process.pid}`;
-    await writeFile(tmp, svg);
-    await rename(tmp, file);
+    await replaceFile(file, svg);
     files.push(file);
   };
 
