@@ -129,7 +129,7 @@ test("stores saving the same file at once in one process all succeed", async () 
   await Promise.all(stores.map((s, i) => s.history(client([[week("2026-10-11", i + 1)]]), `o/r${i}`, i + 1)));
   const saved = await Promise.allSettled(stores.map((s) => s.save()));
   assert.deepEqual(
-    saved.map((r) => r.status),
+    saved.map((r) => (r.status === "rejected" ? `rejected: ${r.reason.code}` : r.status)),
     ["fulfilled", "fulfilled", "fulfilled"],
   );
   assert.ok(JSON.parse(readFileSync(file, "utf8")).repos, "the file is whole");
@@ -152,4 +152,14 @@ test("histories merge week by week, and any missing one makes the whole missing"
   ]);
   assert.deepEqual(mergeStars([]), []);
   assert.equal(mergeStars([a, null]), null);
+});
+
+test("a write that fails leaves no temporary file, and the next write to the file still runs", async () => {
+  const { replaceFile } = await import("../src/files.js");
+  const target = path.join(dir, "no-such-folder", "x.json");
+  await assert.rejects(replaceFile(target, "{}"), { code: "ENOENT" });
+  const file = path.join(dir, "after-failure.json");
+  await Promise.all([replaceFile(file, "1"), replaceFile(file, "2"), replaceFile(file, "3")]);
+  assert.equal(readFileSync(file, "utf8"), "3", "writes to one file land in the order they were asked");
+  assert.deepEqual(readdirSync(dir).filter((f) => f.includes(".tmp-")), []);
 });

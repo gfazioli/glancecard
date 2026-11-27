@@ -28,6 +28,13 @@
     },
     "./package.json": "./package.json"
   },
+  "typesVersions": {
+    "*": {
+      "setup": [
+        "./types/setup.d.ts"
+      ]
+    }
+  },
   "bin": {
     "glancecard": "src/cli.js"
   },

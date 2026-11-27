@@ -24,10 +24,15 @@ for (const [entry, types] of [
   });
 }
 
-test("glancecard: every name it exports is declared", async () => {
-  const names = declared("index.d.ts");
-  for (const name of Object.keys(await import("glancecard"))) assert.ok(names.has(name), `types/index.d.ts declares ${name}`);
-});
+for (const [entry, types] of [
+  ["glancecard", "index.d.ts"],
+  ["glancecard/setup", "setup.d.ts"],
+]) {
+  test(`${entry}: every name it exports is declared in types/${types}`, async () => {
+    const names = declared(types);
+    for (const name of Object.keys(await import(entry))) assert.ok(names.has(name), `types/${types} declares ${name}`);
+  });
+}
 
 test("the library draws a card from a recorded fixture, as its header says", async () => {
   const { repoModel, renderRepo, theme } = await import("glancecard");

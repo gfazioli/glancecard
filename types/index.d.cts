@@ -113,7 +113,11 @@ export interface RepoModel {
   now: string;
   idleDays: number;
   latestTag: string | null;
+  /** 53 weeks of 7 days, null past today. */
+  grid: ({ day: string; count: number } | null)[][];
   days: { day: string; count: number }[];
+  /** The 25th, 50th and 75th percentiles of the days with commits, for the calendar's shades. */
+  quartiles: [number, number, number];
   yearCommits: number;
   capped: boolean;
   streak: number;
@@ -121,15 +125,20 @@ export interface RepoModel {
   activeDays: number;
   busiestDay: string;
   peakHour: number;
+  /** Commits by weekday (Monday first) and hour. */
+  punch: number[][];
   weekly: number[];
   last30: number;
   languages: { name: string; color: string; share: number }[];
+  /** Files on the default branch. */
+  files: number;
   essentials: { label: string; ok: boolean }[];
   commits: { abbreviatedOid: string; messageHeadline: string; authoredDate: string; day: string; author: { name: string; user: { login: string } | null } }[];
   totalCommits: number;
   releases: { tagName: string; publishedAt: string; day: string }[];
   releaseCount: number;
-  cadence: unknown;
+  /** "One every 3 days", or null under two releases. */
+  cadence: string | null;
   downloads: number;
   contributors: { login: string; contributions: number; type: string; avatarUrl: string }[];
   contributorCount: number;
